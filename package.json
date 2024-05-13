@@ -1,0 +1,33 @@
+{
+  "name": "week-8-deployment-sample",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "jest --coverage --runInBand",
+    "tdd": "jest --watch --runInBand"
+  },
+  "engines": {
+    "node": "18.x"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "coveragePathIgnorePatterns": [
+      "/node_modules/"
+    ],
+    "preset": "@shelf/jest-mongodb",
+    "watchPathIgnorePatterns": [
+      "globalConfig"
+    ]
+  },
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "mongoose": "^7.1.1"
+  },
+  "devDependencies": {
+    "@shelf/jest-mongodb": "^4.1.7",
+    "jest": "^29.5.0",
+    "supertest": "^6.3.3"
+  }
+}
