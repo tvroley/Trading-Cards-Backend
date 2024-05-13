@@ -1,5 +1,5 @@
 {
-  "name": "week-8-deployment-sample",
+  "name": "trading-cards-backend",
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
