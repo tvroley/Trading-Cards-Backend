@@ -35,15 +35,17 @@ May 14 - May 21
 Setup project with MongoDB and railway
 Write data models and populate database for project
 Get by grading company and certification compound index function
+Write unit tests
 
 May 21 - May 28
 Proof of concept
 Create user and login/logout functions, and user permissions
 CRUD card collection functions
 CRUD card functions
-sorting and searching functions for cards and collections
+Write unit tests
 
 May 28 - June 9
+Sorting and searching functions for cards and collections
 Write unit tests
 Testing
 Bug fixing
