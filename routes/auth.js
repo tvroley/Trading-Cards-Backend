@@ -61,7 +61,7 @@ router.post("/logout", async (req, res, next) => {
     }
 });
 
-//router.use(middleware.isAuthenticated);
+router.use(middleware.isAuthenticated);
 
 router.put("/password", async (req, res, next) => {
     if(req.body.hasOwnProperty('password') && req.body.password) {
