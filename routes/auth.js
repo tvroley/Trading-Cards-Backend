@@ -61,13 +61,13 @@ router.post("/logout", async (req, res, next) => {
     }
 });
 
-router.use(middleware.isAuthenticated);
+//router.use(middleware.isAuthenticated);
 
 router.put("/password", async (req, res, next) => {
     if(req.body.hasOwnProperty('password') && req.body.password) {
         const textPassword = req.body.password;
         const user = req.user;
-        const hash = await bcrypt.hash(textPassword, 1);
+        const hash = await bcrypt.hash(textPassword, 2);
         try {
             await userDAO.updateUserPassword(user._id, hash);
             res.sendStatus(200);
