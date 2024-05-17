@@ -23,21 +23,24 @@ Indexes for performance and uniqueness when reasonable
 	The tradingCard and cardCollection data models will have a unique compound index of grading company and certification number.  Other indices for performance could be player and year.  The cardCollection data model could have a unique compound index of owner username and collection name.
 
 At least one of text search, aggregations, and lookups
-There could be a text search for tradingCard for a keyword across all fields and/or for specific fields like player and year, and also a text search for collection name, and collections or cards owned by a user.  Aggregations could include counts for number of cards by player, brand and year, and total number of cards a user owns.  Also, there could be stats for cards across all collections.  A lookup would be retrieving all of the card data for one card collection, where the cardCollection only has the object IDs for all the cards included in the collection.
+	There could be a text search for tradingCard for a keyword across all fields and/or for specific fields like player and year, and also a text search for collection name, and collections or cards owned by a user.  Aggregations could include counts for number of cards by player, brand and year, and total number of cards a user owns.  Also, there could be stats for cards across all collections.  A lookup would be retrieving all of the card data for one card collection, where the cardCollection only has the object IDs for all the cards included in the collection.
 
 
 5. A timeline for what project components you plan to complete, week by week, for the remainder of the class.
 
 May 7 - May 14
+
 Work on project proposal
 
 May 14 - May 21
+
 Setup project with MongoDB and railway
 Write data models and populate database for project
 Get by grading company and certification compound index function
 Write unit tests
 
 May 21 - May 28
+
 Proof of concept
 Create user and login/logout functions, and user permissions
 CRUD card collection functions
@@ -45,6 +48,7 @@ CRUD card functions
 Write unit tests
 
 May 28 - June 9
+
 Sorting and searching functions for cards and collections
 Write unit tests
 Testing
