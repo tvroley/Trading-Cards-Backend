@@ -40,8 +40,7 @@ router.post("/login", async (req, res, next) => {
       } else {
           bcrypt.compare(textPassword, storedUser.password).then((result) => {
                 if(result) {
-                    let token = jwt.sign({username: storedUser.username, 
-                        roles: storedUser.roles, _id: storedUser._id}, secret);
+                    let token = jwt.sign({username: storedUser.username, _id: storedUser._id}, secret);
                     res.json({token: token});
                 } else {
                     res.sendStatus(401);
