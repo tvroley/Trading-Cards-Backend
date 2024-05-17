@@ -1,14 +1,7 @@
 const { Router } = require("express");
 const router = Router();
 
-router.get("/", (req, res, next) => {
-  res.send(`
-    <html>
-      <body>
-        <h1> Hello, world! </h1>
-      </body>
-    </html>
-  `)
-});
+router.use("/auth", require('./auth'));
+router.use("/cards", require('./cards'));
 
 module.exports = router;
