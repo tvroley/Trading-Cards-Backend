@@ -17,6 +17,24 @@ module.exports.createCardCollection = async (cardCollectionObj) => {
     }
 }
 
+module.exports.addCardToCollection = async (collectionId, cardId) => {
+  try{
+    const cardCollection = await CardCollection.findOne({_id: collectionId});
+    const cards = cardCollection.tradingCards;
+    if(!cards.includes(cardId)) {
+      cards.push(cardId);
+      cardCollection.tradingCards = cards;
+      return await CardCollection.updateOne({_id: collectionId}, cardCollection);
+    }
+  } catch(err) {
+    if (err.message.includes('validation failed')) {
+      throw new errors.BadDataError(err.message);
+    } else {
+      throw err;
+    }
+  }
+}
+
 module.exports.getCardCollection = async (cardCollectionId) => {
     if (!mongoose.Types.ObjectId.isValid(cardCollectionId)) {
         throw new errors.InvalidMongooseId("Invalid trading card ID");

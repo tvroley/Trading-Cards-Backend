@@ -43,13 +43,13 @@ router.post("/", async (req, res, next) => {
     }
 });
 
-/*router.post("/:id", async (req, res, next) => {
+router.post("/:id", async (req, res, next) => {
     const collectionId = req.params.id;
     const cardId = req.body.cardId;
 
     if(cardId && collectionId) {
         try {
-            const collection = await collectionDAO.createCardCollection(req.body);
+            const collection = await collectionDAO.addCardToCollection(collectionId, cardId);
             res.json(collection);
         } catch(err) {
             next(err);
@@ -57,6 +57,6 @@ router.post("/", async (req, res, next) => {
     } else {
         res.sendStatus(400);
     }
-});*/
+});
 
 module.exports = router;
