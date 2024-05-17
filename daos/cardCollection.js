@@ -26,5 +26,5 @@ module.exports.getCardCollection = async (cardCollectionId) => {
 }
 
 module.exports.getCollectionByOwnerAndTitle = async (title, owner) => {
-    return await Card.findOne({title: title, owner: owner});
+    return await CardCollection.findOne({title: title, owner: owner});
 }

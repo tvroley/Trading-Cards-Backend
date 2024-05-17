@@ -3,6 +3,22 @@ const router = Router();
 
 const collectionDAO = require('../daos/cardCollection');
 
+router.get("/", async (req, res, next) => {
+    const owner = req.body.owner;
+    const title = req.body.title;
+    
+    if(owner && title) {
+        try {
+            const collection = await collectionDAO.getCollectionByOwnerAndTitle(title, owner);
+            res.json(collection);
+        } catch(err) {
+            next(err);
+        }
+    } else {
+        res.sendStatus(400);        
+    }
+});
+
 router.get("/:id", async (req, res, next) => {
     const collectionId = req.params.id;
     
