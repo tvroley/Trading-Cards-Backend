@@ -15,8 +15,8 @@ router.post("/signup", async (req, res, next) => {
         const username = req.body.username;
         const hash = await bcrypt.hash(textPassword, 2);
         try {
-            await userDAO.createUser({username: username, password: hash});
-            res.sendStatus(200)
+            const collection = await userDAO.createUser({username: username, password: hash});
+            res.json(collection);
         } catch(err) {
             next(err);
         }
