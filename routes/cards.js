@@ -48,7 +48,7 @@ router.get("/:id", async (req, res, next) => {
 router.delete("/:id", async (req, res, next) => {
     const cardId = req.params.id;
     try {
-        const card = await cardsDAO.getCard(cardId);
+        const card = await cardsDAO.deleteCard(cardId);
         res.json(card);
     } catch(err) {
         next(err);
