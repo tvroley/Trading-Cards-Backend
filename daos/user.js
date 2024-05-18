@@ -9,7 +9,7 @@ module.exports = {};
 module.exports.createUser = async (userObj) => {
   try {
     const user = await User.create(userObj);
-    const userCollection = {title: `${user.username}'s collection`, owner: [user._id], tradingCards: [],
+    const userCollection = {title: user.username, owner: [user._id], tradingCards: [],
       readUsers: [user._id], writeUsers: [user._id]
     };
     const collection = await CardCollection.create(userCollection);

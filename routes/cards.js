@@ -2,11 +2,16 @@ const { Router } = require("express");
 const router = Router();
 
 const cardsDAO = require('../daos/tradingCard');
+const collectionDAO = require('../daos/cardCollection');
+const userDAO = require('../daos/user');
 
 router.post("/", async (req, res, next) => {
     if(req.body) {
         try {
             const card = await cardsDAO.createCard(req.body);
+            const user = await userDAO.getUser(req.user.username);
+            const mainCollection = await collectionDAO.getCollectionByOwnerAndTitle(req.user.username, user._id);
+            await collectionDAO.addCardToCollection(mainCollection._id, card._id);
             res.json(card);
         } catch(err) {
             next(err);
