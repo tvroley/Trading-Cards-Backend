@@ -36,3 +36,11 @@ module.exports.updateCard = async (cardId, cardObj) => {
     
     return await Card.updateOne({ _id: cardId }, cardObj);
 }
+
+module.exports.deleteCard = async (cardId) => {
+  if (!mongoose.Types.ObjectId.isValid(cardId)) {
+      throw new errors.InvalidMongooseId("Invalid trading card ID");
+  }
+
+  return await Card.deleteOne({_id: cardId});
+}
