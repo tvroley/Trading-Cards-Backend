@@ -13,7 +13,7 @@ module.exports.isAuthenticated = async (req, res, next) => {
       const tokenHeader = req.headers.authorization;
       const token = tokenHeader.split(' ')[1];
       if(!token || token.trim().length === 0){
-        res.sendStatus(401);
+        res.status(401).send("empty token");
       }
       try {
         const decoded = jwt.verify(token, secret);
@@ -21,7 +21,7 @@ module.exports.isAuthenticated = async (req, res, next) => {
             req.user = decoded;
             next();
         } else {
-            res.sendStatus(401);  
+          res.status(401).send("invalid token");
         }
       } catch(err) {
         res.status(401).send(err.message); 
