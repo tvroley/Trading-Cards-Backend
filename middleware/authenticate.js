@@ -17,7 +17,7 @@ module.exports.isAuthenticated = async (req, res, next) => {
       }
       try {
         const decoded = jwt.verify(token, secret);
-        if(decoded && decoded.hasOwnProperty('email')) {
+        if(decoded && decoded.hasOwnProperty('username')) {
             req.user = decoded;
             next();
         } else {
