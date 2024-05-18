@@ -22,7 +22,11 @@ router.put("/:id", async (req, res, next) => {
     if(cardId && card) {
         try {
             const updatedCard = await cardsDAO.updateCard(cardId, card);
-            res.json(updatedCard);
+            if(card) {
+                res.json(updatedCard);
+            } else {
+                res.status(404).send("card not found");
+            }
         } catch(err) {
             next(err);
         }
@@ -36,7 +40,11 @@ router.get("/:id", async (req, res, next) => {
     if(cardId) {
         try {
             const card = await cardsDAO.getCard(cardId);
-            res.json(card);
+            if(card) {
+                res.json(card);
+            } else {
+                res.status(404).send("card not found");
+            }
         } catch(err) {
             next(err);
         }
@@ -49,7 +57,11 @@ router.delete("/:id", async (req, res, next) => {
     const cardId = req.params.id;
     try {
         const card = await cardsDAO.deleteCard(cardId);
-        res.json(card);
+        if(card) {
+            res.json(card);
+        } else {
+            res.status(404).send("card not found");
+        }
     } catch(err) {
         next(err);
     }
