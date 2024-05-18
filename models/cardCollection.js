@@ -3,8 +3,7 @@ const mongoose = require("mongoose");
 const cardCollectionSchema = new mongoose.Schema({
   title: { type: String, required: true },
   owner: {
-    type: { type: mongoose.Schema.Types.ObjectId, ref: "users" },
-    required: true,
+    type: mongoose.Schema.Types.ObjectId, ref: "users", required: true
   },
   tradingCards: {
     type: [{ type: mongoose.Schema.Types.ObjectId, ref: "tradingCards" }],

@@ -13,7 +13,7 @@ module.exports.createUser = async (userObj) => {
       readUsers: [user._id], writeUsers: [user._id]
     };
     const collection = await CardCollection.create(userCollection);
-    return userCollection;
+    return collection;
   } catch(err) {
     if (err.message.includes('duplicate key')) {
       throw new errors.DuplicateKeyError(err.message);
