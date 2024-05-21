@@ -32,9 +32,11 @@ router.get("/:id", async (req, res, next) => {
 });
 
 router.post("/", async (req, res, next) => {
-    if(req.body) {
+    const title = req.body.collectionTitle;
+    const userId = req.user._id;
+    if(title && userId) {
         try {
-            const collection = await collectionDAO.createCardCollection(req.body);
+            const collection = await collectionDAO.createCardCollection(title, userId);
             res.json(collection);
         } catch(err) {
             next(err);

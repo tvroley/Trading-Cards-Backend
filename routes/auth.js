@@ -67,9 +67,9 @@ router.put("/password", async (req, res, next) => {
     if(req.body.hasOwnProperty('password') && req.body.password) {
         const textPassword = req.body.password;
         const user = req.user;
-        const hash = await bcrypt.hash(textPassword, 2);
+        const hashPassword = await bcrypt.hash(textPassword, 2);
         try {
-            await userDAO.updateUserPassword(user._id, hash);
+            await userDAO.updateUserPassword(user._id, user.username, hashPassword);
             res.sendStatus(200);
         } catch(err) {
             next(err);

@@ -5,12 +5,17 @@ const errors = require('../middleware/errors');
 
 module.exports = {};
 
-module.exports.createCardCollection = async (cardCollectionObj) => {
+module.exports.createCardCollection = async (collectionTitle, userId) => {
+    const cardCollectionObj = {title: collectionTitle, owner: userId, tradingCards: [],
+      readUsers: [], writeUsers: []
+    };
     try{
       return await CardCollection.create(cardCollectionObj);
     } catch(err) {
       if (err.message.includes('validation failed')) {
         throw new errors.BadDataError(err.message);
+      } else if (err.message.includes('duplicate key')) {
+        throw new errors.DuplicateKeyError(err.message);
       } else {
         throw err;
       }
