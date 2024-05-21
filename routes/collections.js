@@ -5,14 +5,14 @@ const errors = require('../middleware/errors');
 const collectionDAO = require('../daos/cardCollection');
 
 router.get("/", async (req, res, next) => {
-    const owner = req.body.owner;
+    const ownerName = req.body.owner;
     const title = req.body.title;
     const userId = req.user._id;
     const roles = req.user.roles;
     
-    if(owner && title) {
+    if(ownerName && title) {
         try {
-            const collection = await collectionDAO.getCollectionByOwnerAndTitle(title, owner);
+            const collection = await collectionDAO.getCollectionByOwnerAndTitle(title, ownerName);
             if(collection) {
                 if(collection.readUsers.includes(userId) || roles.includes('admin')) {
                     res.json(collection);

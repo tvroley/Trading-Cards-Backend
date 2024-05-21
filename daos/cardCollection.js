@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 
 const CardCollection = require('../models/cardCollection');
+const User = require('../models/user');
 const errors = require('../middleware/errors');
 
 module.exports = {};
@@ -48,8 +49,13 @@ module.exports.getCardCollection = async (cardCollectionId) => {
     return await CardCollection.findOne({_id: cardCollectionId});
 }
 
-module.exports.getCollectionByOwnerAndTitle = async (title, owner) => {
-    return await CardCollection.findOne({title: title, owner: owner});
+module.exports.getCollectionByOwnerAndTitle = async (title, ownerName) => {
+    const user = await User.findOne({username: ownerName});
+    if(user) {
+      return await CardCollection.findOne({title: title, owner: user._id});
+    } else {
+      throw new errors.BadDataError();     
+    }
 }
 
 module.exports.removeCardCollection = async (cardCollectionId) => {
