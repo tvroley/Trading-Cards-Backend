@@ -13,7 +13,7 @@ module.exports.createUser = async (userObj) => {
       readUsers: [user._id], writeUsers: [user._id]
     };
     const collection = await CardCollection.create(userCollection);
-    return collection;
+    return user;
   } catch(err) {
     if (err.message.includes('duplicate key')) {
       throw new errors.DuplicateKeyError(err.message);
@@ -42,11 +42,11 @@ module.exports.getUser = async (username) => {
     return storedUser;
 }
 
-module.exports.updateUserPassword = async (userId, username, password) => {
+module.exports.updateUserPassword = async (userId, username, password, roles) => {
     if (!mongoose.Types.ObjectId.isValid(userId)) {
         throw new errors.InvalidMongooseId("Invalid user ID");
     }
-    const myUser = {_id: userId, password: password, username: username};
+    const myUser = {_id: userId, password: password, username: username, roles: roles};
     await User.updateOne({ _id: userId }, myUser);
     
     return true;

@@ -16,7 +16,7 @@ router.post("/signup", async (req, res, next) => {
         const username = req.body.username;
         const hash = await bcrypt.hash(textPassword, 2);
         try {
-            const collection = await userDAO.createUser({username: username, password: hash});
+            const collection = await userDAO.createUser({username: username, password: hash, roles: ['user']});
             res.json(collection);
         } catch(err) {
             if(err instanceof errors.DuplicateKeyError) {
@@ -45,7 +45,8 @@ router.post("/login", async (req, res, next) => {
       } else {
           bcrypt.compare(textPassword, storedUser.password).then((result) => {
                 if(result) {
-                    let token = jwt.sign({username: storedUser.username, _id: storedUser._id}, secret);
+                    let token = jwt.sign({username: storedUser.username, _id: storedUser._id, 
+                        roles: storedUser.roles}, secret);
                     res.json({token: token});
                 } else {
                     res.sendStatus(401);
@@ -74,7 +75,7 @@ router.put("/password", async (req, res, next) => {
         const user = req.user;
         const hashPassword = await bcrypt.hash(textPassword, 2);
         try {
-            await userDAO.updateUserPassword(user._id, user.username, hashPassword);
+            await userDAO.updateUserPassword(user._id, user.username, hashPassword, user.roles);
             res.sendStatus(200);
         } catch(err) {
             next(err);

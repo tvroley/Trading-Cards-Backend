@@ -67,9 +67,17 @@ router.delete("/:id", async (req, res, next) => {
 
     if(collectionId) {
         try {
-            const collection = await collectionDAO.removeCardCollection(collectionId);
+            const collection = await collectionDAO.getCardCollection(collectionId);
+            const roles = req.user.roles;
+            const userId = req.user._id;
+            
             if(collection) {
-                res.json(collection);
+                if(userId === collection.owner || roles.includes('admin')) {
+                    const collection = await collectionDAO.removeCardCollection(collectionId);
+                    res.json(collection);
+                } else {
+                    res.sendStatus(401);
+                }
             } else {
                 res.status(404).send("collection not found");
             }
