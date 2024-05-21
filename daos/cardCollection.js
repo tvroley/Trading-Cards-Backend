@@ -7,7 +7,7 @@ module.exports = {};
 
 module.exports.createCardCollection = async (collectionTitle, userId) => {
     const cardCollectionObj = {title: collectionTitle, owner: userId, tradingCards: [],
-      readUsers: [], writeUsers: []
+      readUsers: [userId], writeUsers: [userId]
     };
     try{
       return await CardCollection.create(cardCollectionObj);
