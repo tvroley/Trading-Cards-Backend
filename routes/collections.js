@@ -1,5 +1,6 @@
 const { Router } = require("express");
 const router = Router();
+const errors = require('../middleware/errors');
 
 const collectionDAO = require('../daos/cardCollection');
 
@@ -53,6 +54,29 @@ router.post("/:id", async (req, res, next) => {
             res.json(collection);
         } catch(err) {
             next(err);
+        }
+    } else {
+        res.sendStatus(400);
+    }
+});
+
+router.delete("/:id", async (req, res, next) => {
+    const collectionId = req.params.id;
+
+    if(collectionId) {
+        try {
+            const collection = await collectionDAO.removeCardCollection(collectionId);
+            if(collection) {
+                res.json(collection);
+            } else {
+                res.status(404).send("collection not found");
+            }
+        } catch(err) {
+            if(err instanceof errors.InvalidMongooseId) {
+                res.status(404).send(err.message);
+            } else {
+                next(err);
+            }
         }
     } else {
         res.sendStatus(400);

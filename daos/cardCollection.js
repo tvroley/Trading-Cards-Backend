@@ -37,7 +37,7 @@ module.exports.addCardToCollection = async (collectionId, cardId) => {
 
 module.exports.getCardCollection = async (cardCollectionId) => {
     if (!mongoose.Types.ObjectId.isValid(cardCollectionId)) {
-        throw new errors.InvalidMongooseId("Invalid trading card ID");
+        throw new errors.InvalidMongooseId("Invalid card collection ID");
     }
 
     return await CardCollection.findOne({_id: cardCollectionId});
@@ -45,4 +45,12 @@ module.exports.getCardCollection = async (cardCollectionId) => {
 
 module.exports.getCollectionByOwnerAndTitle = async (title, owner) => {
     return await CardCollection.findOne({title: title, owner: owner});
+}
+
+module.exports.removeCardCollection = async (cardCollectionId) => {
+  if (!mongoose.Types.ObjectId.isValid(cardCollectionId)) {
+      throw new errors.InvalidMongooseId("Invalid card collection ID");
+  }
+
+  return await CardCollection.deleteOne({_id: cardCollectionId});
 }
