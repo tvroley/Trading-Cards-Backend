@@ -32,10 +32,20 @@ router.get("/", async (req, res, next) => {
 
 router.get("/:id", async (req, res, next) => {
     const collectionId = req.params.id;
+    const userId = req.user._id;
     
     try {
         const collection = await collectionDAO.getCardCollection(collectionId);
-        res.json(collection);
+        if(collection) {
+            const readUsers = collection.readUsers;
+            if(readUsers.includes(userId)) {
+                res.json(collection);
+            } else {
+                res.status(401).send(`not authorized to view collection`);    
+            }
+        } else {
+            res.status(404).send(`collection not found`);
+        }
     } catch(err) {
         next(err);
     }
