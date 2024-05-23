@@ -5,9 +5,7 @@ const jwt = require("jsonwebtoken");
 module.exports = {};
 
 module.exports.handleError = async (err, req, res, next) => {
-  if(err instanceof BadDataError) {
-    res.status(404).send(err.message);
-  } else if(err instanceof InvalidMongooseId) {
+  if(err instanceof BadDataError || err instanceof InvalidMongooseId) {
     res.status(400).send(err.message);
   } else if(err instanceof DuplicateKeyError) {
     res.status(409).send(err.message);

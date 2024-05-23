@@ -25,6 +25,10 @@ module.exports.getCard = async (cardId) => {
     return await Card.findOne({_id: cardId});
 }
 
+module.exports.getAllCards = async (cardId) => {
+  return await Card.find();
+}
+
 module.exports.getCardByCert = async (company, cert) => {
     return await Card.findOne({gradingCompany: company, certificationNumber: cert});
 }

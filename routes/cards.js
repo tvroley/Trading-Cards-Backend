@@ -40,13 +40,32 @@ router.put("/:id", async (req, res, next) => {
     }
 });
 
+router.get("/", async (req, res, next) => {
+    const cardId = req.params.id;
+    const roles = req.user.roles;
+    if(roles.includes(`admin`)) {
+        try {
+            const cards = await cardsDAO.getAllCards();
+            if(cards) {
+                res.json({cards: cards});
+            } else {
+                res.status(404).send("no cards not found");
+            }
+        } catch(err) {
+            next(err);
+        }
+    } else {
+        res.sendStatus(401);
+    }
+});
+
 router.get("/:id", async (req, res, next) => {
     const cardId = req.params.id;
     if(cardId) {
         try {
             const card = await cardsDAO.getCard(cardId);
             if(card) {
-                res.json(card);
+                res.json({card: card});
             } else {
                 res.status(404).send("card not found");
             }

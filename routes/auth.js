@@ -16,8 +16,8 @@ router.post("/signup", async (req, res, next) => {
         const username = req.body.username;
         const hash = await bcrypt.hash(textPassword, 2);
         try {
-            const collection = await userDAO.createUser({username: username, password: hash, roles: ['user']});
-            res.json(collection);
+            const result = await userDAO.createUser({username: username, password: hash, roles: ['user']});
+            res.json(result);
         } catch(err) {
             if(err instanceof errors.DuplicateKeyError) {
                 res.status(409).send('username already used');
