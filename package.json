@@ -18,7 +18,8 @@
     "preset": "@shelf/jest-mongodb",
     "watchPathIgnorePatterns": [
       "globalConfig"
-    ]
+    ],
+    "setupFiles": ["./.jest/setEnvVars.js"]
   },
   "license": "MIT",
   "dependencies": {

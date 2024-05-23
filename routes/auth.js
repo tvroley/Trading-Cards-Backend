@@ -41,7 +41,7 @@ router.post("/login", async (req, res, next) => {
       });
   
       if(!storedUser) {
-          res.sendStatus(401);
+          res.status(401).send(`could not find user`);
       } else {
           bcrypt.compare(textPassword, storedUser.password).then((result) => {
                 if(result) {
@@ -49,7 +49,7 @@ router.post("/login", async (req, res, next) => {
                         roles: storedUser.roles}, secret);
                     res.json({token: token});
                 } else {
-                    res.sendStatus(401);
+                    res.status(401).send(`invalid password`);
                 }
           }).catch((err) => {next(err)});
       }
@@ -59,7 +59,7 @@ router.post("/login", async (req, res, next) => {
 });
 
 router.post("/logout", async (req, res, next) => {
-    if(req.headers.hasOwnProperty('authorization')) {
+    if(req.headers.authorization) {
         req.headers.authorization = '';
         res.sendStatus(200);
     } else {
@@ -70,7 +70,7 @@ router.post("/logout", async (req, res, next) => {
 router.use(middleware.isAuthenticated);
 
 router.put("/password", async (req, res, next) => {
-    if(req.body.password) {
+    if(req.body.password || req.body.password.trim().length !== 0) {
         const textPassword = req.body.password;
         const user = req.user;
         const hashPassword = await bcrypt.hash(textPassword, 2);
@@ -81,11 +81,7 @@ router.put("/password", async (req, res, next) => {
             next(err);
         }
     } else {
-        if(!req.body.password || req.body.password.trim().length === 0) {
-            res.sendStatus(400);
-        } else {
-            res.sendStatus(401);
-        }
+        res.sendStatus(400);
     }
 });
 

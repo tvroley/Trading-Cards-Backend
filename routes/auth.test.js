@@ -166,6 +166,11 @@ describe("/auth", () => {
         expect(loginRes0.statusCode).toEqual(200);
         const loginRes1 = await request(server).post("/auth/login").send(user1);
         expect(loginRes1.statusCode).toEqual(200);
+        const res0 = await request(server)
+          .put("/auth/password")
+          .set("Authorization", "Bearer " + token0)
+          .send({ password: user0.password });
+        expect(res.statusCode).toEqual(200);
       });
       it("should change password for user1", async () => {
         const res = await request(server)
