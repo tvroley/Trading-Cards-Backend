@@ -73,8 +73,8 @@ router.post("/:id", async (req, res, next) => {
 
     if(cardId && collectionId) {
         try {
-            const collection = await collectionDAO.addCardToCollection(collectionId, cardId);
-            res.json(collection);
+            await collectionDAO.addCardToCollection(collectionId, cardId);
+            res.sendStatus(200);
         } catch(err) {
             next(err);
         }

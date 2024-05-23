@@ -33,6 +33,21 @@ describe(`cards routes`, () => {
         "variety": ""
     }
 
+    const card0 = {
+        "sold": false,
+        "backCardImageLink": "https://sgcimagprodstorage.blob.core.windows.net/mycollections/6313b7ee-6887-4e10-9a28-dc9fa2312278/h275/back/6313b7ee-6887-4e10-9a28-dc9fa2312278.jpg",
+        "subject": "Mickey Mantle",
+        "cardSet": "1956 Topps",
+        "cardNumber": 135,
+        "gradingCompany": "SGC",
+        "certificationNumber": "1174031",
+        "year": 1956,
+        "frontCardImageLink": "https://sgcimagprodstorage.blob.core.windows.net/mycollections/6313b7ee-6887-4e10-9a28-dc9fa2312278/h275/front/6313b7ee-6887-4e10-9a28-dc9fa2312278.jpg",
+        "brand": "Topps",
+        "grade": "2.5",
+        "variety": ""
+    }
+
     describe("GET /cards", () => {
         let token0;
         let token1;
@@ -45,11 +60,12 @@ describe(`cards routes`, () => {
             token1 = res1.body.token;
         });
         it("should get a card", async () => {
-            const myCard = await Cards.create(card);
-            const response = await request(server).get(`/cards/${myCard._id}`).set("Authorization", "Bearer " + token0).send();
-            expect(response.statusCode).toEqual(200);
-            expect(myCard._id.toString()).toEqual(response.body.card._id);
-            expect(myCard.certificationNumber.toString()).toEqual(response.body.card.certificationNumber);
+            const responsePost = await request(server).post("/cards").set("Authorization", "Bearer " + token0).send(card);
+            expect(responsePost.statusCode).toEqual(200);
+            const responseGet = await request(server).get(`/cards/${responsePost.body.card._id}`)
+            .set("Authorization", "Bearer " + token0).send();
+            expect(responseGet.statusCode).toEqual(200);
+            expect(responseGet.body.card).toEqual(responsePost.body.card);
         });
         it("should send 400 status for invalid card ID", async () => {
             const myCard = await Cards.create(card);
@@ -69,8 +85,15 @@ describe(`cards routes`, () => {
             const res1 = await request(server).post("/auth/login").send(user1);
             token1 = res1.body.token;
         });
+        it("should not store an empty card", async () => {
+            const response = await request(server).post("/cards").set("Authorization", "Bearer " + token0).send({});
+            console.log(response);
+            expect(response.statusCode).toEqual(400);
+            const savedCards = await Cards.find().lean();
+            expect(savedCards.length).toEqual(0);
+        });
         it("should store a card", async () => {
-            const response = await request(server).post("/cards").set("Authorization", "Bearer " + token0).send(card);
+            const response = await request(server).post("/cards").set("Authorization", "Bearer " + token0).send(card0);
             expect(response.statusCode).toEqual(200);
             const savedCards = await Cards.find().lean();
             expect(savedCards.length).toEqual(1);

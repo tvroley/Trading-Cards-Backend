@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 
 const Card = require('../models/tradingCard');
+const CardCollection = require('../models/cardCollection');
 const errors = require('../middleware/errors');
 
 module.exports = {};
@@ -9,7 +10,9 @@ module.exports.createCard = async (cardObj) => {
     try{
       return await Card.create(cardObj);
     } catch(err) {
-      if (err.message.includes('validation failed')) {
+      if (err.message.includes('duplicate key')) {
+        throw new errors.DuplicateKeyError(err.message);
+      } else if (err.message.includes('validation failed')) {
         throw new errors.BadDataError(err.message);
       } else {
         throw err;
@@ -17,15 +20,47 @@ module.exports.createCard = async (cardObj) => {
     }
 }
 
-module.exports.getCard = async (cardId) => {
+module.exports.getCard = async (cardId, userId) => {
     if (!mongoose.Types.ObjectId.isValid(cardId)) {
         throw new errors.InvalidMongooseId("Invalid trading card ID");
     }
 
-    return await Card.findOne({_id: cardId});
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      throw new errors.InvalidMongooseId("Invalid user ID");
+    }
+
+    const cardCollections = await CardCollection.find({owner: userId});
+    let found = false;
+    let count = 0;
+
+    while(!found && count < cardCollections.length) {
+      const currentCards = cardCollections[count].tradingCards;
+      
+      currentCards.map((id) => {
+        if(id.toString() === cardId) {
+          found = true;
+        }
+      });
+
+      count++;
+    }
+
+    if(found) {
+      return await Card.findOne({_id: cardId});
+    } else {
+      throw new errors.BadDataError('user does not own card');
+    }
 }
 
-module.exports.getAllCards = async (cardId) => {
+module.exports.getCardAdmin = async (cardId) => {
+  if (!mongoose.Types.ObjectId.isValid(cardId)) {
+      throw new errors.InvalidMongooseId("Invalid trading card ID");
+  }
+  
+  return await Card.findOne({_id: cardId});
+}
+
+module.exports.getAllCards = async () => {
   return await Card.find();
 }
 

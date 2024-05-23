@@ -30,7 +30,9 @@ module.exports.addCardToCollection = async (collectionId, cardId) => {
     if(!cards.includes(cardId)) {
       cards.push(cardId);
       cardCollection.tradingCards = cards;
-      return await CardCollection.updateOne({_id: collectionId}, cardCollection);
+      await CardCollection.updateOne({_id: collectionId}, cardCollection);
+    } else {
+      throw new errors.BadDataError(`card is already in collection`);
     }
   } catch(err) {
     if (err.message.includes('validation failed')) {
@@ -49,13 +51,20 @@ module.exports.getCardCollection = async (cardCollectionId) => {
     return await CardCollection.findOne({_id: cardCollectionId});
 }
 
-module.exports.getCollectionByOwnerAndTitle = async (title, ownerName) => {
-    const user = await User.findOne({username: ownerName});
-    if(user) {
-      return await CardCollection.findOne({title: title, owner: user._id});
-    } else {
-      throw new errors.BadDataError();     
-    }
+module.exports.getCardCollectionsForUser = async (userId) => {
+  if (!mongoose.Types.ObjectId.isValid(userId)) {
+      throw new errors.InvalidMongooseId("Invalid card collection ID");
+  }
+
+  return await CardCollection.find({owner: userId});
+}
+
+module.exports.getCollectionByOwnerAndTitle = async (title, ownerId) => {
+  if (!mongoose.Types.ObjectId.isValid(ownerId)) {
+    throw new errors.InvalidMongooseId("Invalid owner ID");
+  }
+
+  return await CardCollection.findOne({title: title, owner: ownerId});
 }
 
 module.exports.removeCardCollection = async (cardCollectionId) => {

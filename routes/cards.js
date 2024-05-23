@@ -3,21 +3,20 @@ const router = Router();
 
 const cardsDAO = require('../daos/tradingCard');
 const collectionDAO = require('../daos/cardCollection');
-const userDAO = require('../daos/user');
+const errors = require('../middleware/errors');
 
 router.post("/", async (req, res, next) => {
     if(req.body) {
         try {
             const card = await cardsDAO.createCard(req.body);
-            const user = await userDAO.getUser(req.user.username);
-            const mainCollection = await collectionDAO.getCollectionByOwnerAndTitle(req.user.username, user._id);
+            const mainCollection = await collectionDAO.getCollectionByOwnerAndTitle(req.user.username, req.user._id);
             await collectionDAO.addCardToCollection(mainCollection._id, card._id);
-            res.json(card);
+            res.json({card: card});
         } catch(err) {
             next(err);
         }
     } else {
-        res.sendStatus(400);
+        res.status(400).send(`no request body`);
     }
 });
 
@@ -61,16 +60,29 @@ router.get("/", async (req, res, next) => {
 
 router.get("/:id", async (req, res, next) => {
     const cardId = req.params.id;
+    const userId = req.user._id;
+    const roles = req.user.roles;
+
     if(cardId) {
         try {
-            const card = await cardsDAO.getCard(cardId);
+            let card;
+            if(roles.includes(`admin`)) {
+                card = await cardsDAO.getCardAdmin(cardId);
+            } else {
+                card = await cardsDAO.getCard(cardId, userId);
+            }
+
             if(card) {
                 res.json({card: card});
             } else {
                 res.status(404).send("card not found");
             }
         } catch(err) {
-            next(err);
+            if(err instanceof errors.BadDataError) {
+                res.status(401).send(err.message);
+            } else {
+                next(err);
+            }
         }
     } else {
         res.sendStatus(400);
