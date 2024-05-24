@@ -10,7 +10,7 @@ router.post("/", async (req, res, next) => {
     if(req.body) {
         try {
             const card = await cardsDAO.createCard(req.body);
-            const mainCollection = await collectionDAO.getCollectionByOwnerAndTitle(req.user.username, req.user._id);
+            const mainCollection = await collectionDAO.getCollectionByOwnerAndTitle(req.user.username, req.user.username);
             await collectionDAO.addCardToCollection(mainCollection._id, card._id, userId);
             res.json({card: card});
         } catch(err) {
