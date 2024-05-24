@@ -15,7 +15,7 @@ router.get("/", async (req, res, next) => {
             const collection = await collectionDAO.getCollectionByOwnerAndTitle(title, ownerName);
             if(collection) {
                 if(collection.readUsers.includes(userId) || roles.includes('admin')) {
-                    res.json(collection);
+                    res.json({collection: collection});
                 } else {
                     res.sendStatus(401);
                 }
@@ -24,6 +24,13 @@ router.get("/", async (req, res, next) => {
             }
         } catch(err) {
             next(err);
+        }
+    } else if(ownerName) {
+        const collections = await collectionDAO.getCardCollectionsForUser(ownerName, userId, roles);
+        if(collections) {
+            res.json(collections);
+        } else {
+            res.status(404).send("could not find any collections for user");
         }
     } else {
         res.sendStatus(400);        
@@ -40,7 +47,7 @@ router.get("/:id", async (req, res, next) => {
         if(collection) {
             const readUsers = collection.readUsers;
             if(readUsers.includes(userId) || roles.includes('admin')) {
-                res.json(collection);
+                res.json({collection: collection});
             } else {
                 res.status(401).send(`not authorized to view collection`);    
             }
@@ -70,10 +77,11 @@ router.post("/", async (req, res, next) => {
 router.post("/:id", async (req, res, next) => {
     const collectionId = req.params.id;
     const cardId = req.body.cardId;
+    const userId = req.user._id;
 
     if(cardId && collectionId) {
         try {
-            await collectionDAO.addCardToCollection(collectionId, cardId);
+            await collectionDAO.addCardToCollection(collectionId, cardId, userId);
             res.sendStatus(200);
         } catch(err) {
             next(err);

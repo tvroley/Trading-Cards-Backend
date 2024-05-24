@@ -6,11 +6,12 @@ const collectionDAO = require('../daos/cardCollection');
 const errors = require('../middleware/errors');
 
 router.post("/", async (req, res, next) => {
+    const userId = req.user._id;
     if(req.body) {
         try {
             const card = await cardsDAO.createCard(req.body);
             const mainCollection = await collectionDAO.getCollectionByOwnerAndTitle(req.user.username, req.user._id);
-            await collectionDAO.addCardToCollection(mainCollection._id, card._id);
+            await collectionDAO.addCardToCollection(mainCollection._id, card._id, userId);
             res.json({card: card});
         } catch(err) {
             next(err);

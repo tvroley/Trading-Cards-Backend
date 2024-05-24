@@ -85,8 +85,17 @@ describe(`cards routes`, () => {
             const res1 = await request(server).post("/auth/login").send(user1);
             token1 = res1.body.token;
         });
-        it("should not store an empty card", async () => {
+        it("should not store an empty card object", async () => {
             const response = await request(server).post("/cards").set("Authorization", "Bearer " + token0).send({});
+            console.log(response);
+            expect(response.statusCode).toEqual(400);
+            const savedCards = await Cards.find().lean();
+            expect(savedCards.length).toEqual(0);
+        });
+        it("should not store a card object with missing fields", async () => {
+            const response = await request(server).post("/cards").set("Authorization", "Bearer " + token0).send({
+                player: 'Randy Johnson', year: 1999
+            });
             console.log(response);
             expect(response.statusCode).toEqual(400);
             const savedCards = await Cards.find().lean();
