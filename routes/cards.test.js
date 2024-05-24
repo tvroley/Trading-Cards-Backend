@@ -66,10 +66,17 @@ describe(`cards routes`, () => {
         it("should get a card", async () => {
             const responsePost = await request(server).post("/cards").set("Authorization", "Bearer " + token0).send(card);
             expect(responsePost.statusCode).toEqual(200);
-            const responseGet = await request(server).get(`/cards/${responsePost.body.card._id}`)
-            .set("Authorization", "Bearer " + token0).send();
+            const cardId = responsePost.body.card._id;
+            const responseGet = await request(server).get(`/cards/${cardId}`).set("Authorization", "Bearer " + token0).send();
             expect(responseGet.statusCode).toEqual(200);
             expect(responseGet.body.card).toEqual(responsePost.body.card);
+        });
+        it("should not get a card that user doesn't have read permissions for", async () => {
+            const responsePost = await request(server).post("/cards").set("Authorization", "Bearer " + token0).send(card);
+            expect(responsePost.statusCode).toEqual(200);
+            const responseGet = await request(server).get(`/cards/${responsePost.body.card._id}`)
+            .set("Authorization", "Bearer " + token1).send();
+            expect(responseGet.statusCode).toEqual(401);
         });
     });
 

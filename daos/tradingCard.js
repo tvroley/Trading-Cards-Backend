@@ -36,11 +36,22 @@ module.exports.getCard = async (cardId, userId) => {
     while(!found && count < cardCollections.length) {
       const currentCards = cardCollections[count].tradingCards;
       
-      currentCards.map((id) => {
-        if(id.toString() === cardId) {
-          found = true;
-        }
-      });
+      if(currentCards.includes(cardId)) {
+        found = true;
+      }
+
+      count++;
+    }
+
+    const allCardCollections = await CardCollection.find();
+    count = 0;
+    while(!found && count < allCardCollections.length) {
+      currentCards = allCardCollections[count].tradingCards;
+      const readUsers = allCardCollections[count].readUsers;
+      
+      if(currentCards.includes(cardId) && readUsers.includes(userId)) {
+        found = true;
+      }
 
       count++;
     }
@@ -48,7 +59,7 @@ module.exports.getCard = async (cardId, userId) => {
     if(found) {
       return await Card.findOne({_id: cardId});
     } else {
-      throw new errors.BadDataError('user does not own card');
+      throw new errors.BadDataError('user does not have read permissions for card');
     }
 }
 
