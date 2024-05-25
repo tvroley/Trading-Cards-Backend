@@ -65,12 +65,12 @@ router.post("/", async (req, res, next) => {
     if(title && userId) {
         try {
             const collection = await collectionDAO.createCardCollection(title, userId);
-            res.json(collection);
+            res.json({collection: collection});
         } catch(err) {
             next(err);
         }
     } else {
-        res.sendStatus(400);
+        res.status(400).send('missing collection title');
     }
 });
 
@@ -99,9 +99,10 @@ router.delete("/:id", async (req, res, next) => {
             const collection = await collectionDAO.getCardCollection(collectionId);
             const roles = req.user.roles;
             const userId = req.user._id;
+            const username = req.user.username;
             
             if(collection) {
-                if(userId === collection.owner || roles.includes('admin')) {
+                if(roles.includes('admin') || (userId === collection.owner && collection.title !==username)) {
                     const collection = await collectionDAO.removeCardCollection(collectionId);
                     res.json(collection);
                 } else {

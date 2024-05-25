@@ -2,12 +2,13 @@ const mongoose = require('mongoose');
 
 const CardCollection = require('../models/cardCollection');
 const User = require('../models/user');
+const CollectionForCard = require('../models/collectionForCard');
 const errors = require('../middleware/errors');
 
 module.exports = {};
 
 module.exports.createCardCollection = async (collectionTitle, userId) => {
-    const cardCollectionObj = {title: collectionTitle, owner: userId, tradingCards: [],
+    const cardCollectionObj = {title: collectionTitle, owner: userId,
       readUsers: [userId], writeUsers: [userId]
     };
     try{
@@ -34,20 +35,18 @@ module.exports.addCardToCollection = async (collectionId, cardId, userId) => {
   
   try {
     const cardCollection = await CardCollection.findOne({_id: collectionId});
-    const cards = cardCollection.tradingCards;
+    if(!cardCollection) {
+      throw new errors.BadDataError('did not find card collection');
+    }
     if(cardCollection.writeUsers.includes(userId)) {
-      if(!cards.includes(cardId)) {
-        cards.push(cardId);
-        cardCollection.tradingCards = cards;
-        await CardCollection.updateOne({_id: collectionId}, cardCollection);
-      } else {
-        throw new errors.BadDataError(`card is already in collection`);
-      }
+      return await CollectionForCard.create({tradingCard: cardId, cardCollection: collectionId});
     } else {
       throw new errors.BadDataError('user does not have write permissions for this collection');
     }
   } catch(err) {
-    if (err.message.includes('validation failed')) {
+    if (err.message.includes('duplicate key')) {
+      throw new errors.DuplicateKeyError(err.message);
+    } else if (err.message.includes('validation failed')) {
       throw new errors.BadDataError(err.message);
     } else {
       throw err;

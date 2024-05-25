@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 
 const Card = require('../models/tradingCard');
 const CardCollection = require('../models/cardCollection');
+const CollectionForCard = require('../models/collectionForCard');
 const errors = require('../middleware/errors');
 
 module.exports = {};
@@ -29,27 +30,16 @@ module.exports.getCard = async (cardId, userId) => {
       throw new errors.InvalidMongooseId("Invalid user ID");
     }
 
-    const cardCollections = await CardCollection.find({owner: userId});
+    const collectionsForCard = await CollectionForCard.find({tradingCard: cardId});
     let found = false;
     let count = 0;
 
-    while(!found && count < cardCollections.length) {
-      const currentCards = cardCollections[count].tradingCards;
+    while(!found && count < collectionsForCard.length) {
+      const collectionId = collectionsForCard[count].cardCollection;
+      const fullCollection = await CardCollection.findOne({_id: collectionId});
+      const readUsers = fullCollection.readUsers;
       
-      if(currentCards.includes(cardId)) {
-        found = true;
-      }
-
-      count++;
-    }
-
-    const allCardCollections = await CardCollection.find();
-    count = 0;
-    while(!found && count < allCardCollections.length) {
-      currentCards = allCardCollections[count].tradingCards;
-      const readUsers = allCardCollections[count].readUsers;
-      
-      if(currentCards.includes(cardId) && readUsers.includes(userId)) {
+      if(readUsers.includes(userId)) {
         found = true;
       }
 

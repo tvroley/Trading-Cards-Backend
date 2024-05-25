@@ -62,12 +62,50 @@ describe(`cards routes`, () => {
             const res1 = await request(server).post("/auth/login").send(user1);
             token1 = res1.body.token;
         });
+        it("should not get a collection using an invalid collection ID in the URL params", async () => {
+            const response = await request(server).get(`/collections/123`)
+            .set("Authorization", "Bearer " + token0).send();
+            expect(response.statusCode).toEqual(400);
+        });
+        it("should not get a collection for a user that doesn't have read permission", async () => {
+            const response = await request(server).get(`/collections/${user0MainCollection._id}`)
+            .set("Authorization", "Bearer " + token1).send();
+            expect(response.statusCode).toEqual(401);
+        });
         it("should get a collection using the ID in the URL params", async () => {
             const response = await request(server).get(`/collections/${user0MainCollection._id}`)
             .set("Authorization", "Bearer " + token0).send();
             expect(response.statusCode).toEqual(200);
             const collection = response.body.collection;
             expect(collection).toMatchObject(user0MainCollection);
+        });
+    });
+
+    describe("POST /collections", () => {
+        let token0;
+        let token1;
+        let user0MainCollection;
+        beforeEach(async () => {
+            const result = await request(server).post("/auth/signup").send(user0);
+            user0MainCollection = result.body.collection;
+            const res0 = await request(server).post("/auth/login").send(user0);
+            token0 = res0.body.token;
+            await request(server).post("/auth/signup").send(user1);
+            const res1 = await request(server).post("/auth/login").send(user1);
+            token1 = res1.body.token;
+        });
+        it("should not create a collection that already exist", async () => {
+            const response = await request(server).post(`/collections`).set("Authorization", "Bearer " + token0)
+            .send({"collectionTitle": "user011"});
+            expect(response.statusCode).toEqual(409);
+        });
+        it("should create a collection", async () => {
+            const response = await request(server).post(`/collections`).set("Authorization", "Bearer " + token0)
+            .send({"collectionTitle": "testCollection"});
+            expect(response.statusCode).toEqual(200);
+            const myCollection = await CardCollectionDao.findOne({title: "testCollection"}).lean();
+            expect(response.body.collection._id).toEqual(myCollection._id.toString());
+            expect(response.body.collection.owner).toEqual(myCollection.owner.toString());
         });
     });
 });

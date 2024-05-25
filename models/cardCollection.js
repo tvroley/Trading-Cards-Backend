@@ -5,10 +5,6 @@ const cardCollectionSchema = new mongoose.Schema({
   owner: {
     type: mongoose.Schema.Types.ObjectId, ref: "users", required: true
   },
-  tradingCards: {
-    type: [{ type: mongoose.Schema.Types.ObjectId, ref: "tradingCards" }],
-    required: true,
-  },
   readUsers: {
     type: [{ type: mongoose.Schema.Types.ObjectId, ref: "users" }],
     required: true,
