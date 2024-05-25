@@ -116,6 +116,7 @@ module.exports.removeCardCollection = async (cardCollectionId) => {
   if (!mongoose.Types.ObjectId.isValid(cardCollectionId)) {
       throw new errors.InvalidMongooseId("Invalid card collection ID");
   }
-
+  
+  await CollectionForCard.deleteMany({cardCollection: cardCollectionId});
   return await CardCollection.deleteOne({_id: cardCollectionId});
 }

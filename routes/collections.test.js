@@ -108,4 +108,38 @@ describe(`cards routes`, () => {
             expect(response.body.collection.owner).toEqual(myCollection.owner.toString());
         });
     });
+
+    describe("DELETE /collections", () => {
+        let token0;
+        let token1;
+        let user0MainCollection;
+        beforeEach(async () => {
+            const result = await request(server).post("/auth/signup").send(user0);
+            user0MainCollection = result.body.collection;
+            const res0 = await request(server).post("/auth/login").send(user0);
+            token0 = res0.body.token;
+            await request(server).post("/auth/signup").send(user1);
+            const res1 = await request(server).post("/auth/login").send(user1);
+            token1 = res1.body.token;
+        });
+        it("should send code 404 for deleting a collection that doesn't exist", async () => {
+            const response = await request(server).delete(`/collections/123`).set("Authorization", "Bearer " + token0).send();
+            expect(response.statusCode).toEqual(404);
+        });
+        it("should send code 409 for deleting a main collection for a user", async () => {
+            const response = await request(server).delete(`/collections/${user0MainCollection._id}`).set("Authorization", "Bearer " + token0).send();
+            expect(response.statusCode).toEqual(409);
+        });
+        it("should delete a collection that the user owns", async () => {
+            const responsePost = await request(server).post(`/collections`).set("Authorization", "Bearer " + token0)
+            .send({"collectionTitle": "testCollection"});
+            expect(responsePost.statusCode).toEqual(200);
+            const collection = responsePost.body.collection;
+            const responseDelete = await request(server).delete(`/collections/${collection._id}`)
+            .set("Authorization", "Bearer " + token0).send();
+            expect(responseDelete.statusCode).toEqual(200);
+            const collections = await CardCollectionDao.find({title: "testCollection"}).lean();
+            expect(collections.length).toEqual(0);
+        });
+    });
 });

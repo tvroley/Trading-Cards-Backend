@@ -102,11 +102,15 @@ router.delete("/:id", async (req, res, next) => {
             const username = req.user.username;
             
             if(collection) {
-                if(roles.includes('admin') || (userId === collection.owner && collection.title !==username)) {
+                if(roles.includes('admin') || (userId === collection.owner.toString() && collection.title !== username)) {
                     const collection = await collectionDAO.removeCardCollection(collectionId);
                     res.json(collection);
                 } else {
-                    res.sendStatus(401);
+                    if(collection.title === username) {
+                        res.sendStatus(409);
+                    } else {
+                        res.status(401).send(`no permission to delete collection`);
+                    }
                 }
             } else {
                 res.status(404).send("collection not found");
