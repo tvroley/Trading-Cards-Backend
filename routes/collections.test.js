@@ -142,6 +142,54 @@ describe(`cards routes`, () => {
         });
     });
 
+    describe("PUT /collections", () => {
+        let token0;
+        let token1;
+        let user0MainCollection;
+        beforeEach(async () => {
+            const result = await request(server).post("/auth/signup").send(user0);
+            user0MainCollection = result.body.collection;
+            const res0 = await request(server).post("/auth/login").send(user0);
+            token0 = res0.body.token;
+            await request(server).post("/auth/signup").send(user1);
+            const res1 = await request(server).post("/auth/login").send(user1);
+            token1 = res1.body.token;
+        });
+        it("should not update a collection title with an invalid collection ID", async () => {
+            const responsePost = await request(server).post(`/collections`).set("Authorization", "Bearer " + token0)
+            .send({"collectionTitle": "testCollection"});
+            expect(responsePost.statusCode).toEqual(200);
+            const responsePut = await request(server).put(`/collections/123`).set("Authorization", "Bearer " + token0)
+            .send({"collectionTitle": "updatedTitle"});
+            expect(responsePut.statusCode).toEqual(400);
+            const collections = await CardCollectionDao.find({title: "updatedTitle"}).lean();
+            expect(collections.length).toEqual(0);
+        });
+        it("should not update a collection title when the user doesn't have permission", async () => {
+            const responsePost = await request(server).post(`/collections`).set("Authorization", "Bearer " + token0)
+            .send({"collectionTitle": "testCollection"});
+            expect(responsePost.statusCode).toEqual(200);
+            const responsePut = await request(server).put(`/collections/${user0MainCollection._id}`).set("Authorization", "Bearer " + token1)
+            .send({"collectionTitle": "updatedTitle"});
+            expect(responsePut.statusCode).toEqual(401);
+            const collections = await CardCollectionDao.find({title: "updatedTitle"}).lean();
+            expect(collections.length).toEqual(0);
+        });
+        it("should update a collection title", async () => {
+            const responsePost = await request(server).post(`/collections`).set("Authorization", "Bearer " + token0)
+            .send({"collectionTitle": "testCollection"});
+            expect(responsePost.statusCode).toEqual(200);
+            const collectinIdExpected = responsePost.body.collection._id;
+            const responsePut = await request(server).put(`/collections/${collectinIdExpected}`).set("Authorization", "Bearer " + token0)
+            .send({"collectionTitle": "updatedTitle"});
+            expect(responsePut.statusCode).toEqual(200);
+            const collections = await CardCollectionDao.find({title: "updatedTitle"}).lean();
+            expect(collections.length).toEqual(1);
+            const collectinIdReceived = collections[0]._id.toString();
+            expect(collectinIdReceived).toEqual(collectinIdExpected);
+        });
+    });
+
     describe("DELETE /collections", () => {
         let token0;
         let token1;

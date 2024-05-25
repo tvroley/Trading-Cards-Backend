@@ -95,6 +95,30 @@ router.post("/:id", async (req, res, next) => {
     }
 });
 
+router.put("/:id", async (req, res, next) => {
+    const collectionId = req.params.id;
+    const collectionTitle = req.body.collectionTitle;
+    const userId = req.user._id;
+    const username = req.user.username;
+
+    if(collectionId) {
+        try {
+            const result = await collectionDAO.updateCardCollectionTitle(collectionId, userId, username, collectionTitle);
+            res.json(result);
+        } catch(err) {
+            if(err.message.includes(`write permission`)) {
+                res.status(401).send(err.message);
+            } else if(err.message.includes(`did not find`)) {
+                res.status(404).send(err.message);
+            } else {
+                next(err);
+            }
+        }
+    } else {
+        res.sendStatus(400);
+    }
+});
+
 router.delete("/:id", async (req, res, next) => {
     const collectionId = req.params.id;
 

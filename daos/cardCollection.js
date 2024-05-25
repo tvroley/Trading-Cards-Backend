@@ -54,6 +54,35 @@ module.exports.addCardToCollection = async (collectionId, cardId, userId) => {
   }
 }
 
+module.exports.updateCardCollectionTitle = async (collectionId, userId, userName, collectionTitle) => {
+  if (!mongoose.Types.ObjectId.isValid(collectionId)) {
+    throw new errors.InvalidMongooseId("Invalid card collection ID");
+  }
+
+  if (!mongoose.Types.ObjectId.isValid(userId)) {
+    throw new errors.InvalidMongooseId("Invalid user ID");
+  }
+  
+  try {
+    const cardCollection = await CardCollection.findOne({_id: collectionId});
+
+    if(!cardCollection) {
+      throw new errors.BadDataError('did not find card collection');
+    }
+    if(cardCollection.owner.toString() === userId && cardCollection.title !== userName) {
+      return await CardCollection.updateOne({_id: collectionId}, {$set: {title: collectionTitle}});
+    } else {
+      throw new errors.BadDataError('user does not have write permissions for this collection');
+    }
+  } catch(err) {
+    if (err.message.includes('validation failed')) {
+      throw new errors.BadDataError(err.message);
+    } else {
+      throw err;
+    }
+  }
+}
+
 module.exports.getCardCollection = async (cardCollectionId) => {
     if (!mongoose.Types.ObjectId.isValid(cardCollectionId)) {
         throw new errors.InvalidMongooseId("Invalid card collection ID");
