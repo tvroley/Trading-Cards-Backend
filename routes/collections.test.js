@@ -3,6 +3,7 @@ const request = require("supertest");
 const server = require("../server");
 const testUtils = require('../test-utils');
 const CardsDao = require('../models/tradingCard');
+const UserDao = require('../models/user');
 const CardCollectionDao = require('../models/cardCollection');
 
 describe(`cards routes`, () => {
@@ -78,6 +79,19 @@ describe(`cards routes`, () => {
             expect(response.statusCode).toEqual(200);
             const collection = response.body.collection;
             expect(collection).toMatchObject(user0MainCollection);
+        });
+        it("should get all collections for an owner", async () => {
+            const responsePost = await request(server).post(`/collections`).set("Authorization", "Bearer " + token0)
+            .send({"collectionTitle": "testCollection"});
+            expect(responsePost.statusCode).toEqual(200);
+            const responseGet = await request(server).get(`/collections`)
+            .set("Authorization", "Bearer " + token0).send({'ownerName': user0.username});
+            expect(responseGet.statusCode).toEqual(200);
+            const collections = responseGet.body.collections;
+            expect(collections.length).toEqual(2);
+            const owner = await UserDao.findOne({username: user0.username}).lean();
+            expect(collections[0].owner).toEqual(owner._id.toString());
+            expect(collections[1].owner).toEqual(owner._id.toString());
         });
     });
 

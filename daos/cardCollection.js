@@ -62,17 +62,17 @@ module.exports.getCardCollection = async (cardCollectionId) => {
     return await CardCollection.findOne({_id: cardCollectionId});
 }
 
-module.exports.getCardCollectionsForUser = async (ownerId, userId, roles) => {
+module.exports.getCardCollectionsForUser = async (ownerName, userId, roles) => {
   if (!mongoose.Types.ObjectId.isValid(userId)) {
       throw new errors.InvalidMongooseId("Invalid user ID");
   }
 
-  if (!mongoose.Types.ObjectId.isValid(ownerId)) {
-    throw new errors.InvalidMongooseId("Invalid collection owner ID");
-  }
-
   try {
-    const cardCollections = await CardCollection.find({owner: ownerId});
+    const ownerUser = await User.findOne({username: ownerName});
+    if(!ownerUser) {
+      throw new errors.BadDataError('could not find collection owner');
+    }
+    const cardCollections = await CardCollection.find({owner: ownerUser._id});
     const allowedCollections = [];
 
     if(roles.includes('admin')) {
@@ -116,7 +116,7 @@ module.exports.removeCardCollection = async (cardCollectionId) => {
   if (!mongoose.Types.ObjectId.isValid(cardCollectionId)) {
       throw new errors.InvalidMongooseId("Invalid card collection ID");
   }
-  
+
   await CollectionForCard.deleteMany({cardCollection: cardCollectionId});
   return await CardCollection.deleteOne({_id: cardCollectionId});
 }

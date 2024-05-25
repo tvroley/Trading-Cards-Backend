@@ -5,7 +5,7 @@ const errors = require('../middleware/errors');
 const collectionDAO = require('../daos/cardCollection');
 
 router.get("/", async (req, res, next) => {
-    const ownerName = req.body.owner;
+    const ownerName = req.body.ownerName;
     const title = req.body.title;
     const userId = req.user._id;
     const roles = req.user.roles;
@@ -26,11 +26,15 @@ router.get("/", async (req, res, next) => {
             next(err);
         }
     } else if(ownerName) {
-        const collections = await collectionDAO.getCardCollectionsForUser(ownerName, userId, roles);
-        if(collections) {
-            res.json(collections);
-        } else {
-            res.status(404).send("could not find any collections for user");
+        try {
+            const collections = await collectionDAO.getCardCollectionsForUser(ownerName, userId, roles);
+            if(collections) {
+                res.json({collections: collections});
+            } else {
+                res.status(404).send("could not find any collections for user");
+            }
+        } catch(err) {
+            next(err);
         }
     } else {
         res.sendStatus(400);        
