@@ -98,6 +98,15 @@ describe(`cards routes`, () => {
             const response = await request(server).post(`/collections`).set("Authorization", "Bearer " + token0)
             .send({"collectionTitle": "user011"});
             expect(response.statusCode).toEqual(409);
+            const collections = await CardCollectionDao.find({title: "user011"}).lean();
+            expect(collections.length).toEqual(1);
+        });
+        it("should not create a collection with an empty name", async () => {
+            const response = await request(server).post(`/collections`).set("Authorization", "Bearer " + token0)
+            .send({"collectionTitle": ""});
+            expect(response.statusCode).toEqual(400);
+            const collections = await CardCollectionDao.find({title: ""}).lean();
+            expect(collections.length).toEqual(0);
         });
         it("should create a collection", async () => {
             const response = await request(server).post(`/collections`).set("Authorization", "Bearer " + token0)
@@ -129,6 +138,8 @@ describe(`cards routes`, () => {
         it("should send code 409 for deleting a main collection for a user", async () => {
             const response = await request(server).delete(`/collections/${user0MainCollection._id}`).set("Authorization", "Bearer " + token0).send();
             expect(response.statusCode).toEqual(409);
+            const collections = await CardCollectionDao.find({title: user0.username}).lean();
+            expect(collections.length).toEqual(1);
         });
         it("should delete a collection that the user owns", async () => {
             const responsePost = await request(server).post(`/collections`).set("Authorization", "Bearer " + token0)
