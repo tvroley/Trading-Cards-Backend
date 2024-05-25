@@ -141,5 +141,16 @@ describe(`cards routes`, () => {
             const collections = await CardCollectionDao.find({title: "testCollection"}).lean();
             expect(collections.length).toEqual(0);
         });
+        it("should not delete a collection that the user doesn't own and send code 401", async () => {
+            const responsePost = await request(server).post(`/collections`).set("Authorization", "Bearer " + token0)
+            .send({"collectionTitle": "testCollection"});
+            expect(responsePost.statusCode).toEqual(200);
+            const collection = responsePost.body.collection;
+            const responseDelete = await request(server).delete(`/collections/${collection._id}`)
+            .set("Authorization", "Bearer " + token1).send();
+            expect(responseDelete.statusCode).toEqual(401);
+            const collections = await CardCollectionDao.find({title: "testCollection"}).lean();
+            expect(collections.length).toEqual(1);
+        });
     });
 });
