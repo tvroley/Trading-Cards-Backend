@@ -68,6 +68,20 @@ describe(`cards routes`, () => {
             .set("Authorization", "Bearer " + token0).send();
             expect(response.statusCode).toEqual(400);
         });
+        it("should not get a collection that doesn't exist", async () => {
+            const responsePost = await request(server).post(`/collections`).set("Authorization", "Bearer " + token0)
+            .send({"collectionTitle": "testCollection"});
+            expect(responsePost.statusCode).toEqual(200);
+            const collection = responsePost.body.collection;
+            const responseDelete = await request(server).delete(`/collections/${collection._id}`)
+            .set("Authorization", "Bearer " + token0).send();
+            expect(responseDelete.statusCode).toEqual(200);
+            const collections = await CardCollectionDao.find({title: "testCollection"}).lean();
+            expect(collections.length).toEqual(0);
+            const response = await request(server).get(`/collections/${collection._id}`)
+            .set("Authorization", "Bearer " + token0).send();
+            expect(response.statusCode).toEqual(404);
+        });
         it("should not get a collection for a user that doesn't have read permission", async () => {
             const response = await request(server).get(`/collections/${user0MainCollection._id}`)
             .set("Authorization", "Bearer " + token1).send();
@@ -163,6 +177,20 @@ describe(`cards routes`, () => {
             const collections = await CardCollectionDao.find({title: "updatedTitle"}).lean();
             expect(collections.length).toEqual(0);
         });
+        it("should not update a collection that doesn't exist", async () => {
+            const responsePost = await request(server).post(`/collections`).set("Authorization", "Bearer " + token0)
+            .send({"collectionTitle": "testCollection"});
+            expect(responsePost.statusCode).toEqual(200);
+            const collection = responsePost.body.collection;
+            const responseDelete = await request(server).delete(`/collections/${collection._id}`)
+            .set("Authorization", "Bearer " + token0).send();
+            expect(responseDelete.statusCode).toEqual(200);
+            const collections = await CardCollectionDao.find({title: "testCollection"}).lean();
+            expect(collections.length).toEqual(0);
+            const responsePut = await request(server).put(`/collections/${collection._id}`).set("Authorization", "Bearer " + token0)
+            .send({"collectionTitle": "updatedTitle"});
+            expect(responsePut.statusCode).toEqual(404);
+        });
         it("should not update a collection title when the user doesn't have permission", async () => {
             const responsePost = await request(server).post(`/collections`).set("Authorization", "Bearer " + token0)
             .send({"collectionTitle": "testCollection"});
@@ -201,9 +229,23 @@ describe(`cards routes`, () => {
             const res1 = await request(server).post("/auth/login").send(user1);
             token1 = res1.body.token;
         });
-        it("should send code 404 for deleting a collection that doesn't exist", async () => {
+        it("should send code 404 for deleting a collection with an invalid ID", async () => {
             const response = await request(server).delete(`/collections/123`).set("Authorization", "Bearer " + token0).send();
             expect(response.statusCode).toEqual(404);
+        });
+        it("should not delete a collection that doesn't exist", async () => {
+            const responsePost = await request(server).post(`/collections`).set("Authorization", "Bearer " + token0)
+            .send({"collectionTitle": "testCollection"});
+            expect(responsePost.statusCode).toEqual(200);
+            const collection = responsePost.body.collection;
+            const responseDelete = await request(server).delete(`/collections/${collection._id}`)
+            .set("Authorization", "Bearer " + token0).send();
+            expect(responseDelete.statusCode).toEqual(200);
+            const collections = await CardCollectionDao.find({title: "testCollection"}).lean();
+            expect(collections.length).toEqual(0);
+            const responseDelete2 = await request(server).delete(`/collections/${collection._id}`)
+            .set("Authorization", "Bearer " + token0).send();
+            expect(responseDelete2.statusCode).toEqual(404);
         });
         it("should send code 409 for deleting a main collection for a user", async () => {
             const response = await request(server).delete(`/collections/${user0MainCollection._id}`).set("Authorization", "Bearer " + token0).send();
