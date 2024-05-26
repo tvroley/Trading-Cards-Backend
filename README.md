@@ -1,3 +1,12 @@
+Project Update
+
+Finishing all tasks on time
+Still need to implement sorting and searching
+Writing unit tests and fixing bugs can take a long time as expected
+Finished user functionality early on because it was necessary for testing card collections
+I may want to combine some mongodb commands into one, once I finalize the functionality for different functions, 
+but that might cause problems for sending different error status codes.
+
 1. A description of the scenario your project is operating in.
 
 Previously, I created a front end application that displays graded trading cards from different grading companies, and I would like to create a more robust backend for it using Mongodb and Mongoose instead of Firebase.
