@@ -27,7 +27,7 @@ router.put("/:id", async (req, res, next) => {
     const userId = req.user._id;
     const roles = req.user.roles;
 
-    if(cardId && card) {
+    if(cardId && card && Object.keys(card).length !== 0) {
         try {
             const result = await cardsDAO.updateCard(cardId, card, userId, roles);
             if(card) {

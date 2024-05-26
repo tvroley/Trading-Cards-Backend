@@ -106,6 +106,19 @@ describe(`cards routes`, () => {
             const res1 = await request(server).post("/auth/login").send(user1);
             token1 = res1.body.token;
         });
+        it("should not update a card with an invalid ID", async () => {
+            const responsePut = await request(server).put(`/cards/123`).set("Authorization", "Bearer " + token1)
+            .send(updatedCard);
+            expect(responsePut.statusCode).toEqual(400);
+        });
+        it("should not update a card with an empty card object", async () => {
+            const responsePost = await request(server).post("/cards").set("Authorization", "Bearer " + token0).send(card);
+            expect(responsePost.statusCode).toEqual(200);
+            const cardId = responsePost.body.card._id;
+            const responsePut = await request(server).put(`/cards/${cardId}`).set("Authorization", "Bearer " + token0)
+            .send({});
+            expect(responsePut.statusCode).toEqual(400);
+        });
         it("should not update a card the user doesn't have permission for", async () => {
             const responsePost = await request(server).post("/cards").set("Authorization", "Bearer " + token0).send(card);
             expect(responsePost.statusCode).toEqual(200);
