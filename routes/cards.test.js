@@ -33,6 +33,21 @@ describe(`cards routes`, () => {
         "variety": ""
     }
 
+    const updatedCard = {
+        "certificationNumber": "78261079",
+        "sold": true,
+        "grade": "9",
+        "subject": "Mariano Rivera",
+        "frontCardImageLink": "https://d1htnxwo4o0jhw.cloudfront.net/cert/144383603/mObd2K1wxkWOuMB96W2XNw.jpg",
+        "gradingCompany": "PSA",
+        "cardSet": "1992 Bowman",
+        "cardNumber": "302",
+        "year": 1992,
+        "backCardImageLink": "https://d1htnxwo4o0jhw.cloudfront.net/cert/144383603/ATcQDQWFv06Dsq_CHPayHA.jpg",
+        "brand": "Bowman",
+        "variety": ""
+    }
+
     const card0 = {
       "cardNumber": "30",
       "certificationNumber": "8812288",
@@ -77,6 +92,30 @@ describe(`cards routes`, () => {
             const responseGet = await request(server).get(`/cards/${responsePost.body.card._id}`)
             .set("Authorization", "Bearer " + token1).send();
             expect(responseGet.statusCode).toEqual(401);
+        });
+    });
+
+    describe("PUT /cards", () => {
+        let token0;
+        let token1;
+        beforeEach(async () => {
+            await request(server).post("/auth/signup").send(user0);
+            const res0 = await request(server).post("/auth/login").send(user0);
+            token0 = res0.body.token;
+            await request(server).post("/auth/signup").send(user1);
+            const res1 = await request(server).post("/auth/login").send(user1);
+            token1 = res1.body.token;
+        });
+        it("updates a card", async () => {
+            const responsePost = await request(server).post("/cards").set("Authorization", "Bearer " + token0).send(card);
+            expect(responsePost.statusCode).toEqual(200);
+            const cardId = responsePost.body.card._id;
+            const responsePut = await request(server).put(`/cards/${cardId}`).set("Authorization", "Bearer " + token0)
+            .send(updatedCard);
+            expect(responsePut.statusCode).toEqual(200);
+            expect(responsePut.body.modifiedCount).toEqual(1);
+            const soldCard = await Cards.findOne({certificationNumber: "78261079"}).lean();
+            expect(soldCard.sold).toBeTruthy();
         });
     });
 

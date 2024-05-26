@@ -29,9 +29,9 @@ router.put("/:id", async (req, res, next) => {
 
     if(cardId && card) {
         try {
-            const updatedCard = await cardsDAO.updateCard(cardId, card, userId, roles);
+            const result = await cardsDAO.updateCard(cardId, card, userId, roles);
             if(card) {
-                res.json(updatedCard);
+                res.json(result);
             } else {
                 res.status(404).send("card not found");
             }
