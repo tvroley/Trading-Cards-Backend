@@ -106,7 +106,15 @@ describe(`cards routes`, () => {
             const res1 = await request(server).post("/auth/login").send(user1);
             token1 = res1.body.token;
         });
-        it("updates a card", async () => {
+        it("should not update a card the user doesn't have permission for", async () => {
+            const responsePost = await request(server).post("/cards").set("Authorization", "Bearer " + token0).send(card);
+            expect(responsePost.statusCode).toEqual(200);
+            const cardId = responsePost.body.card._id;
+            const responsePut = await request(server).put(`/cards/${cardId}`).set("Authorization", "Bearer " + token1)
+            .send(updatedCard);
+            expect(responsePut.statusCode).toEqual(401);
+        });
+        it("should update a card", async () => {
             const responsePost = await request(server).post("/cards").set("Authorization", "Bearer " + token0).send(card);
             expect(responsePost.statusCode).toEqual(200);
             const cardId = responsePost.body.card._id;

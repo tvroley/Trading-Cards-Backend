@@ -36,7 +36,11 @@ router.put("/:id", async (req, res, next) => {
                 res.status(404).send("card not found");
             }
         } catch(err) {
-            next(err);
+            if(err.message.includes(`write permission`)) {
+                res.status(401).send(err.message);
+            } else {
+                next(err);
+            }
         }
     } else {
         res.sendStatus(400);

@@ -73,7 +73,7 @@ module.exports.updateCard = async (cardId, cardObj, userId, roles) => {
       if(fullCollection.owner.toString() === userId) {
         return await Card.updateOne({ _id: cardId }, cardObj);
       } else {
-        throw new errors.BadDataError('user does not have read permissions for card');
+        throw new errors.BadDataError('user does not have write permissions for card');
       }
     }
 }
