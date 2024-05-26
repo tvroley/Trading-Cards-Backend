@@ -198,6 +198,18 @@ describe(`cards routes`, () => {
             const deleteCardArray = await Cards.find({certificationNumber: "78261079"}).lean();
             expect(deleteCardArray.length).toEqual(1);
         });
+        it("should not delete a card that doesn't exist", async () => {
+            const responsePost = await request(server).post("/cards").set("Authorization", "Bearer " + token0).send(card);
+            expect(responsePost.statusCode).toEqual(200);
+            const cardId = responsePost.body.card._id;
+            const responseDelete = await request(server).delete(`/cards/${cardId}`).set("Authorization", "Bearer " + token0).send();
+            expect(responseDelete.statusCode).toEqual(200);
+            expect(responseDelete.body.deletedCount).toEqual(1);
+            const deleteCardArray = await Cards.find({certificationNumber: "78261079"}).lean();
+            expect(deleteCardArray.length).toEqual(0);
+            const responseDelete2 = await request(server).delete(`/cards/${cardId}`).set("Authorization", "Bearer " + token0).send();
+            expect(responseDelete2.statusCode).toEqual(404);
+        });
         it("should delete a card", async () => {
             const responsePost = await request(server).post("/cards").set("Authorization", "Bearer " + token0).send(card);
             expect(responsePost.statusCode).toEqual(200);
