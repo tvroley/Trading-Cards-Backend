@@ -103,14 +103,18 @@ router.delete("/:id", async (req, res, next) => {
     const roles = req.user.roles;
 
     try {
-        const card = await cardsDAO.deleteCard(cardId, userId, roles);
-        if(card) {
-            res.json(card);
+        const result = await cardsDAO.deleteCard(cardId, userId, roles);
+        if(result) {
+            res.json(result);
         } else {
             res.status(404).send("card not found");
         }
     } catch(err) {
-        next(err);
+        if(err.message.includes('permission')) {
+            res.status(401).send(err.message);
+        } else {
+            next(err);
+        }
     }
 });
 

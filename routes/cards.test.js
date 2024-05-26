@@ -173,5 +173,41 @@ describe(`cards routes`, () => {
             expect(savedCards[0]).toMatchObject(card);
         });
     });
+
+    describe("DELETE /cards", () => {
+        let token0;
+        let token1;
+        beforeEach(async () => {
+            await request(server).post("/auth/signup").send(user0);
+            const res0 = await request(server).post("/auth/login").send(user0);
+            token0 = res0.body.token;
+            await request(server).post("/auth/signup").send(user1);
+            const res1 = await request(server).post("/auth/login").send(user1);
+            token1 = res1.body.token;
+        });
+        it("should not delete a card with an invalid ID", async () => {
+            const responseDelete = await request(server).delete(`/cards/123`).set("Authorization", "Bearer " + token0).send();
+            expect(responseDelete.statusCode).toEqual(400);
+        });
+        it("should not delete a card when user doesn't have permission", async () => {
+            const responsePost = await request(server).post("/cards").set("Authorization", "Bearer " + token0).send(card);
+            expect(responsePost.statusCode).toEqual(200);
+            const cardId = responsePost.body.card._id;
+            const responseDelete = await request(server).delete(`/cards/${cardId}`).set("Authorization", "Bearer " + token1).send();
+            expect(responseDelete.statusCode).toEqual(401);
+            const deleteCardArray = await Cards.find({certificationNumber: "78261079"}).lean();
+            expect(deleteCardArray.length).toEqual(1);
+        });
+        it("should delete a card", async () => {
+            const responsePost = await request(server).post("/cards").set("Authorization", "Bearer " + token0).send(card);
+            expect(responsePost.statusCode).toEqual(200);
+            const cardId = responsePost.body.card._id;
+            const responseDelete = await request(server).delete(`/cards/${cardId}`).set("Authorization", "Bearer " + token0).send();
+            expect(responseDelete.statusCode).toEqual(200);
+            expect(responseDelete.body.deletedCount).toEqual(1);
+            const deleteCardArray = await Cards.find({certificationNumber: "78261079"}).lean();
+            expect(deleteCardArray.length).toEqual(0);
+        });
+    });
 });
 
