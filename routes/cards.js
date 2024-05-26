@@ -24,9 +24,12 @@ router.post("/", async (req, res, next) => {
 router.put("/:id", async (req, res, next) => {
     const cardId = req.params.id;
     const card = req.body;
+    const userId = req.user._id;
+    const roles = req.user.roles;
+
     if(cardId && card) {
         try {
-            const updatedCard = await cardsDAO.updateCard(cardId, card);
+            const updatedCard = await cardsDAO.updateCard(cardId, card, userId, roles);
             if(card) {
                 res.json(updatedCard);
             } else {
@@ -92,8 +95,11 @@ router.get("/:id", async (req, res, next) => {
 
 router.delete("/:id", async (req, res, next) => {
     const cardId = req.params.id;
+    const userId = req.user._id;
+    const roles = req.user.roles;
+
     try {
-        const card = await cardsDAO.deleteCard(cardId);
+        const card = await cardsDAO.deleteCard(cardId, userId, roles);
         if(card) {
             res.json(card);
         } else {

@@ -8,9 +8,7 @@ const errors = require('../middleware/errors');
 module.exports = {};
 
 module.exports.createCardCollection = async (collectionTitle, userId) => {
-    const cardCollectionObj = {title: collectionTitle, owner: userId,
-      readUsers: [userId], writeUsers: [userId]
-    };
+    const cardCollectionObj = {title: collectionTitle, owner: userId};
     try{
       return await CardCollection.create(cardCollectionObj);
     } catch(err) {
@@ -24,7 +22,7 @@ module.exports.createCardCollection = async (collectionTitle, userId) => {
     }
 }
 
-module.exports.addCardToCollection = async (collectionId, cardId, userId) => {
+module.exports.addCardToCollection = async (collectionId, cardId, userId, roles) => {
   if (!mongoose.Types.ObjectId.isValid(collectionId)) {
     throw new errors.InvalidMongooseId("Invalid card collection ID");
   }
@@ -38,7 +36,7 @@ module.exports.addCardToCollection = async (collectionId, cardId, userId) => {
     if(!cardCollection) {
       throw new errors.BadDataError('did not find card collection');
     }
-    if(cardCollection.writeUsers.includes(userId)) {
+    if(cardCollection.owner.toString() === userId || roles.includes('admin')) {
       return await CollectionForCard.create({tradingCard: cardId, cardCollection: collectionId});
     } else {
       throw new errors.BadDataError('user does not have write permissions for this collection');
@@ -91,7 +89,7 @@ module.exports.getCardCollection = async (cardCollectionId) => {
     return await CardCollection.findOne({_id: cardCollectionId});
 }
 
-module.exports.getCardCollectionsForUser = async (ownerName, userId, roles) => {
+module.exports.getCardCollectionsForUser = async (ownerName, userId) => {
   if (!mongoose.Types.ObjectId.isValid(userId)) {
       throw new errors.InvalidMongooseId("Invalid user ID");
   }
@@ -102,18 +100,8 @@ module.exports.getCardCollectionsForUser = async (ownerName, userId, roles) => {
       throw new errors.BadDataError('could not find collection owner');
     }
     const cardCollections = await CardCollection.find({owner: ownerUser._id});
-    const allowedCollections = [];
 
-    if(roles.includes('admin')) {
-      allowedCollections = cardCollections;
-    } else {
-      cardCollections.map((collect) => {
-        if(collect.readUsers.includes(userId)) {
-          allowedCollections.push(collect);
-        }
-      });
-    }
-    return allowedCollections;
+    return cardCollections;
   } catch(err) {
     if (err.message.includes('validation failed')) {
       throw new errors.BadDataError(err.message);

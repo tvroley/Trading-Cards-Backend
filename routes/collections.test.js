@@ -93,15 +93,13 @@ describe(`cards routes`, () => {
             expect(collections[0].owner).toEqual(owner._id.toString());
             expect(collections[1].owner).toEqual(owner._id.toString());
         });
-        it("should not get all collections for an owner the user doesn't have permission for", async () => {
+        it("should not get all collections for an owner that the user doesn't have permission for", async () => {
             const responsePost = await request(server).post(`/collections`).set("Authorization", "Bearer " + token0)
             .send({"collectionTitle": "testCollection"});
             expect(responsePost.statusCode).toEqual(200);
             const responseGet = await request(server).get(`/collections`)
             .set("Authorization", "Bearer " + token1).send({'ownerName': user0.username});
-            expect(responseGet.statusCode).toEqual(200);
-            const collections = responseGet.body.collections;
-            expect(collections.length).toEqual(0);
+            expect(responseGet.statusCode).toEqual(401);
         });
     });
 

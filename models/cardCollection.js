@@ -5,14 +5,6 @@ const cardCollectionSchema = new mongoose.Schema({
   owner: {
     type: mongoose.Schema.Types.ObjectId, ref: "users", required: true
   },
-  readUsers: {
-    type: [{ type: mongoose.Schema.Types.ObjectId, ref: "users" }],
-    required: true,
-  },
-  writeUsers: {
-    type: [{ type: mongoose.Schema.Types.ObjectId, ref: "users" }],
-    required: true,
-  },
 });
 
 cardCollectionSchema.index({title: 1, owner: 1}, {unique: true});

@@ -14,7 +14,7 @@ router.get("/", async (req, res, next) => {
         try {
             const collection = await collectionDAO.getCollectionByOwnerAndTitle(title, ownerName);
             if(collection) {
-                if(collection.readUsers.includes(userId) || roles.includes('admin')) {
+                if(collection.owner.toString() === userId || roles.includes('admin')) {
                     res.json({collection: collection});
                 } else {
                     res.sendStatus(401);
@@ -27,9 +27,13 @@ router.get("/", async (req, res, next) => {
         }
     } else if(ownerName) {
         try {
-            const collections = await collectionDAO.getCardCollectionsForUser(ownerName, userId, roles);
-            if(collections) {
-                res.json({collections: collections});
+            const collections = await collectionDAO.getCardCollectionsForUser(ownerName, userId);
+            if(collections && collections.length > 0) {
+                if (collections[0].owner.toString() === userId || roles.includes('admin')) {
+                    res.json({collections: collections});
+                } else {
+                    res.sendStatus(401);
+                }
             } else {
                 res.status(404).send("could not find any collections for user");
             }
@@ -49,8 +53,7 @@ router.get("/:id", async (req, res, next) => {
     try {
         const collection = await collectionDAO.getCardCollection(collectionId);
         if(collection) {
-            const readUsers = collection.readUsers;
-            if(readUsers.includes(userId) || roles.includes('admin')) {
+            if(collection.owner.toString() === userId || roles.includes('admin')) {
                 res.json({collection: collection});
             } else {
                 res.status(401).send(`not authorized to view collection`);    
@@ -82,10 +85,11 @@ router.post("/:id", async (req, res, next) => {
     const collectionId = req.params.id;
     const cardId = req.body.cardId;
     const userId = req.user._id;
+    const roles = req.user.roles;
 
     if(cardId && collectionId) {
         try {
-            await collectionDAO.addCardToCollection(collectionId, cardId, userId);
+            await collectionDAO.addCardToCollection(collectionId, cardId, userId, roles);
             res.sendStatus(200);
         } catch(err) {
             next(err);

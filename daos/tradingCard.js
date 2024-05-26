@@ -30,23 +30,12 @@ module.exports.getCard = async (cardId, userId) => {
       throw new errors.InvalidMongooseId("Invalid user ID");
     }
 
-    const collectionsForCard = await CollectionForCard.find({tradingCard: cardId});
-    let found = false;
-    let count = 0;
+    const collectionForCard = await CollectionForCard.findOne({tradingCard: cardId});
 
-    while(!found && count < collectionsForCard.length) {
-      const collectionId = collectionsForCard[count].cardCollection;
-      const fullCollection = await CardCollection.findOne({_id: collectionId});
-      const readUsers = fullCollection.readUsers;
-      
-      if(readUsers.includes(userId)) {
-        found = true;
-      }
+    const collectionId = collectionForCard.cardCollection;
+    const fullCollection = await CardCollection.findOne({_id: collectionId});
 
-      count++;
-    }
-
-    if(found) {
+    if(fullCollection.owner.toString() === userId) {
       return await Card.findOne({_id: cardId});
     } else {
       throw new errors.BadDataError('user does not have read permissions for card');
@@ -69,18 +58,42 @@ module.exports.getCardByCert = async (company, cert) => {
     return await Card.findOne({gradingCompany: company, certificationNumber: cert});
 }
 
-module.exports.updateCard = async (cardId, cardObj) => {
+module.exports.updateCard = async (cardId, cardObj, userId, roles) => {
     if (!mongoose.Types.ObjectId.isValid(cardId)) {
         throw new errors.InvalidMongooseId("Invalid trading card ID");
     }
-    
-    return await Card.updateOne({ _id: cardId }, cardObj);
+
+    if(roles.includes('admin')) {
+      return await Card.updateOne({ _id: cardId }, cardObj);
+    } else {
+      const collectionForCard = await CollectionForCard.findOne({tradingCard: cardId});
+      const collectionId = collectionForCard.cardCollection;
+      const fullCollection = await CardCollection.findOne({_id: collectionId});
+      
+      if(fullCollection.owner.toString() === userId) {
+        return await Card.updateOne({ _id: cardId }, cardObj);
+      } else {
+        throw new errors.BadDataError('user does not have read permissions for card');
+      }
+    }
 }
 
-module.exports.deleteCard = async (cardId) => {
+module.exports.deleteCard = async (cardId, userId, roles) => {
   if (!mongoose.Types.ObjectId.isValid(cardId)) {
       throw new errors.InvalidMongooseId("Invalid trading card ID");
   }
 
-  return await Card.deleteOne({_id: cardId});
+  if(roles.includes('admin')) {
+    return await Card.deleteOne({_id: cardId});
+  } else {
+    const collectionForCard = await CollectionForCard.findOne({tradingCard: cardId});
+    const collectionId = collectionForCard.cardCollection;
+    const fullCollection = await CardCollection.findOne({_id: collectionId});
+    
+    if(fullCollection.owner.toString() === userId) {
+      return await Card.deleteOne({_id: cardId});
+    } else {
+      throw new errors.BadDataError('user does not have read permissions for card');
+    }
+  }
 }
