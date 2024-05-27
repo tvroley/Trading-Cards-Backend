@@ -52,7 +52,7 @@ module.exports.addCardToCollection = async (collectionId, cardId, userId, roles)
   }
 }
 
-module.exports.updateCardCollectionTitle = async (collectionId, userId, userName, collectionTitle) => {
+module.exports.updateCardCollectionTitle = async (collectionId, userId, userName, collectionTitle, roles) => {
   if (!mongoose.Types.ObjectId.isValid(collectionId)) {
     throw new errors.InvalidMongooseId("Invalid card collection ID");
   }
@@ -67,7 +67,8 @@ module.exports.updateCardCollectionTitle = async (collectionId, userId, userName
     if(!cardCollection) {
       throw new errors.BadDataError('did not find card collection');
     }
-    if(cardCollection.owner.toString() === userId && cardCollection.title !== userName) {
+    if((cardCollection.owner.toString() === userId && cardCollection.title !== userName) ||
+      roles.includes('admin')) {
       return await CardCollection.updateOne({_id: collectionId}, {$set: {title: collectionTitle}});
     } else {
       throw new errors.BadDataError('user does not have write permissions for this collection');

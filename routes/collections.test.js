@@ -205,14 +205,32 @@ describe(`cards routes`, () => {
             const responsePost = await request(server).post(`/collections`).set("Authorization", "Bearer " + token0)
             .send({"collectionTitle": "testCollection"});
             expect(responsePost.statusCode).toEqual(200);
-            const collectinIdExpected = responsePost.body.collection._id;
-            const responsePut = await request(server).put(`/collections/${collectinIdExpected}`).set("Authorization", "Bearer " + token0)
+            const collectionIdExpected = responsePost.body.collection._id;
+            const responsePut = await request(server).put(`/collections/${collectionIdExpected}`)
+            .set("Authorization", "Bearer " + token0)
             .send({"collectionTitle": "updatedTitle"});
             expect(responsePut.statusCode).toEqual(200);
             const collections = await CardCollectionDao.find({title: "updatedTitle"}).lean();
             expect(collections.length).toEqual(1);
-            const collectinIdReceived = collections[0]._id.toString();
-            expect(collectinIdReceived).toEqual(collectinIdExpected);
+            const collectionIdReceived = collections[0]._id.toString();
+            expect(collectionIdReceived).toEqual(collectionIdExpected);
+        });
+        it("admin should update any collection title", async () => {
+            const responsePost = await request(server).post("/collections").set("Authorization", "Bearer " + token0)
+            .send({"collectionTitle": "testCollection"});
+            expect(responsePost.statusCode).toEqual(200);
+            const collectionId = responsePost.body.collection._id;
+            await UserDao.updateOne({username: user1.username}, {$set: {"roles": ['admin']}});
+            const respsonseLogin = await request(server).post("/auth/login").send(user1);
+            const token2 = respsonseLogin.body.token;
+            const responsePut = await request(server).put(`/collections/${collectionId}`)
+            .set("Authorization", "Bearer " + token2).send({"collectionTitle": "updatedTitle"});
+            expect(responsePut.statusCode).toEqual(200);
+            expect(responsePut.body.modifiedCount).toEqual(1);
+            const updateCollectionArray = await CardCollectionDao.find({title: "updatedTitle"}).lean();
+            expect(updateCollectionArray.length).toEqual(1);
+            const collectionIdReceived = updateCollectionArray[0]._id.toString();
+            expect(collectionIdReceived).toEqual(collectionId);
         });
     });
 

@@ -104,10 +104,11 @@ router.put("/:id", async (req, res, next) => {
     const collectionTitle = req.body.collectionTitle;
     const userId = req.user._id;
     const username = req.user.username;
+    const roles = req.user.roles;
 
     if(collectionId) {
         try {
-            const result = await collectionDAO.updateCardCollectionTitle(collectionId, userId, username, collectionTitle);
+            const result = await collectionDAO.updateCardCollectionTitle(collectionId, userId, username, collectionTitle, roles);
             res.json(result);
         } catch(err) {
             if(err.message.includes(`write permission`)) {
