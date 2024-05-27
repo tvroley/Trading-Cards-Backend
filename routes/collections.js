@@ -47,17 +47,11 @@ router.get("/", async (req, res, next) => {
 
 router.get("/:id", async (req, res, next) => {
     const collectionId = req.params.id;
-    const userId = req.user._id;
-    const roles = req.user.roles;
     
     try {
         const collection = await collectionDAO.getCardCollection(collectionId);
         if(collection) {
-            if(collection.owner.toString() === userId || roles.includes('admin')) {
-                res.json({collection: collection});
-            } else {
-                res.status(401).send(`not authorized to view collection`);    
-            }
+            res.json({collection: collection});
         } else {
             res.status(404).send(`collection not found`);
         }

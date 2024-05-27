@@ -82,14 +82,16 @@ describe(`cards routes`, () => {
             .set("Authorization", "Bearer " + token0).send();
             expect(response.statusCode).toEqual(404);
         });
-        it("should not get a collection for a user that doesn't have read permission", async () => {
-            const response = await request(server).get(`/collections/${user0MainCollection._id}`)
-            .set("Authorization", "Bearer " + token1).send();
-            expect(response.statusCode).toEqual(401);
-        });
-        it("should get a collection using the ID in the URL params", async () => {
+        it("user should get their own collection using the ID in the URL params", async () => {
             const response = await request(server).get(`/collections/${user0MainCollection._id}`)
             .set("Authorization", "Bearer " + token0).send();
+            expect(response.statusCode).toEqual(200);
+            const collection = response.body.collection;
+            expect(collection).toMatchObject(user0MainCollection);
+        });
+        it("user should get the collection of another user using the ID in the URL params", async () => {
+            const response = await request(server).get(`/collections/${user0MainCollection._id}`)
+            .set("Authorization", "Bearer " + token1).send();
             expect(response.statusCode).toEqual(200);
             const collection = response.body.collection;
             expect(collection).toMatchObject(user0MainCollection);
