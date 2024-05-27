@@ -158,6 +158,20 @@ describe(`cards routes`, () => {
             const soldCard = await Cards.findOne({certificationNumber: "78261079"}).lean();
             expect(soldCard.sold).toBeTruthy();
         });
+        it("admin should update any card", async () => {
+            const responsePost = await request(server).post("/cards").set("Authorization", "Bearer " + token0).send(card);
+            expect(responsePost.statusCode).toEqual(200);
+            const cardId = responsePost.body.card._id;
+            await User.updateOne({username: "user10"}, {$set: {"roles": ['admin']}});
+            const respsonseLogin = await request(server).post("/auth/login").send(user1);
+            const token2 = respsonseLogin.body.token;
+            const responseUpdate = await request(server).put(`/cards/${cardId}`).set("Authorization", "Bearer " + token2)
+            .send(updatedCard);
+            expect(responseUpdate.statusCode).toEqual(200);
+            expect(responseUpdate.body.modifiedCount).toEqual(1);
+            const updatedCardResult = await Cards.findOne({certificationNumber: "78261079"}).lean();
+            expect(updatedCardResult.sold).toBeTruthy();
+        });
     });
 
     describe("POST /cards", () => {
