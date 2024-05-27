@@ -15,6 +15,9 @@ const tradingCardSchema = new mongoose.Schema({
   sold: { type: Boolean, required: true },
 });
 
-tradingCardSchema.index({gradingCompany: 1, certificationNumber: 1}, {unique: true});
+tradingCardSchema.index(
+  { gradingCompany: 1, certificationNumber: 1 },
+  { unique: true },
+);
 
 module.exports = mongoose.model("tradingCards", tradingCardSchema);

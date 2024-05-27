@@ -1,1 +1,1 @@
-process.env.JWT_SECRET="NnekaEziJewellSkylarMercedes"
+process.env.JWT_SECRET = "NnekaEziJewellSkylarMercedes";

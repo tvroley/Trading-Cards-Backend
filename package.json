@@ -19,7 +19,9 @@
     "watchPathIgnorePatterns": [
       "globalConfig"
     ],
-    "setupFiles": ["./.jest/setEnvVars.js"]
+    "setupFiles": [
+      "./.jest/setEnvVars.js"
+    ]
   },
   "license": "MIT",
   "dependencies": {
@@ -32,6 +34,7 @@
   "devDependencies": {
     "@shelf/jest-mongodb": "^4.1.7",
     "jest": "^29.5.0",
+    "prettier": "3.2.5",
     "supertest": "^6.3.3"
   }
 }
