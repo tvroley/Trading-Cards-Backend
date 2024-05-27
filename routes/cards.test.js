@@ -103,6 +103,17 @@ describe(`cards routes`, () => {
             .set("Authorization", "Bearer " + token1).send();
             expect(responseGet.statusCode).toEqual(401);
         });
+        it("admin should get any card", async () => {
+            const responsePost = await request(server).post("/cards").set("Authorization", "Bearer " + token0).send(card);
+            expect(responsePost.statusCode).toEqual(200);
+            const cardId = responsePost.body.card._id;
+            await User.updateOne({username: "user10"}, {$set: {"roles": ['admin']}});
+            const respsonseLogin = await request(server).post("/auth/login").send(user1);
+            const token2 = respsonseLogin.body.token;
+            const responseGet = await request(server).get(`/cards/${cardId}`).set("Authorization", "Bearer " + token2).send();
+            expect(responseGet.statusCode).toEqual(200);
+            expect(responsePost.body.card).toMatchObject(responseGet.body.card);
+        });
     });
 
     describe("PUT /cards", () => {
