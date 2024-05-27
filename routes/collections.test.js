@@ -275,5 +275,20 @@ describe(`cards routes`, () => {
             const collections = await CardCollectionDao.find({title: "testCollection"}).lean();
             expect(collections.length).toEqual(1);
         });
+        it("admin should delete any collection", async () => {
+            const responsePost = await request(server).post("/collections").set("Authorization", "Bearer " + token0)
+            .send({"collectionTitle": "testCollection"});
+            expect(responsePost.statusCode).toEqual(200);
+            const collectionId = responsePost.body.collection._id;
+            await UserDao.updateOne({username: user1.username}, {$set: {"roles": ['admin']}});
+            const respsonseLogin = await request(server).post("/auth/login").send(user1);
+            const token2 = respsonseLogin.body.token;
+            const responseDelete = await request(server).delete(`/collections/${collectionId}`)
+            .set("Authorization", "Bearer " + token2).send();
+            expect(responseDelete.statusCode).toEqual(200);
+            expect(responseDelete.body.deletedCount).toEqual(1);
+            const deleteCollectionArray = await CardCollectionDao.find({_id: collectionId}).lean();
+            expect(deleteCollectionArray.length).toEqual(0);
+        });
     });
 });
