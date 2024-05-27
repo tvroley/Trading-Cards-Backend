@@ -104,11 +104,7 @@ module.exports.getCardCollectionsForUser = async (ownerName, userId) => {
 
     return cardCollections;
   } catch(err) {
-    if (err.message.includes('validation failed')) {
-      throw new errors.BadDataError(err.message);
-    } else {
-      throw err;
-    }
+    throw err;
   }
 }
 

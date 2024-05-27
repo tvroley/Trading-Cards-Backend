@@ -64,6 +64,29 @@ describe(`cards routes`, () => {
       "variety": ""
     }
 
+    describe("before signup", () => {
+        describe("GET /cards", () => {
+          it("should return 401", async () => {
+            const response = await request(server).get(`/cards/123`).send();
+            expect(response.statusCode).toEqual(401);
+          });
+        });
+    
+        describe("PUT /cards", () => {
+          it("should return 401", async () => {
+            const res = await request(server).put("/cards/123").send(updatedCard);
+            expect(res.statusCode).toEqual(401);
+          });
+        });
+    
+        describe("DELETE /cards", () => {
+            it("should return 401", async () => {
+              const res = await request(server).delete("/cards/123").send();
+              expect(res.statusCode).toEqual(401);
+            });
+        });
+    });
+
     describe("GET /cards", () => {
         let token0;
         let token1;

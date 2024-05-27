@@ -50,6 +50,29 @@ describe(`cards routes`, () => {
         "variety": ""
     }
 
+    describe("before signup", () => {
+        describe("GET /collections", () => {
+          it("should return 401", async () => {
+            const response = await request(server).get(`/collections/123`).send();
+            expect(response.statusCode).toEqual(401);
+          });
+        });
+    
+        describe("PUT /collections", () => {
+          it("should return 401", async () => {
+            const res = await request(server).put("/collections/123").send({"collectionTitle": "testCollection"});
+            expect(res.statusCode).toEqual(401);
+          });
+        });
+    
+        describe("DELETE /collections", () => {
+            it("should return 401", async () => {
+              const res = await request(server).delete("/collections/123").send();
+              expect(res.statusCode).toEqual(401);
+            });
+        });
+    });
+
     describe("GET /collections", () => {
         let token0;
         let token1;

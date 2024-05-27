@@ -23,8 +23,7 @@ module.exports.createUser = async (userObj) => {
     } else {
       throw err;
     }
-  }
-      
+  }    
 }
 
 module.exports.getUser = async (username) => {
@@ -33,9 +32,6 @@ module.exports.getUser = async (username) => {
         (docs) => {
             storedUser = docs;
         }).catch((err) => {
-            if (err.message.includes('validation failed')) {
-                throw new errors.BadDataError(err.message);
-            }
             throw err;        
         }
     );
