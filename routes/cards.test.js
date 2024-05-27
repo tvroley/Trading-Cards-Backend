@@ -3,6 +3,7 @@ const request = require("supertest");
 const server = require("../server");
 const testUtils = require('../test-utils');
 const Cards = require('../models/tradingCard');
+const User = require('../models/user');
 
 describe(`cards routes`, () => {
     beforeAll(testUtils.connectDB);
@@ -234,6 +235,19 @@ describe(`cards routes`, () => {
             expect(responsePost.statusCode).toEqual(200);
             const cardId = responsePost.body.card._id;
             const responseDelete = await request(server).delete(`/cards/${cardId}`).set("Authorization", "Bearer " + token0).send();
+            expect(responseDelete.statusCode).toEqual(200);
+            expect(responseDelete.body.deletedCount).toEqual(1);
+            const deleteCardArray = await Cards.find({certificationNumber: "78261079"}).lean();
+            expect(deleteCardArray.length).toEqual(0);
+        });
+        it("admin should delete any card", async () => {
+            const responsePost = await request(server).post("/cards").set("Authorization", "Bearer " + token0).send(card);
+            expect(responsePost.statusCode).toEqual(200);
+            const cardId = responsePost.body.card._id;
+            await User.updateOne({username: "user10"}, {$set: {"roles": ['admin']}});
+            const respsonseLogin = await request(server).post("/auth/login").send(user1);
+            const token2 = respsonseLogin.body.token;
+            const responseDelete = await request(server).delete(`/cards/${cardId}`).set("Authorization", "Bearer " + token2).send();
             expect(responseDelete.statusCode).toEqual(200);
             expect(responseDelete.body.deletedCount).toEqual(1);
             const deleteCardArray = await Cards.find({certificationNumber: "78261079"}).lean();
