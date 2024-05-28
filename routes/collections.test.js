@@ -92,81 +92,95 @@ describe(`cards routes`, () => {
       const res1 = await request(server).post("/auth/login").send(user1);
       token1 = res1.body.token;
     });
-    it("should not get a collection using an invalid collection ID in the URL params", async () => {
-      const response = await request(server)
-        .get(`/collections/123`)
-        .set("Authorization", "Bearer " + token0)
-        .send();
-      expect(response.statusCode).toEqual(400);
+    describe("invalid collection ID in the URL params", () => {
+      it("should send status 400", async () => {
+        const response = await request(server)
+          .get(`/collections/123`)
+          .set("Authorization", "Bearer " + token0)
+          .send();
+        expect(response.statusCode).toEqual(400);
+      });
     });
-    it("should not get a collection that doesn't exist", async () => {
-      const responsePost = await request(server)
-        .post(`/collections`)
-        .set("Authorization", "Bearer " + token0)
-        .send({ collectionTitle: "testCollection" });
-      expect(responsePost.statusCode).toEqual(200);
-      const collection = responsePost.body.collection;
-      const responseDelete = await request(server)
-        .delete(`/collections/${collection._id}`)
-        .set("Authorization", "Bearer " + token0)
-        .send();
-      expect(responseDelete.statusCode).toEqual(200);
-      const collections = await CardCollectionDao.find({
-        title: "testCollection",
-      }).lean();
-      expect(collections.length).toEqual(0);
-      const response = await request(server)
-        .get(`/collections/${collection._id}`)
-        .set("Authorization", "Bearer " + token0)
-        .send();
-      expect(response.statusCode).toEqual(404);
+    describe("collection ID for a collection that doesn't exist in the URL params", () => {
+      it("should send status 404", async () => {
+        const responsePost = await request(server)
+          .post(`/collections`)
+          .set("Authorization", "Bearer " + token0)
+          .send({ collectionTitle: "testCollection" });
+        expect(responsePost.statusCode).toEqual(200);
+        const collection = responsePost.body.collection;
+        const responseDelete = await request(server)
+          .delete(`/collections/${collection._id}`)
+          .set("Authorization", "Bearer " + token0)
+          .send();
+        expect(responseDelete.statusCode).toEqual(200);
+        const collections = await CardCollectionDao.find({
+          title: "testCollection",
+        }).lean();
+        expect(collections.length).toEqual(0);
+        const response = await request(server)
+          .get(`/collections/${collection._id}`)
+          .set("Authorization", "Bearer " + token0)
+          .send();
+        expect(response.statusCode).toEqual(404);
+      });
     });
-    it("user should get their own collection using the ID in the URL params", async () => {
-      const response = await request(server)
-        .get(`/collections/${user0MainCollection._id}`)
-        .set("Authorization", "Bearer " + token0)
-        .send();
-      expect(response.statusCode).toEqual(200);
-      const collection = response.body.collection;
-      expect(collection).toMatchObject(user0MainCollection);
+    describe("collection ID for a collection the user owns in the URL params", () => {
+      it("should send status 200", async () => {
+        const response = await request(server)
+          .get(`/collections/${user0MainCollection._id}`)
+          .set("Authorization", "Bearer " + token0)
+          .send();
+        expect(response.statusCode).toEqual(200);
+        const collection = response.body.collection;
+        expect(collection).toMatchObject(user0MainCollection);
+      });
     });
-    it("user should get the collection of another user using the ID in the URL params", async () => {
-      const response = await request(server)
-        .get(`/collections/${user0MainCollection._id}`)
-        .set("Authorization", "Bearer " + token1)
-        .send();
-      expect(response.statusCode).toEqual(200);
-      const collection = response.body.collection;
-      expect(collection).toMatchObject(user0MainCollection);
+    describe("collection ID for a collection another user owns in the URL params", () => {
+      it("should send status 200", async () => {
+        const response = await request(server)
+          .get(`/collections/${user0MainCollection._id}`)
+          .set("Authorization", "Bearer " + token1)
+          .send();
+        expect(response.statusCode).toEqual(200);
+        const collection = response.body.collection;
+        expect(collection).toMatchObject(user0MainCollection);
+      });
     });
-    it("should get all collections for an owner", async () => {
-      const responsePost = await request(server)
-        .post(`/collections`)
-        .set("Authorization", "Bearer " + token0)
-        .send({ collectionTitle: "testCollection" });
-      expect(responsePost.statusCode).toEqual(200);
-      const responseGet = await request(server)
-        .get(`/collections`)
-        .set("Authorization", "Bearer " + token0)
-        .send({ ownerName: user0.username });
-      expect(responseGet.statusCode).toEqual(200);
-      const collections = responseGet.body.collections;
-      expect(collections.length).toEqual(2);
-      const owner = await UserDao.findOne({ username: user0.username }).lean();
-      expect(collections[0].owner).toEqual(owner._id.toString());
-      expect(collections[1].owner).toEqual(owner._id.toString());
+    describe("username of current user in request body", () => {
+      it("should send status 200 and get all collections for an owner", async () => {
+        const responsePost = await request(server)
+          .post(`/collections`)
+          .set("Authorization", "Bearer " + token0)
+          .send({ collectionTitle: "testCollection" });
+        expect(responsePost.statusCode).toEqual(200);
+        const responseGet = await request(server)
+          .get(`/collections`)
+          .set("Authorization", "Bearer " + token0)
+          .send({ ownerName: user0.username });
+        expect(responseGet.statusCode).toEqual(200);
+        const collections = responseGet.body.collections;
+        expect(collections.length).toEqual(2);
+        const owner = await UserDao.findOne({
+          username: user0.username,
+        }).lean();
+        expect(collections[0].owner).toEqual(owner._id.toString());
+        expect(collections[1].owner).toEqual(owner._id.toString());
+      });
     });
-    it("should not get all collections for an owner that the user doesn't have permission for", async () => {
-      const responsePost = await request(server)
-        .post(`/collections`)
-        .set("Authorization", "Bearer " + token0)
-        .send({ collectionTitle: "testCollection" });
-      expect(responsePost.statusCode).toEqual(200);
-      const responseGet = await request(server)
-        .get(`/collections`)
-        .set("Authorization", "Bearer " + token1)
-        .send({ ownerName: user0.username });
-      expect(responseGet.statusCode).toEqual(401);
+    describe("username of another user in request body", () => {
+      it("should send status 200 and get all collections for an owner", async () => {
+        const responsePost = await request(server)
+          .post(`/collections`)
+          .set("Authorization", "Bearer " + token0)
+          .send({ collectionTitle: "testCollection" });
+        expect(responsePost.statusCode).toEqual(200);
+        const responseGet = await request(server)
+          .get(`/collections`)
+          .set("Authorization", "Bearer " + token1)
+          .send({ ownerName: user0.username });
+        expect(responseGet.statusCode).toEqual(200);
+      });
     });
   });
 

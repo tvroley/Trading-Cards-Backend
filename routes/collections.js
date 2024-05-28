@@ -17,11 +17,7 @@ router.get("/", async (req, res, next) => {
         ownerName,
       );
       if (collection) {
-        if (collection.owner.toString() === userId || roles.includes("admin")) {
-          res.json({ collection: collection });
-        } else {
-          res.sendStatus(401);
-        }
+        res.json({ collection: collection });
       } else {
         res.status(404).send("could not find collection");
       }
@@ -35,14 +31,7 @@ router.get("/", async (req, res, next) => {
         userId,
       );
       if (collections && collections.length > 0) {
-        if (
-          collections[0].owner.toString() === userId ||
-          roles.includes("admin")
-        ) {
-          res.json({ collections: collections });
-        } else {
-          res.sendStatus(401);
-        }
+        res.json({ collections: collections });
       } else {
         res.status(404).send("could not find any collections for user");
       }
