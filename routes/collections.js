@@ -161,7 +161,7 @@ router.delete("/:id", async (req, res, next) => {
       }
     } catch (err) {
       if (err instanceof errors.InvalidMongooseId) {
-        res.status(404).send(err.message);
+        res.status(400).send(err.message);
       } else {
         next(err);
       }
