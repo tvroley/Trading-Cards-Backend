@@ -26,31 +26,6 @@ module.exports.getCard = async (cardId, userId) => {
     throw new errors.InvalidMongooseId("Invalid trading card ID");
   }
 
-  if (!mongoose.Types.ObjectId.isValid(userId)) {
-    throw new errors.InvalidMongooseId("Invalid user ID");
-  }
-
-  const collectionForCard = await CollectionForCard.findOne({
-    tradingCard: cardId,
-  });
-
-  const collectionId = collectionForCard.cardCollection;
-  const fullCollection = await CardCollection.findOne({ _id: collectionId });
-
-  if (fullCollection.owner.toString() === userId) {
-    return await Card.findOne({ _id: cardId });
-  } else {
-    throw new errors.BadDataError(
-      "user does not have read permissions for card",
-    );
-  }
-};
-
-module.exports.getCardAdmin = async (cardId) => {
-  if (!mongoose.Types.ObjectId.isValid(cardId)) {
-    throw new errors.InvalidMongooseId("Invalid trading card ID");
-  }
-
   return await Card.findOne({ _id: cardId });
 };
 

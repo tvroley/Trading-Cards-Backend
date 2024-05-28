@@ -82,12 +82,7 @@ router.get("/:id", async (req, res, next) => {
 
   if (cardId) {
     try {
-      let card;
-      if (roles.includes(`admin`)) {
-        card = await cardsDAO.getCardAdmin(cardId);
-      } else {
-        card = await cardsDAO.getCard(cardId, userId);
-      }
+      const card = await cardsDAO.getCard(cardId, userId);
 
       if (card) {
         res.json({ card: card });
@@ -95,11 +90,7 @@ router.get("/:id", async (req, res, next) => {
         res.status(404).send("card not found");
       }
     } catch (err) {
-      if (err instanceof errors.BadDataError) {
-        res.status(401).send(err.message);
-      } else {
-        next(err);
-      }
+      next(err);
     }
   } else {
     res.sendStatus(400);

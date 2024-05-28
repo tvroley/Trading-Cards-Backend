@@ -104,78 +104,50 @@ describe(`cards routes`, () => {
       const res1 = await request(server).post("/auth/login").send(user1);
       token1 = res1.body.token;
     });
-    it("should send 400 status for invalid card ID", async () => {
-      const response = await request(server)
-        .get(`/cards/123`)
-        .set("Authorization", "Bearer " + token0)
-        .send();
-      expect(response.statusCode).toEqual(400);
+    describe("invalid card ID in URL param", () => {
+      it("should send 400 status", async () => {
+        const response = await request(server)
+          .get(`/cards/123`)
+          .set("Authorization", "Bearer " + token0)
+          .send();
+        expect(response.statusCode).toEqual(400);
+      });
     });
-    it("should get a card", async () => {
-      const responsePost = await request(server)
-        .post("/cards")
-        .set("Authorization", "Bearer " + token0)
-        .send(card);
-      expect(responsePost.statusCode).toEqual(200);
-      const cardId = responsePost.body.card._id;
-      const responseGet = await request(server)
-        .get(`/cards/${cardId}`)
-        .set("Authorization", "Bearer " + token0)
-        .send();
-      expect(responseGet.statusCode).toEqual(200);
-      expect(responseGet.body.card).toEqual(responsePost.body.card);
+    describe("valid card ID in URL param", () => {
+      it("should get a card and send 200 status", async () => {
+        const responsePost = await request(server)
+          .post("/cards")
+          .set("Authorization", "Bearer " + token0)
+          .send(card);
+        expect(responsePost.statusCode).toEqual(200);
+        const cardId = responsePost.body.card._id;
+        const responseGet = await request(server)
+          .get(`/cards/${cardId}`)
+          .set("Authorization", "Bearer " + token0)
+          .send();
+        expect(responseGet.statusCode).toEqual(200);
+        expect(responseGet.body.card).toEqual(responsePost.body.card);
+      });
     });
-    it("should not get a card that doesn't exist", async () => {
-      const responsePost = await request(server)
-        .post("/cards")
-        .set("Authorization", "Bearer " + token0)
-        .send(card);
-      expect(responsePost.statusCode).toEqual(200);
-      const cardId = responsePost.body.card._id;
-      const responseDelete = await request(server)
-        .delete(`/cards/${cardId}`)
-        .set("Authorization", "Bearer " + token0)
-        .send();
-      expect(responseDelete.statusCode).toEqual(200);
-      const responseGet = await request(server)
-        .get(`/cards/${cardId}`)
-        .set("Authorization", "Bearer " + token0)
-        .send();
-      expect(responseGet.statusCode).toEqual(404);
-    });
-    it("should not get a card that user doesn't have read permissions for", async () => {
-      const responsePost = await request(server)
-        .post("/cards")
-        .set("Authorization", "Bearer " + token0)
-        .send(card);
-      expect(responsePost.statusCode).toEqual(200);
-      const responseGet = await request(server)
-        .get(`/cards/${responsePost.body.card._id}`)
-        .set("Authorization", "Bearer " + token1)
-        .send();
-      expect(responseGet.statusCode).toEqual(401);
-    });
-    it("admin should get any card", async () => {
-      const responsePost = await request(server)
-        .post("/cards")
-        .set("Authorization", "Bearer " + token0)
-        .send(card);
-      expect(responsePost.statusCode).toEqual(200);
-      const cardId = responsePost.body.card._id;
-      await User.updateOne(
-        { username: "user10" },
-        { $set: { roles: ["admin"] } },
-      );
-      const respsonseLogin = await request(server)
-        .post("/auth/login")
-        .send(user1);
-      const token2 = respsonseLogin.body.token;
-      const responseGet = await request(server)
-        .get(`/cards/${cardId}`)
-        .set("Authorization", "Bearer " + token2)
-        .send();
-      expect(responseGet.statusCode).toEqual(200);
-      expect(responsePost.body.card).toMatchObject(responseGet.body.card);
+    describe("card that doesn't exist in URL param", () => {
+      it("should send 404 status", async () => {
+        const responsePost = await request(server)
+          .post("/cards")
+          .set("Authorization", "Bearer " + token0)
+          .send(card);
+        expect(responsePost.statusCode).toEqual(200);
+        const cardId = responsePost.body.card._id;
+        const responseDelete = await request(server)
+          .delete(`/cards/${cardId}`)
+          .set("Authorization", "Bearer " + token0)
+          .send();
+        expect(responseDelete.statusCode).toEqual(200);
+        const responseGet = await request(server)
+          .get(`/cards/${cardId}`)
+          .set("Authorization", "Bearer " + token0)
+          .send();
+        expect(responseGet.statusCode).toEqual(404);
+      });
     });
   });
 
