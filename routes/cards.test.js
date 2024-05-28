@@ -162,100 +162,112 @@ describe(`cards routes`, () => {
       const res1 = await request(server).post("/auth/login").send(user1);
       token1 = res1.body.token;
     });
-    it("should not update a card with an invalid ID", async () => {
-      const responsePut = await request(server)
-        .put(`/cards/123`)
-        .set("Authorization", "Bearer " + token1)
-        .send(updatedCard);
-      expect(responsePut.statusCode).toEqual(400);
+    describe("update a card with an invalid ID in the URL params", () => {
+      it("should send 400 status", async () => {
+        const responsePut = await request(server)
+          .put(`/cards/123`)
+          .set("Authorization", "Bearer " + token1)
+          .send(updatedCard);
+        expect(responsePut.statusCode).toEqual(400);
+      });
     });
-    it("should not update a card that doesn't exist", async () => {
-      const responsePost = await request(server)
-        .post("/cards")
-        .set("Authorization", "Bearer " + token0)
-        .send(card);
-      expect(responsePost.statusCode).toEqual(200);
-      const cardId = responsePost.body.card._id;
-      const responseDelete = await request(server)
-        .delete(`/cards/${cardId}`)
-        .set("Authorization", "Bearer " + token0)
-        .send();
-      expect(responseDelete.statusCode).toEqual(200);
-      const responsePut = await request(server)
-        .put(`/cards/${cardId}`)
-        .set("Authorization", "Bearer " + token0)
-        .send(updatedCard);
-      expect(responsePut.statusCode).toEqual(404);
+    describe("update a card with a card ID for a card that doesn't exist in the URL params", () => {
+      it("should send 400 status", async () => {
+        const responsePost = await request(server)
+          .post("/cards")
+          .set("Authorization", "Bearer " + token0)
+          .send(card);
+        expect(responsePost.statusCode).toEqual(200);
+        const cardId = responsePost.body.card._id;
+        const responseDelete = await request(server)
+          .delete(`/cards/${cardId}`)
+          .set("Authorization", "Bearer " + token0)
+          .send();
+        expect(responseDelete.statusCode).toEqual(200);
+        const responsePut = await request(server)
+          .put(`/cards/${cardId}`)
+          .set("Authorization", "Bearer " + token0)
+          .send(updatedCard);
+        expect(responsePut.statusCode).toEqual(404);
+      });
     });
-    it("should not update a card with an empty card object", async () => {
-      const responsePost = await request(server)
-        .post("/cards")
-        .set("Authorization", "Bearer " + token0)
-        .send(card);
-      expect(responsePost.statusCode).toEqual(200);
-      const cardId = responsePost.body.card._id;
-      const responsePut = await request(server)
-        .put(`/cards/${cardId}`)
-        .set("Authorization", "Bearer " + token0)
-        .send({});
-      expect(responsePut.statusCode).toEqual(400);
+    describe("update a card with an empty card object in the request body", () => {
+      it("should send status 400", async () => {
+        const responsePost = await request(server)
+          .post("/cards")
+          .set("Authorization", "Bearer " + token0)
+          .send(card);
+        expect(responsePost.statusCode).toEqual(200);
+        const cardId = responsePost.body.card._id;
+        const responsePut = await request(server)
+          .put(`/cards/${cardId}`)
+          .set("Authorization", "Bearer " + token0)
+          .send({});
+        expect(responsePut.statusCode).toEqual(400);
+      });
     });
-    it("should not update a card the user doesn't have permission for", async () => {
-      const responsePost = await request(server)
-        .post("/cards")
-        .set("Authorization", "Bearer " + token0)
-        .send(card);
-      expect(responsePost.statusCode).toEqual(200);
-      const cardId = responsePost.body.card._id;
-      const responsePut = await request(server)
-        .put(`/cards/${cardId}`)
-        .set("Authorization", "Bearer " + token1)
-        .send(updatedCard);
-      expect(responsePut.statusCode).toEqual(401);
+    describe("update a card that the user doesn't own", () => {
+      it("should send status 400", async () => {
+        const responsePost = await request(server)
+          .post("/cards")
+          .set("Authorization", "Bearer " + token0)
+          .send(card);
+        expect(responsePost.statusCode).toEqual(200);
+        const cardId = responsePost.body.card._id;
+        const responsePut = await request(server)
+          .put(`/cards/${cardId}`)
+          .set("Authorization", "Bearer " + token1)
+          .send(updatedCard);
+        expect(responsePut.statusCode).toEqual(401);
+      });
     });
-    it("should update a card", async () => {
-      const responsePost = await request(server)
-        .post("/cards")
-        .set("Authorization", "Bearer " + token0)
-        .send(card);
-      expect(responsePost.statusCode).toEqual(200);
-      const cardId = responsePost.body.card._id;
-      const responsePut = await request(server)
-        .put(`/cards/${cardId}`)
-        .set("Authorization", "Bearer " + token0)
-        .send(updatedCard);
-      expect(responsePut.statusCode).toEqual(200);
-      expect(responsePut.body.modifiedCount).toEqual(1);
-      const soldCard = await Cards.findOne({
-        certificationNumber: "78261079",
-      }).lean();
-      expect(soldCard.sold).toBeTruthy();
+    describe("update a card that the user owns", () => {
+      it("should send status 200", async () => {
+        const responsePost = await request(server)
+          .post("/cards")
+          .set("Authorization", "Bearer " + token0)
+          .send(card);
+        expect(responsePost.statusCode).toEqual(200);
+        const cardId = responsePost.body.card._id;
+        const responsePut = await request(server)
+          .put(`/cards/${cardId}`)
+          .set("Authorization", "Bearer " + token0)
+          .send(updatedCard);
+        expect(responsePut.statusCode).toEqual(200);
+        expect(responsePut.body.modifiedCount).toEqual(1);
+        const soldCard = await Cards.findOne({
+          certificationNumber: "78261079",
+        }).lean();
+        expect(soldCard.sold).toBeTruthy();
+      });
     });
-    it("admin should update any card", async () => {
-      const responsePost = await request(server)
-        .post("/cards")
-        .set("Authorization", "Bearer " + token0)
-        .send(card);
-      expect(responsePost.statusCode).toEqual(200);
-      const cardId = responsePost.body.card._id;
-      await User.updateOne(
-        { username: "user10" },
-        { $set: { roles: ["admin"] } },
-      );
-      const respsonseLogin = await request(server)
-        .post("/auth/login")
-        .send(user1);
-      const token2 = respsonseLogin.body.token;
-      const responseUpdate = await request(server)
-        .put(`/cards/${cardId}`)
-        .set("Authorization", "Bearer " + token2)
-        .send(updatedCard);
-      expect(responseUpdate.statusCode).toEqual(200);
-      expect(responseUpdate.body.modifiedCount).toEqual(1);
-      const updatedCardResult = await Cards.findOne({
-        certificationNumber: "78261079",
-      }).lean();
-      expect(updatedCardResult.sold).toBeTruthy();
+    describe("admin updates any card", () => {
+      it("should send status 200", async () => {
+        const responsePost = await request(server)
+          .post("/cards")
+          .set("Authorization", "Bearer " + token0)
+          .send(card);
+        expect(responsePost.statusCode).toEqual(200);
+        const cardId = responsePost.body.card._id;
+        await User.updateOne(
+          { username: "user10" },
+          { $set: { roles: ["admin"] } },
+        );
+        const respsonseLogin = await request(server)
+          .post("/auth/login")
+          .send(user1);
+        const token2 = respsonseLogin.body.token;
+        const responseUpdate = await request(server)
+          .put(`/cards/${cardId}`)
+          .set("Authorization", "Bearer " + token2)
+          .send(updatedCard);
+        expect(responseUpdate.statusCode).toEqual(200);
+        expect(responseUpdate.body.modifiedCount).toEqual(1);
+        const updatedCardResult = await Cards.findOne({
+          certificationNumber: "78261079",
+        }).lean();
+        expect(updatedCardResult.sold).toBeTruthy();
+      });
     });
   });
 
@@ -270,36 +282,42 @@ describe(`cards routes`, () => {
       const res1 = await request(server).post("/auth/login").send(user1);
       token1 = res1.body.token;
     });
-    it("should not store an empty card object", async () => {
-      const response = await request(server)
-        .post("/cards")
-        .set("Authorization", "Bearer " + token0)
-        .send({});
-      expect(response.statusCode).toEqual(400);
-      const savedCards = await Cards.find().lean();
-      expect(savedCards.length).toEqual(0);
+    describe("empty card object in request body", () => {
+      it("should send status 400", async () => {
+        const response = await request(server)
+          .post("/cards")
+          .set("Authorization", "Bearer " + token0)
+          .send({});
+        expect(response.statusCode).toEqual(400);
+        const savedCards = await Cards.find().lean();
+        expect(savedCards.length).toEqual(0);
+      });
     });
-    it("should not store a card object with missing fields", async () => {
-      const response = await request(server)
-        .post("/cards")
-        .set("Authorization", "Bearer " + token0)
-        .send({
-          player: "Randy Johnson",
-          year: 1999,
-        });
-      expect(response.statusCode).toEqual(400);
-      const savedCards = await Cards.find().lean();
-      expect(savedCards.length).toEqual(0);
+    describe("card object with missing fields in request body", () => {
+      it("should send status 400", async () => {
+        const response = await request(server)
+          .post("/cards")
+          .set("Authorization", "Bearer " + token0)
+          .send({
+            player: "Randy Johnson",
+            year: 1999,
+          });
+        expect(response.statusCode).toEqual(400);
+        const savedCards = await Cards.find().lean();
+        expect(savedCards.length).toEqual(0);
+      });
     });
-    it("should store a card", async () => {
-      const response = await request(server)
-        .post("/cards")
-        .set("Authorization", "Bearer " + token0)
-        .send(card);
-      expect(response.statusCode).toEqual(200);
-      const savedCards = await Cards.find().lean();
-      expect(savedCards.length).toEqual(1);
-      expect(savedCards[0]).toMatchObject(card);
+    describe("card object with all fields in request body", () => {
+      it("should send status 200", async () => {
+        const response = await request(server)
+          .post("/cards")
+          .set("Authorization", "Bearer " + token0)
+          .send(card);
+        expect(response.statusCode).toEqual(200);
+        const savedCards = await Cards.find().lean();
+        expect(savedCards.length).toEqual(1);
+        expect(savedCards[0]).toMatchObject(card);
+      });
     });
   });
 
@@ -314,96 +332,106 @@ describe(`cards routes`, () => {
       const res1 = await request(server).post("/auth/login").send(user1);
       token1 = res1.body.token;
     });
-    it("should not delete a card with an invalid ID", async () => {
-      const responseDelete = await request(server)
-        .delete(`/cards/123`)
-        .set("Authorization", "Bearer " + token0)
-        .send();
-      expect(responseDelete.statusCode).toEqual(400);
+    describe("invalid card ID in URL params", () => {
+      it("should send status 400", async () => {
+        const responseDelete = await request(server)
+          .delete(`/cards/123`)
+          .set("Authorization", "Bearer " + token0)
+          .send();
+        expect(responseDelete.statusCode).toEqual(400);
+      });
     });
-    it("should not delete a card when user doesn't have permission", async () => {
-      const responsePost = await request(server)
-        .post("/cards")
-        .set("Authorization", "Bearer " + token0)
-        .send(card);
-      expect(responsePost.statusCode).toEqual(200);
-      const cardId = responsePost.body.card._id;
-      const responseDelete = await request(server)
-        .delete(`/cards/${cardId}`)
-        .set("Authorization", "Bearer " + token1)
-        .send();
-      expect(responseDelete.statusCode).toEqual(401);
-      const deleteCardArray = await Cards.find({
-        certificationNumber: "78261079",
-      }).lean();
-      expect(deleteCardArray.length).toEqual(1);
+    describe("card ID in URL params for card user doesn't own", () => {
+      it("should send status 401", async () => {
+        const responsePost = await request(server)
+          .post("/cards")
+          .set("Authorization", "Bearer " + token0)
+          .send(card);
+        expect(responsePost.statusCode).toEqual(200);
+        const cardId = responsePost.body.card._id;
+        const responseDelete = await request(server)
+          .delete(`/cards/${cardId}`)
+          .set("Authorization", "Bearer " + token1)
+          .send();
+        expect(responseDelete.statusCode).toEqual(401);
+        const deleteCardArray = await Cards.find({
+          certificationNumber: "78261079",
+        }).lean();
+        expect(deleteCardArray.length).toEqual(1);
+      });
     });
-    it("should not delete a card that doesn't exist", async () => {
-      const responsePost = await request(server)
-        .post("/cards")
-        .set("Authorization", "Bearer " + token0)
-        .send(card);
-      expect(responsePost.statusCode).toEqual(200);
-      const cardId = responsePost.body.card._id;
-      const responseDelete = await request(server)
-        .delete(`/cards/${cardId}`)
-        .set("Authorization", "Bearer " + token0)
-        .send();
-      expect(responseDelete.statusCode).toEqual(200);
-      expect(responseDelete.body.deletedCount).toEqual(1);
-      const deleteCardArray = await Cards.find({
-        certificationNumber: "78261079",
-      }).lean();
-      expect(deleteCardArray.length).toEqual(0);
-      const responseDelete2 = await request(server)
-        .delete(`/cards/${cardId}`)
-        .set("Authorization", "Bearer " + token0)
-        .send();
-      expect(responseDelete2.statusCode).toEqual(404);
+    describe("card ID for a card that doesn't exist in URL params", () => {
+      it("should send 404", async () => {
+        const responsePost = await request(server)
+          .post("/cards")
+          .set("Authorization", "Bearer " + token0)
+          .send(card);
+        expect(responsePost.statusCode).toEqual(200);
+        const cardId = responsePost.body.card._id;
+        const responseDelete = await request(server)
+          .delete(`/cards/${cardId}`)
+          .set("Authorization", "Bearer " + token0)
+          .send();
+        expect(responseDelete.statusCode).toEqual(200);
+        expect(responseDelete.body.deletedCount).toEqual(1);
+        const deleteCardArray = await Cards.find({
+          certificationNumber: "78261079",
+        }).lean();
+        expect(deleteCardArray.length).toEqual(0);
+        const responseDelete2 = await request(server)
+          .delete(`/cards/${cardId}`)
+          .set("Authorization", "Bearer " + token0)
+          .send();
+        expect(responseDelete2.statusCode).toEqual(404);
+      });
     });
-    it("should delete a card", async () => {
-      const responsePost = await request(server)
-        .post("/cards")
-        .set("Authorization", "Bearer " + token0)
-        .send(card);
-      expect(responsePost.statusCode).toEqual(200);
-      const cardId = responsePost.body.card._id;
-      const responseDelete = await request(server)
-        .delete(`/cards/${cardId}`)
-        .set("Authorization", "Bearer " + token0)
-        .send();
-      expect(responseDelete.statusCode).toEqual(200);
-      expect(responseDelete.body.deletedCount).toEqual(1);
-      const deleteCardArray = await Cards.find({
-        certificationNumber: "78261079",
-      }).lean();
-      expect(deleteCardArray.length).toEqual(0);
+    describe("card ID for a card the user owns in URL params", () => {
+      it("should delete a card", async () => {
+        const responsePost = await request(server)
+          .post("/cards")
+          .set("Authorization", "Bearer " + token0)
+          .send(card);
+        expect(responsePost.statusCode).toEqual(200);
+        const cardId = responsePost.body.card._id;
+        const responseDelete = await request(server)
+          .delete(`/cards/${cardId}`)
+          .set("Authorization", "Bearer " + token0)
+          .send();
+        expect(responseDelete.statusCode).toEqual(200);
+        expect(responseDelete.body.deletedCount).toEqual(1);
+        const deleteCardArray = await Cards.find({
+          certificationNumber: "78261079",
+        }).lean();
+        expect(deleteCardArray.length).toEqual(0);
+      });
     });
-    it("admin should delete any card", async () => {
-      const responsePost = await request(server)
-        .post("/cards")
-        .set("Authorization", "Bearer " + token0)
-        .send(card);
-      expect(responsePost.statusCode).toEqual(200);
-      const cardId = responsePost.body.card._id;
-      await User.updateOne(
-        { username: "user10" },
-        { $set: { roles: ["admin"] } },
-      );
-      const respsonseLogin = await request(server)
-        .post("/auth/login")
-        .send(user1);
-      const token2 = respsonseLogin.body.token;
-      const responseDelete = await request(server)
-        .delete(`/cards/${cardId}`)
-        .set("Authorization", "Bearer " + token2)
-        .send();
-      expect(responseDelete.statusCode).toEqual(200);
-      expect(responseDelete.body.deletedCount).toEqual(1);
-      const deleteCardArray = await Cards.find({
-        certificationNumber: "78261079",
-      }).lean();
-      expect(deleteCardArray.length).toEqual(0);
+    describe("card ID for a card the admin user doesn't own in URL params", () => {
+      it("admin send status 200", async () => {
+        const responsePost = await request(server)
+          .post("/cards")
+          .set("Authorization", "Bearer " + token0)
+          .send(card);
+        expect(responsePost.statusCode).toEqual(200);
+        const cardId = responsePost.body.card._id;
+        await User.updateOne(
+          { username: "user10" },
+          { $set: { roles: ["admin"] } },
+        );
+        const respsonseLogin = await request(server)
+          .post("/auth/login")
+          .send(user1);
+        const token2 = respsonseLogin.body.token;
+        const responseDelete = await request(server)
+          .delete(`/cards/${cardId}`)
+          .set("Authorization", "Bearer " + token2)
+          .send();
+        expect(responseDelete.statusCode).toEqual(200);
+        expect(responseDelete.body.deletedCount).toEqual(1);
+        const deleteCardArray = await Cards.find({
+          certificationNumber: "78261079",
+        }).lean();
+        expect(deleteCardArray.length).toEqual(0);
+      });
     });
   });
 });
