@@ -56,14 +56,14 @@ describe(`cards routes`, () => {
 
   describe("before signup", () => {
     describe("GET /collections", () => {
-      it("should return 401", async () => {
+      it("should return 401 and not get a collection", async () => {
         const response = await request(server).get(`/collections/123`).send();
         expect(response.statusCode).toEqual(401);
       });
     });
 
     describe("PUT /collections", () => {
-      it("should return 401", async () => {
+      it("should return 401 and not update a collection", async () => {
         const res = await request(server)
           .put("/collections/123")
           .send({ collectionTitle: "testCollection" });
@@ -72,7 +72,7 @@ describe(`cards routes`, () => {
     });
 
     describe("DELETE /collections", () => {
-      it("should return 401", async () => {
+      it("should return 401 and not delete a collection", async () => {
         const res = await request(server).delete("/collections/123").send();
         expect(res.statusCode).toEqual(401);
       });
@@ -93,7 +93,7 @@ describe(`cards routes`, () => {
       token1 = res1.body.token;
     });
     describe("invalid collection ID in the URL params", () => {
-      it("should send status 400", async () => {
+      it("should send status 400 and not get a collection", async () => {
         const response = await request(server)
           .get(`/collections/123`)
           .set("Authorization", "Bearer " + token0)
@@ -102,7 +102,7 @@ describe(`cards routes`, () => {
       });
     });
     describe("collection ID for a collection that doesn't exist in the URL params", () => {
-      it("should send status 404", async () => {
+      it("should send status 404 and not get a collection", async () => {
         const responsePost = await request(server)
           .post(`/collections`)
           .set("Authorization", "Bearer " + token0)
@@ -126,7 +126,7 @@ describe(`cards routes`, () => {
       });
     });
     describe("collection ID for a collection the user owns in the URL params", () => {
-      it("should send status 200", async () => {
+      it("should send status 200 and get a collection", async () => {
         const response = await request(server)
           .get(`/collections/${user0MainCollection._id}`)
           .set("Authorization", "Bearer " + token0)
@@ -137,7 +137,7 @@ describe(`cards routes`, () => {
       });
     });
     describe("collection ID for a collection another user owns in the URL params", () => {
-      it("should send status 200", async () => {
+      it("should send status 200 and get a collection", async () => {
         const response = await request(server)
           .get(`/collections/${user0MainCollection._id}`)
           .set("Authorization", "Bearer " + token1)
@@ -198,7 +198,7 @@ describe(`cards routes`, () => {
       token1 = res1.body.token;
     });
     describe("create a collection that already exist in the request body", () => {
-      it("should send status 409", async () => {
+      it("should send status 409 and not post a collection", async () => {
         const response = await request(server)
           .post(`/collections`)
           .set("Authorization", "Bearer " + token0)
@@ -211,7 +211,7 @@ describe(`cards routes`, () => {
       });
     });
     describe("create a collection with an empty name in the request body", () => {
-      it("should send status 400", async () => {
+      it("should send status 400 and not post a collection", async () => {
         const response = await request(server)
           .post(`/collections`)
           .set("Authorization", "Bearer " + token0)
@@ -222,7 +222,7 @@ describe(`cards routes`, () => {
       });
     });
     describe("create a collection with a valid title in the request body", () => {
-      it("should send code 200", async () => {
+      it("should send code 200 and post a collection", async () => {
         const response = await request(server)
           .post(`/collections`)
           .set("Authorization", "Bearer " + token0)
@@ -255,7 +255,7 @@ describe(`cards routes`, () => {
       token1 = res1.body.token;
     });
     describe("update a collection with an invalid collection ID in the URL params", () => {
-      it("should send status 400", async () => {
+      it("should send status 400 and not update a collection", async () => {
         const responsePost = await request(server)
           .post(`/collections`)
           .set("Authorization", "Bearer " + token0)
@@ -273,7 +273,7 @@ describe(`cards routes`, () => {
       });
     });
     describe("update a collection with a collection ID in the URL params for a collection that doesn't exist", () => {
-      it("should send status 404", async () => {
+      it("should send status 404 and not update a collection", async () => {
         const responsePost = await request(server)
           .post(`/collections`)
           .set("Authorization", "Bearer " + token0)
@@ -297,7 +297,7 @@ describe(`cards routes`, () => {
       });
     });
     describe("update a collection with a collection ID in the URL params for a collection that the user doesn't own", () => {
-      it("should send status 401", async () => {
+      it("should send status 401 and not update a collection", async () => {
         const responsePost = await request(server)
           .post(`/collections`)
           .set("Authorization", "Bearer " + token0)
@@ -315,7 +315,7 @@ describe(`cards routes`, () => {
       });
     });
     describe("update a collection with a collection ID in the URL params for a collection that the user owns", () => {
-      it("should send status 200", async () => {
+      it("should send status 200 and update a collection", async () => {
         const responsePost = await request(server)
           .post(`/collections`)
           .set("Authorization", "Bearer " + token0)
@@ -336,7 +336,7 @@ describe(`cards routes`, () => {
       });
     });
     describe("admin update a collection with a collection ID in the URL params for any collection", () => {
-      it("should send status 200", async () => {
+      it("should send status 200 and update a collection", async () => {
         const responsePost = await request(server)
           .post("/collections")
           .set("Authorization", "Bearer " + token0)
@@ -381,7 +381,7 @@ describe(`cards routes`, () => {
       token1 = res1.body.token;
     });
     describe("delete a collection with an invalid ID in the URL params", () => {
-      it("should send code 400", async () => {
+      it("should send code 400 and not delete a collection", async () => {
         const response = await request(server)
           .delete(`/collections/123`)
           .set("Authorization", "Bearer " + token0)
@@ -390,7 +390,7 @@ describe(`cards routes`, () => {
       });
     });
     describe("delete a collection with a collection ID in the URL params for a collection that doesn't exist", () => {
-      it("should send status 404", async () => {
+      it("should send status 404 and not delete a collection", async () => {
         const responsePost = await request(server)
           .post(`/collections`)
           .set("Authorization", "Bearer " + token0)
@@ -414,7 +414,7 @@ describe(`cards routes`, () => {
       });
     });
     describe("delete a collection with a collection ID in the URL params for a main collection for a user", () => {
-      it("should send status code 409", async () => {
+      it("should send status code 409 and not delete a collection", async () => {
         const response = await request(server)
           .delete(`/collections/${user0MainCollection._id}`)
           .set("Authorization", "Bearer " + token0)
@@ -427,7 +427,7 @@ describe(`cards routes`, () => {
       });
     });
     describe("delete a collection with a collection ID in the URL params for a collection that the user owns", () => {
-      it("should send status 200", async () => {
+      it("should send status 200 and delete a collection", async () => {
         const responsePost = await request(server)
           .post(`/collections`)
           .set("Authorization", "Bearer " + token0)

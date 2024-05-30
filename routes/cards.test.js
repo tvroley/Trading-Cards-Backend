@@ -72,21 +72,21 @@ describe(`cards routes`, () => {
 
   describe("before signup", () => {
     describe("GET /cards", () => {
-      it("should return 401", async () => {
+      it("should send status code 401 and not get a card", async () => {
         const response = await request(server).get(`/cards/123`).send();
         expect(response.statusCode).toEqual(401);
       });
     });
 
     describe("PUT /cards", () => {
-      it("should return 401", async () => {
+      it("should return 401 and not update a card", async () => {
         const res = await request(server).put("/cards/123").send(updatedCard);
         expect(res.statusCode).toEqual(401);
       });
     });
 
     describe("DELETE /cards", () => {
-      it("should return 401", async () => {
+      it("should return 401 and not delete a card", async () => {
         const res = await request(server).delete("/cards/123").send();
         expect(res.statusCode).toEqual(401);
       });
@@ -105,7 +105,7 @@ describe(`cards routes`, () => {
       token1 = res1.body.token;
     });
     describe("invalid card ID in URL param", () => {
-      it("should send 400 status", async () => {
+      it("should send 400 status and not get a card", async () => {
         const response = await request(server)
           .get(`/cards/123`)
           .set("Authorization", "Bearer " + token0)
@@ -130,7 +130,7 @@ describe(`cards routes`, () => {
       });
     });
     describe("card that doesn't exist in URL param", () => {
-      it("should send 404 status", async () => {
+      it("should send 404 status and not get a card", async () => {
         const responsePost = await request(server)
           .post("/cards")
           .set("Authorization", "Bearer " + token0)
@@ -163,7 +163,7 @@ describe(`cards routes`, () => {
       token1 = res1.body.token;
     });
     describe("update a card with an invalid ID in the URL params", () => {
-      it("should send 400 status", async () => {
+      it("should send 400 status and not update a card", async () => {
         const responsePut = await request(server)
           .put(`/cards/123`)
           .set("Authorization", "Bearer " + token1)
@@ -172,7 +172,7 @@ describe(`cards routes`, () => {
       });
     });
     describe("update a card with a card ID for a card that doesn't exist in the URL params", () => {
-      it("should send 400 status", async () => {
+      it("should send 400 status and not update a card", async () => {
         const responsePost = await request(server)
           .post("/cards")
           .set("Authorization", "Bearer " + token0)
@@ -192,7 +192,7 @@ describe(`cards routes`, () => {
       });
     });
     describe("update a card with an empty card object in the request body", () => {
-      it("should send status 400", async () => {
+      it("should send status 400 and not update a card", async () => {
         const responsePost = await request(server)
           .post("/cards")
           .set("Authorization", "Bearer " + token0)
@@ -207,7 +207,7 @@ describe(`cards routes`, () => {
       });
     });
     describe("update a card that the user doesn't own", () => {
-      it("should send status 400", async () => {
+      it("should send status 400 and not update a card", async () => {
         const responsePost = await request(server)
           .post("/cards")
           .set("Authorization", "Bearer " + token0)
@@ -222,7 +222,7 @@ describe(`cards routes`, () => {
       });
     });
     describe("update a card that the user owns", () => {
-      it("should send status 200", async () => {
+      it("should send status 200 and update a card", async () => {
         const responsePost = await request(server)
           .post("/cards")
           .set("Authorization", "Bearer " + token0)
@@ -242,7 +242,7 @@ describe(`cards routes`, () => {
       });
     });
     describe("admin updates any card", () => {
-      it("should send status 200", async () => {
+      it("should send status 200 and update a card", async () => {
         const responsePost = await request(server)
           .post("/cards")
           .set("Authorization", "Bearer " + token0)
@@ -283,7 +283,7 @@ describe(`cards routes`, () => {
       token1 = res1.body.token;
     });
     describe("empty card object in request body", () => {
-      it("should send status 400", async () => {
+      it("should send status 400 and not post a card", async () => {
         const response = await request(server)
           .post("/cards")
           .set("Authorization", "Bearer " + token0)
@@ -294,7 +294,7 @@ describe(`cards routes`, () => {
       });
     });
     describe("card object with missing fields in request body", () => {
-      it("should send status 400", async () => {
+      it("should send status 400 and not post a card", async () => {
         const response = await request(server)
           .post("/cards")
           .set("Authorization", "Bearer " + token0)
@@ -308,7 +308,7 @@ describe(`cards routes`, () => {
       });
     });
     describe("card object with all fields in request body", () => {
-      it("should send status 200", async () => {
+      it("should send status 200 post a card", async () => {
         const response = await request(server)
           .post("/cards")
           .set("Authorization", "Bearer " + token0)
@@ -333,7 +333,7 @@ describe(`cards routes`, () => {
       token1 = res1.body.token;
     });
     describe("invalid card ID in URL params", () => {
-      it("should send status 400", async () => {
+      it("should send status 400 and not delete a card", async () => {
         const responseDelete = await request(server)
           .delete(`/cards/123`)
           .set("Authorization", "Bearer " + token0)
@@ -342,7 +342,7 @@ describe(`cards routes`, () => {
       });
     });
     describe("card ID in URL params for card user doesn't own", () => {
-      it("should send status 401", async () => {
+      it("should send status 401 and not delete a card", async () => {
         const responsePost = await request(server)
           .post("/cards")
           .set("Authorization", "Bearer " + token0)
@@ -361,7 +361,7 @@ describe(`cards routes`, () => {
       });
     });
     describe("card ID for a card that doesn't exist in URL params", () => {
-      it("should send 404", async () => {
+      it("should send 404 and not delete a card", async () => {
         const responsePost = await request(server)
           .post("/cards")
           .set("Authorization", "Bearer " + token0)
@@ -386,7 +386,7 @@ describe(`cards routes`, () => {
       });
     });
     describe("card ID for a card the user owns in URL params", () => {
-      it("should delete a card", async () => {
+      it("should send status code 200 and delete a card", async () => {
         const responsePost = await request(server)
           .post("/cards")
           .set("Authorization", "Bearer " + token0)
@@ -406,7 +406,7 @@ describe(`cards routes`, () => {
       });
     });
     describe("card ID for a card the admin user doesn't own in URL params", () => {
-      it("admin send status 200", async () => {
+      it("should send status 200 and delete a card", async () => {
         const responsePost = await request(server)
           .post("/cards")
           .set("Authorization", "Bearer " + token0)
