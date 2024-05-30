@@ -114,11 +114,7 @@ module.exports.getCardCollection = async (cardCollectionId) => {
   return await CardCollection.findOne({ _id: cardCollectionId });
 };
 
-module.exports.getCardCollectionsForUser = async (ownerName, userId) => {
-  if (!mongoose.Types.ObjectId.isValid(userId)) {
-    throw new errors.InvalidMongooseId("Invalid user ID");
-  }
-
+module.exports.getCardCollectionsForUser = async (ownerName) => {
   try {
     const ownerUser = await User.findOne({ username: ownerName });
     if (!ownerUser) {

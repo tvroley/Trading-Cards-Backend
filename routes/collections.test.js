@@ -6,7 +6,7 @@ const CardsDao = require("../models/tradingCard");
 const UserDao = require("../models/user");
 const CardCollectionDao = require("../models/cardCollection");
 
-describe(`cards routes`, () => {
+describe(`collections routes`, () => {
   beforeAll(testUtils.connectDB);
   afterAll(testUtils.stopDB);
   afterEach(testUtils.clearDB);
@@ -79,7 +79,7 @@ describe(`cards routes`, () => {
     });
   });
 
-  describe("GET /collections", () => {
+  describe("GET /collections by collection ID", () => {
     let token0;
     let token1;
     let user0MainCollection;
@@ -147,6 +147,21 @@ describe(`cards routes`, () => {
         expect(collection).toMatchObject(user0MainCollection);
       });
     });
+  });
+
+  describe("GET /collections by collection ID", () => {
+    let token0;
+    let token1;
+    let user0MainCollection;
+    beforeEach(async () => {
+      const result = await request(server).post("/auth/signup").send(user0);
+      user0MainCollection = result.body.collection;
+      const res0 = await request(server).post("/auth/login").send(user0);
+      token0 = res0.body.token;
+      await request(server).post("/auth/signup").send(user1);
+      const res1 = await request(server).post("/auth/login").send(user1);
+      token1 = res1.body.token;
+    });
     describe("username of current user in request body", () => {
       it("should send status 200 and get all collections for an owner", async () => {
         const responsePost = await request(server)
@@ -180,6 +195,97 @@ describe(`cards routes`, () => {
           .set("Authorization", "Bearer " + token1)
           .send({ ownerName: user0.username });
         expect(responseGet.statusCode).toEqual(200);
+      });
+    });
+    describe("username of a fake user in the request body", () => {
+      it("should send status 404 and not get all collections for an owner", async () => {
+        const responseGet = await request(server)
+          .get(`/collections`)
+          .set("Authorization", "Bearer " + token1)
+          .send({ ownerName: "Nobody" });
+        expect(responseGet.statusCode).toEqual(404);
+      });
+    });
+    describe("empty username in the request body", () => {
+      it("should send status 400 and not get all collections for an owner", async () => {
+        const responseGet = await request(server)
+          .get(`/collections`)
+          .set("Authorization", "Bearer " + token1)
+          .send({ ownerName: "" });
+        expect(responseGet.statusCode).toEqual(400);
+      });
+    });
+  });
+
+  describe("GET /collections by owner and title", () => {
+    let token0;
+    let token1;
+    let user0MainCollection;
+    beforeEach(async () => {
+      const result = await request(server).post("/auth/signup").send(user0);
+      user0MainCollection = result.body.collection;
+      const res0 = await request(server).post("/auth/login").send(user0);
+      token0 = res0.body.token;
+      await request(server).post("/auth/signup").send(user1);
+      const res1 = await request(server).post("/auth/login").send(user1);
+      token1 = res1.body.token;
+    });
+    describe("collection name for a collection that doesn't exist with a real user in the request body", () => {
+      it("should send status 404 and not get a collection", async () => {
+        const response = await request(server)
+          .get(`/collections`)
+          .set("Authorization", "Bearer " + token0)
+          .send({ ownerName: user0.username, title: "nothing" });
+        expect(response.statusCode).toEqual(404);
+      });
+    });
+    describe("collection name with a fake user in the request body", () => {
+      it("should send status 404 and not get a collection", async () => {
+        const response = await request(server)
+          .get(`/collections`)
+          .set("Authorization", "Bearer " + token0)
+          .send({ ownerName: "nobody", title: user0.username });
+        expect(response.statusCode).toEqual(404);
+      });
+    });
+    describe("collection name with an empty username in the request body", () => {
+      it("should send status 400 and not get a collection", async () => {
+        const response = await request(server)
+          .get(`/collections`)
+          .set("Authorization", "Bearer " + token0)
+          .send({ ownerName: "", title: user0.username });
+        expect(response.statusCode).toEqual(400);
+      });
+    });
+    describe("empty collection name with a username in the request body", () => {
+      it("should send status 400 and not get a collection", async () => {
+        const response = await request(server)
+          .get(`/collections`)
+          .set("Authorization", "Bearer " + token0)
+          .send({ ownerName: user0.username, title: "" });
+        expect(response.statusCode).toEqual(400);
+      });
+    });
+    describe("the main collection name for a user and the username owns in the request body", () => {
+      it("should send status 200 and get a collection", async () => {
+        const response = await request(server)
+          .get(`/collections`)
+          .set("Authorization", "Bearer " + token0)
+          .send({ ownerName: user0.username, title: user0.username });
+        expect(response.statusCode).toEqual(200);
+        const collection = response.body.collection;
+        expect(collection).toMatchObject(user0MainCollection);
+      });
+    });
+    describe("main collection title and username for another user in the request body", () => {
+      it("should send status 200 and get a collection", async () => {
+        const response = await request(server)
+          .get(`/collections`)
+          .set("Authorization", "Bearer " + token1)
+          .send({ ownerName: user0.username, title: user0.username });
+        expect(response.statusCode).toEqual(200);
+        const collection = response.body.collection;
+        expect(collection).toMatchObject(user0MainCollection);
       });
     });
   });

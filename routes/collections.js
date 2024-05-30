@@ -7,10 +7,12 @@ const collectionDAO = require("../daos/cardCollection");
 router.get("/", async (req, res, next) => {
   const ownerName = req.body.ownerName;
   const title = req.body.title;
-  const userId = req.user._id;
-  const roles = req.user.roles;
 
-  if (ownerName && title) {
+  if (String(ownerName).trim().length === 0) {
+    res.status(400).send("empty collection owner name");
+  } else if (String(title).trim().length === 0) {
+    res.status(400).send("empty collection title name");
+  } else if (ownerName && title) {
     try {
       const collection = await collectionDAO.getCollectionByOwnerAndTitle(
         title,
@@ -22,21 +24,27 @@ router.get("/", async (req, res, next) => {
         res.status(404).send("could not find collection");
       }
     } catch (err) {
-      next(err);
+      if (err.message.includes("did not find")) {
+        res.status(404).send(err.message);
+      } else {
+        next(err);
+      }
     }
-  } else if (ownerName) {
+  } else if (ownerName && !title) {
     try {
-      const collections = await collectionDAO.getCardCollectionsForUser(
-        ownerName,
-        userId,
-      );
+      const collections =
+        await collectionDAO.getCardCollectionsForUser(ownerName);
       if (collections && collections.length > 0) {
         res.json({ collections: collections });
       } else {
         res.status(404).send("could not find any collections for user");
       }
     } catch (err) {
-      next(err);
+      if (err.message.includes("could not find")) {
+        res.status(404).send(err.message);
+      } else {
+        next(err);
+      }
     }
   } else {
     res.sendStatus(400);
