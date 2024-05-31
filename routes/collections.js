@@ -69,6 +69,10 @@ router.get("/:id", async (req, res, next) => {
 router.post("/", async (req, res, next) => {
   const title = req.body.collectionTitle;
   const userId = req.user._id;
+  const roles = req.user.roles;
+  const collectionId = req.body.collectionId;
+  const cardId = req.body.cardId;
+
   if (title && userId) {
     try {
       const collection = await collectionDAO.createCardCollection(
@@ -79,8 +83,20 @@ router.post("/", async (req, res, next) => {
     } catch (err) {
       next(err);
     }
+  } else if (collectionId && cardId) {
+    try {
+      const collectionForCard = await collectionDAO.addCardToCollection(
+        collectionId,
+        cardId,
+        userId,
+        roles,
+      );
+      res.json({ collectionForCard: collectionForCard });
+    } catch (err) {
+      next(err);
+    }
   } else {
-    res.status(400).send("missing collection title");
+    res.status(400).send("missing data in request body");
   }
 });
 

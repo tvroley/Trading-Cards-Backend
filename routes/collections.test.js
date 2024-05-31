@@ -5,6 +5,7 @@ const testUtils = require("../test-utils");
 const CardsDao = require("../models/tradingCard");
 const UserDao = require("../models/user");
 const CardCollectionDao = require("../models/cardCollection");
+const CollectionForCard = require("../models/collectionForCard");
 
 describe(`collections routes`, () => {
   beforeAll(testUtils.connectDB);
@@ -290,7 +291,7 @@ describe(`collections routes`, () => {
     });
   });
 
-  describe("POST /collections", () => {
+  describe("POST /collections create new collection", () => {
     let token0;
     let token1;
     let user0MainCollection;
@@ -343,6 +344,86 @@ describe(`collections routes`, () => {
         expect(response.body.collection.owner).toEqual(
           myCollection.owner.toString(),
         );
+      });
+    });
+  });
+
+  describe("POST /collections add card to collection", () => {
+    let token0;
+    let token1;
+    let user0MainCollection;
+    beforeEach(async () => {
+      const result = await request(server).post("/auth/signup").send(user0);
+      user0MainCollection = result.body.collection;
+      const res0 = await request(server).post("/auth/login").send(user0);
+      token0 = res0.body.token;
+      await request(server).post("/auth/signup").send(user1);
+      const res1 = await request(server).post("/auth/login").send(user1);
+      token1 = res1.body.token;
+    });
+    describe("add card to a collection in the request body", () => {
+      it("should send status 200 and add a card to a collection", async () => {
+        const resCollectionPost = await request(server)
+          .post(`/collections`)
+          .set("Authorization", "Bearer " + token0)
+          .send({ collectionTitle: "testCollection" });
+        expect(resCollectionPost.statusCode).toEqual(200);
+        const responsePostCard = await request(server)
+          .post("/cards")
+          .set("Authorization", "Bearer " + token0)
+          .send(card);
+        expect(responsePostCard.statusCode).toEqual(200);
+        const resPostCardToCollection = await request(server)
+          .post(`/collections`)
+          .set("Authorization", "Bearer " + token0)
+          .send({
+            collectionId: resCollectionPost.body.collection._id,
+            cardId: responsePostCard.body.card._id,
+          });
+        expect(resPostCardToCollection.statusCode).toEqual(200);
+        const collectionForCard = await CollectionForCard.findOne({
+          cardCollection: resCollectionPost.body.collection._id,
+        }).lean();
+        expect(responsePostCard.body.card._id).toEqual(
+          collectionForCard.tradingCard.toString(),
+        );
+      });
+    });
+    describe("add card to a collection that already has that card in the request body", () => {
+      it("should send status 409 and not add a card to a collection", async () => {
+        const resCollectionPost = await request(server)
+          .post(`/collections`)
+          .set("Authorization", "Bearer " + token0)
+          .send({ collectionTitle: "testCollection" });
+        expect(resCollectionPost.statusCode).toEqual(200);
+        const responsePostCard = await request(server)
+          .post("/cards")
+          .set("Authorization", "Bearer " + token0)
+          .send(card);
+        expect(responsePostCard.statusCode).toEqual(200);
+        const resPostCardToCollection = await request(server)
+          .post(`/collections`)
+          .set("Authorization", "Bearer " + token0)
+          .send({
+            collectionId: resCollectionPost.body.collection._id,
+            cardId: responsePostCard.body.card._id,
+          });
+        expect(resPostCardToCollection.statusCode).toEqual(200);
+        const resPostCardToCollectionDup = await request(server)
+          .post(`/collections`)
+          .set("Authorization", "Bearer " + token0)
+          .send({
+            collectionId: resCollectionPost.body.collection._id,
+            cardId: responsePostCard.body.card._id,
+          });
+        expect(resPostCardToCollectionDup.statusCode).toEqual(409);
+        const collectionForCard = await CollectionForCard.find({
+          cardCollection: resCollectionPost.body.collection._id,
+        }).lean();
+        expect(responsePostCard.body.card._id).toEqual(
+          collectionForCard[0].tradingCard.toString(),
+        );
+        expect(collectionForCard.length).toEqual(1);
       });
     });
   });
