@@ -59,9 +59,10 @@ describe("/auth", () => {
         });
         expect(res.statusCode).toEqual(400);
       });
-      it("should return 200 and with a password", async () => {
+      it("should return 200 and collection with the title of the username with a password in the request body", async () => {
         const res = await request(server).post("/auth/signup").send(user1);
         expect(res.statusCode).toEqual(200);
+        expect(res.body.collection.title).toEqual(user1.username);
       });
       it("should return 409 Conflict with a repeat signup", async () => {
         let res = await request(server).post("/auth/signup").send(user0);
