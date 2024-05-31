@@ -374,10 +374,9 @@ describe(`collections routes`, () => {
           .send(card);
         expect(responsePostCard.statusCode).toEqual(200);
         const resPostCardToCollection = await request(server)
-          .post(`/collections`)
+          .post(`/collections/${resCollectionPost.body.collection._id}`)
           .set("Authorization", "Bearer " + token0)
           .send({
-            collectionId: resCollectionPost.body.collection._id,
             cardId: responsePostCard.body.card._id,
           });
         expect(resPostCardToCollection.statusCode).toEqual(200);
@@ -402,18 +401,16 @@ describe(`collections routes`, () => {
           .send(card);
         expect(responsePostCard.statusCode).toEqual(200);
         const resPostCardToCollection = await request(server)
-          .post(`/collections`)
+          .post(`/collections/${resCollectionPost.body.collection._id}`)
           .set("Authorization", "Bearer " + token0)
           .send({
-            collectionId: resCollectionPost.body.collection._id,
             cardId: responsePostCard.body.card._id,
           });
         expect(resPostCardToCollection.statusCode).toEqual(200);
         const resPostCardToCollectionDup = await request(server)
-          .post(`/collections`)
+          .post(`/collections/${resCollectionPost.body.collection._id}`)
           .set("Authorization", "Bearer " + token0)
           .send({
-            collectionId: resCollectionPost.body.collection._id,
             cardId: responsePostCard.body.card._id,
           });
         expect(resPostCardToCollectionDup.statusCode).toEqual(409);
@@ -434,10 +431,9 @@ describe(`collections routes`, () => {
           .send({ collectionTitle: "testCollection" });
         expect(resCollectionPost.statusCode).toEqual(200);
         const resPostCardToCollectionDup = await request(server)
-          .post(`/collections`)
+          .post(`/collections/${resCollectionPost.body.collection._id}`)
           .set("Authorization", "Bearer " + token0)
           .send({
-            collectionId: resCollectionPost.body.collection._id,
             cardId: "",
           });
         expect(resPostCardToCollectionDup.statusCode).toEqual(400);
@@ -447,70 +443,47 @@ describe(`collections routes`, () => {
         expect(collectionForCard.length).toEqual(0);
       });
     });
-  describe("add card to a collection with an empty collection in the request body", () => {
-    it("should send status 400 and not add a card to a collection", async () => {
-      const responsePostCard = await request(server)
-        .post("/cards")
-        .set("Authorization", "Bearer " + token0)
-        .send(card);
-      expect(responsePostCard.statusCode).toEqual(200);
-      const resPostCardToCollection = await request(server)
-        .post(`/collections`)
-        .set("Authorization", "Bearer " + token0)
-        .send({
-          collectionId: "",
-          cardId: responsePostCard.body.card._id,
-        });
-      expect(resPostCardToCollection.statusCode).toEqual(400);
-      const collectionForCard = await CollectionForCard.find({
-        tradingCard: responsePostCard.body.card._id,
-      }).lean();
-      expect(collectionForCard.length).toEqual(1);
+    describe("add card to a collection with an invalid collection ID in the request body", () => {
+      it("should send status 400 and not add a card to a collection", async () => {
+        const responsePostCard = await request(server)
+          .post("/cards")
+          .set("Authorization", "Bearer " + token0)
+          .send(card);
+        expect(responsePostCard.statusCode).toEqual(200);
+        const resPostCardToCollection = await request(server)
+          .post(`/collections/123`)
+          .set("Authorization", "Bearer " + token0)
+          .send({
+            cardId: responsePostCard.body.card._id,
+          });
+        expect(resPostCardToCollection.statusCode).toEqual(400);
+        const collectionForCard = await CollectionForCard.find({
+          tradingCard: responsePostCard.body.card._id,
+        }).lean();
+        expect(collectionForCard.length).toEqual(1);
+      });
+    });
+    describe("add card to a collection with an invalid ID in the request body", () => {
+      it("should send status 400 and not add a card to a collection", async () => {
+        const resCollectionPost = await request(server)
+          .post(`/collections`)
+          .set("Authorization", "Bearer " + token0)
+          .send({ collectionTitle: "testCollection" });
+        expect(resCollectionPost.statusCode).toEqual(200);
+        const resPostCardToCollectionDup = await request(server)
+          .post(`/collections/${resCollectionPost.body.collection._id}`)
+          .set("Authorization", "Bearer " + token0)
+          .send({
+            cardId: "123",
+          });
+        expect(resPostCardToCollectionDup.statusCode).toEqual(400);
+        const collectionForCard = await CollectionForCard.find({
+          cardCollection: resCollectionPost.body.collection._id,
+        }).lean();
+        expect(collectionForCard.length).toEqual(0);
+      });
     });
   });
-  describe("add card to a collection with an invalid collection ID in the request body", () => {
-    it("should send status 400 and not add a card to a collection", async () => {
-      const responsePostCard = await request(server)
-        .post("/cards")
-        .set("Authorization", "Bearer " + token0)
-        .send(card);
-      expect(responsePostCard.statusCode).toEqual(200);
-      const resPostCardToCollection = await request(server)
-        .post(`/collections`)
-        .set("Authorization", "Bearer " + token0)
-        .send({
-          collectionId: "123",
-          cardId: responsePostCard.body.card._id,
-        });
-      expect(resPostCardToCollection.statusCode).toEqual(400);
-      const collectionForCard = await CollectionForCard.find({
-        tradingCard: responsePostCard.body.card._id,
-      }).lean();
-      expect(collectionForCard.length).toEqual(1);
-    });
-  });
-  describe("add card to a collection with an invalid ID in the request body", () => {
-    it("should send status 400 and not add a card to a collection", async () => {
-      const resCollectionPost = await request(server)
-        .post(`/collections`)
-        .set("Authorization", "Bearer " + token0)
-        .send({ collectionTitle: "testCollection" });
-      expect(resCollectionPost.statusCode).toEqual(200);
-      const resPostCardToCollectionDup = await request(server)
-        .post(`/collections`)
-        .set("Authorization", "Bearer " + token0)
-        .send({
-          collectionId: resCollectionPost.body.collection._id,
-          cardId: "123",
-        });
-      expect(resPostCardToCollectionDup.statusCode).toEqual(400);
-      const collectionForCard = await CollectionForCard.find({
-        cardCollection: resCollectionPost.body.collection._id,
-      }).lean();
-      expect(collectionForCard.length).toEqual(0);
-    });
-  });
-});
 
   describe("PUT /collections", () => {
     let token0;

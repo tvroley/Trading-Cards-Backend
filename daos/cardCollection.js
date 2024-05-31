@@ -52,8 +52,6 @@ module.exports.addCardToCollection = async (
   } catch (err) {
     if (err.message.includes("duplicate key")) {
       throw new errors.DuplicateKeyError(err.message);
-    } else if (err.message.includes("validation failed")) {
-      throw new errors.BadDataError(err.message);
     } else {
       throw err;
     }
