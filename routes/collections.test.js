@@ -468,6 +468,48 @@ describe(`collections routes`, () => {
       expect(collectionForCard.length).toEqual(1);
     });
   });
+  describe("add card to a collection with an invalid collection ID in the request body", () => {
+    it("should send status 400 and not add a card to a collection", async () => {
+      const responsePostCard = await request(server)
+        .post("/cards")
+        .set("Authorization", "Bearer " + token0)
+        .send(card);
+      expect(responsePostCard.statusCode).toEqual(200);
+      const resPostCardToCollection = await request(server)
+        .post(`/collections`)
+        .set("Authorization", "Bearer " + token0)
+        .send({
+          collectionId: "123",
+          cardId: responsePostCard.body.card._id,
+        });
+      expect(resPostCardToCollection.statusCode).toEqual(400);
+      const collectionForCard = await CollectionForCard.find({
+        tradingCard: responsePostCard.body.card._id,
+      }).lean();
+      expect(collectionForCard.length).toEqual(1);
+    });
+  });
+  describe("add card to a collection with an invalid ID in the request body", () => {
+    it("should send status 400 and not add a card to a collection", async () => {
+      const resCollectionPost = await request(server)
+        .post(`/collections`)
+        .set("Authorization", "Bearer " + token0)
+        .send({ collectionTitle: "testCollection" });
+      expect(resCollectionPost.statusCode).toEqual(200);
+      const resPostCardToCollectionDup = await request(server)
+        .post(`/collections`)
+        .set("Authorization", "Bearer " + token0)
+        .send({
+          collectionId: resCollectionPost.body.collection._id,
+          cardId: "123",
+        });
+      expect(resPostCardToCollectionDup.statusCode).toEqual(400);
+      const collectionForCard = await CollectionForCard.find({
+        cardCollection: resCollectionPost.body.collection._id,
+      }).lean();
+      expect(collectionForCard.length).toEqual(0);
+    });
+  });
 });
 
   describe("PUT /collections", () => {
