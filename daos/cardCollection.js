@@ -110,6 +110,27 @@ module.exports.getCardCollection = async (cardCollectionId) => {
   return await CardCollection.findOne({ _id: cardCollectionId });
 };
 
+module.exports.getCardsInCollection = async (cardCollectionId) => {
+  if (!mongoose.Types.ObjectId.isValid(cardCollectionId)) {
+    throw new errors.InvalidMongooseId("Invalid card collection ID");
+  }
+
+  return await CollectionForCard.aggregate([
+    {
+      $match: { cardCollection: new mongoose.Types.ObjectId(cardCollectionId) },
+    },
+    {
+      $lookup: {
+        from: "tradingcards",
+        localField: "tradingCard",
+        foreignField: "_id",
+        as: "tradingCard",
+      },
+    },
+    { $project: { tradingCard: { $first: "$tradingCard" }, _id: 0 } },
+  ]);
+};
+
 module.exports.getCardCollectionsForUser = async (ownerName) => {
   try {
     const ownerUser = await User.findOne({ username: ownerName });

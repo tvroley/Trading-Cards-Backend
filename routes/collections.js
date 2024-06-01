@@ -53,13 +53,24 @@ router.get("/", async (req, res, next) => {
 
 router.get("/:id", async (req, res, next) => {
   const collectionId = req.params.id;
+  const verbose = req.body.verbose;
 
   try {
-    const collection = await collectionDAO.getCardCollection(collectionId);
-    if (collection) {
-      res.json({ collection: collection });
-    } else {
-      res.status(404).send(`collection not found`);
+    if (collectionId && verbose === "true") {
+      const tradingCards =
+        await collectionDAO.getCardsInCollection(collectionId);
+      if (tradingCards) {
+        res.json({ tradingCards: tradingCards });
+      } else {
+        res.status(404).send(`collection not found`);
+      }
+    } else if (collectionId) {
+      const collection = await collectionDAO.getCardCollection(collectionId);
+      if (collection) {
+        res.json({ collection: collection });
+      } else {
+        res.status(404).send(`collection not found`);
+      }
     }
   } catch (err) {
     next(err);
