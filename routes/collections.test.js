@@ -326,6 +326,27 @@ describe(`collections routes`, () => {
         expect(tradingCards[1]).toMatchObject(card0);
       });
     });
+    describe("valid collection ID and verbose equals false in the request body", () => {
+      it("should send status 200 and collection object", async () => {
+        const responsePost1 = await request(server)
+          .post("/cards")
+          .set("Authorization", "Bearer " + token0)
+          .send(card);
+        expect(responsePost1.statusCode).toEqual(200);
+        const responsePost2 = await request(server)
+          .post("/cards")
+          .set("Authorization", "Bearer " + token0)
+          .send(card0);
+        expect(responsePost2.statusCode).toEqual(200);
+        const responseGet = await request(server)
+          .get(`/collections/${user0MainCollection._id}`)
+          .set("Authorization", "Bearer " + token0)
+          .send({ verbose: "false" });
+        expect(responseGet.statusCode).toEqual(200);
+        const collection = responseGet.body.collection;
+        expect(collection.title).toEqual(user0.username);
+      });
+    });
     describe("collection ID for collection that doesn't exist and verbose in the request body", () => {
       it("should send status 404 and not send trading cards", async () => {
         const responsePost = await request(server)
