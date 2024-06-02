@@ -44,7 +44,7 @@ describe(`collections routes`, () => {
       "https://sgcimagprodstorage.blob.core.windows.net/mycollections/6313b7ee-6887-4e10-9a28-dc9fa2312278/h275/back/6313b7ee-6887-4e10-9a28-dc9fa2312278.jpg",
     subject: "Mickey Mantle",
     cardSet: "1956 Topps",
-    cardNumber: 135,
+    cardNumber: "135",
     gradingCompany: "SGC",
     certificationNumber: "1174031",
     year: 1956,
@@ -287,6 +287,72 @@ describe(`collections routes`, () => {
         expect(response.statusCode).toEqual(200);
         const collection = response.body.collection;
         expect(collection).toMatchObject(user0MainCollection);
+      });
+    });
+  });
+
+  describe("GET /collections get all cards in a collection", () => {
+    let token0;
+    let token1;
+    let user0MainCollection;
+    beforeEach(async () => {
+      const result = await request(server).post("/auth/signup").send(user0);
+      user0MainCollection = result.body.collection;
+      const res0 = await request(server).post("/auth/login").send(user0);
+      token0 = res0.body.token;
+      await request(server).post("/auth/signup").send(user1);
+      const res1 = await request(server).post("/auth/login").send(user1);
+      token1 = res1.body.token;
+    });
+    describe("valid collection ID and verbose in the request body", () => {
+      it("should send status 200 and cards sorted by grading company and cert number", async () => {
+        const responsePost1 = await request(server)
+          .post("/cards")
+          .set("Authorization", "Bearer " + token0)
+          .send(card);
+        expect(responsePost1.statusCode).toEqual(200);
+        const responsePost2 = await request(server)
+          .post("/cards")
+          .set("Authorization", "Bearer " + token0)
+          .send(card0);
+        expect(responsePost2.statusCode).toEqual(200);
+        const responseGet = await request(server)
+          .get(`/collections/${user0MainCollection._id}`)
+          .set("Authorization", "Bearer " + token0)
+          .send({ verbose: "true" });
+        expect(responseGet.statusCode).toEqual(200);
+        const tradingCards = responseGet.body.tradingCards;
+        expect(tradingCards[0]).toMatchObject(card);
+        expect(tradingCards[1]).toMatchObject(card0);
+      });
+    });
+    describe("collection ID for collection that doesn't exist and verbose in the request body", () => {
+      it("should send status 404 and not send trading cards", async () => {
+        const responsePost = await request(server)
+          .post(`/collections`)
+          .set("Authorization", "Bearer " + token0)
+          .send({ collectionTitle: "testCollection" });
+        expect(responsePost.statusCode).toEqual(200);
+        const collection = responsePost.body.collection;
+        const responseDelete = await request(server)
+          .delete(`/collections/${collection._id}`)
+          .set("Authorization", "Bearer " + token0)
+          .send();
+        expect(responseDelete.statusCode).toEqual(200);
+        const responseGet = await request(server)
+          .get(`/collections/${collection._id}`)
+          .set("Authorization", "Bearer " + token0)
+          .send({ verbose: "true" });
+        expect(responseGet.statusCode).toEqual(404);
+      });
+    });
+    describe("invalid collection ID in the URL params", () => {
+      it("should send status 404 and not get a collection", async () => {
+        const response = await request(server)
+          .get(`/collections/123`)
+          .set("Authorization", "Bearer " + token0)
+          .send({ verbose: "true" });
+        expect(response.statusCode).toEqual(400);
       });
     });
   });
