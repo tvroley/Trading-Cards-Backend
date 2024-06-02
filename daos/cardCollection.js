@@ -128,6 +128,13 @@ module.exports.getCardsInCollection = async (cardCollectionId) => {
       },
     },
     { $project: { tradingCard: { $first: "$tradingCard" }, _id: 0 } },
+    { $project: { _id: "$tradingCard._id", year: "$tradingCard.year", brand: "$tradingCard.brand", 
+      cardNumber: "$tradingCard.cardNumber", cardSet: "$tradingCard.cardSet", subject: "$tradingCard.subject",
+      variety: "$tradingCard.variety", gradingCompany: "$tradingCard.gradingCompany",
+      grade: "$tradingCard.grade", certificationNumber: "$tradingCard.certificationNumber", 
+      frontCardImageLink: "$tradingCard.frontCardImageLink", backCardImageLink: "$tradingCard.backCardImageLink",
+      sold: "$tradingCard.sold", } },
+    { $sort: { gradingCompany: 1, certificationNumber: 1 } },
   ]);
 };
 
