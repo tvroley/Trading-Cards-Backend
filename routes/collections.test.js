@@ -322,7 +322,7 @@ describe(`collections routes`, () => {
       token1 = res1.body.token;
     });
     describe("valid collection ID and verbose in the request body", () => {
-      it("should send status 200 and cards sorted by grading company and cert number", async () => {
+      it("should send status 200 and cards sorted by year", async () => {
         const responsePost1 = await request(server)
           .post("/cards")
           .set("Authorization", "Bearer " + token0)
@@ -378,7 +378,7 @@ describe(`collections routes`, () => {
       });
     });
     describe("valid collection ID and verbose in the request body and sortBy equals year", () => {
-      it("should send status 200 and cards sorted by grading company and cert number", async () => {
+      it("should send status 200 and cards sorted by year", async () => {
         const responsePost1 = await request(server)
           .post("/cards")
           .set("Authorization", "Bearer " + token0)
@@ -402,6 +402,34 @@ describe(`collections routes`, () => {
         const tradingCards = responseGet.body.tradingCards;
         expect(tradingCards[0]).toMatchObject(card0);
         expect(tradingCards[1]).toMatchObject(card1);
+        expect(tradingCards[2]).toMatchObject(card);
+      });
+    });
+    describe("valid collection ID and verbose in the request body and sortBy equals player", () => {
+      it("should send status 200 and cards sorted by player", async () => {
+        const responsePost1 = await request(server)
+          .post("/cards")
+          .set("Authorization", "Bearer " + token0)
+          .send(card);
+        expect(responsePost1.statusCode).toEqual(200);
+        const responsePost2 = await request(server)
+          .post("/cards")
+          .set("Authorization", "Bearer " + token0)
+          .send(card0);
+        expect(responsePost2.statusCode).toEqual(200);
+        const responsePost3 = await request(server)
+          .post("/cards")
+          .set("Authorization", "Bearer " + token0)
+          .send(card1);
+        expect(responsePost3.statusCode).toEqual(200);
+        const responseGet = await request(server)
+          .get(`/collections/${user0MainCollection._id}`)
+          .set("Authorization", "Bearer " + token0)
+          .send({ verbose: "true", sortBy: "player" });
+        expect(responseGet.statusCode).toEqual(200);
+        const tradingCards = responseGet.body.tradingCards;
+        expect(tradingCards[0]).toMatchObject(card1);
+        expect(tradingCards[1]).toMatchObject(card0);
         expect(tradingCards[2]).toMatchObject(card);
       });
     });
