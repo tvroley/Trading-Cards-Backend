@@ -115,7 +115,7 @@ module.exports.getCardsInCollection = async (cardCollectionId, sortBy) => {
     throw new errors.InvalidMongooseId("Invalid card collection ID");
   }
 
-  const aggArray =  [
+  const aggArray = [
     {
       $match: { cardCollection: new mongoose.Types.ObjectId(cardCollectionId) },
     },
@@ -128,16 +128,31 @@ module.exports.getCardsInCollection = async (cardCollectionId, sortBy) => {
       },
     },
     { $project: { tradingCard: { $first: "$tradingCard" }, _id: 0 } },
-    { $project: { _id: "$tradingCard._id", year: "$tradingCard.year", brand: "$tradingCard.brand", 
-      cardNumber: "$tradingCard.cardNumber", cardSet: "$tradingCard.cardSet", subject: "$tradingCard.subject",
-      variety: "$tradingCard.variety", gradingCompany: "$tradingCard.gradingCompany",
-      grade: "$tradingCard.grade", certificationNumber: "$tradingCard.certificationNumber", 
-      frontCardImageLink: "$tradingCard.frontCardImageLink", backCardImageLink: "$tradingCard.backCardImageLink",
-      sold: "$tradingCard.sold", } },
+    {
+      $project: {
+        _id: "$tradingCard._id",
+        year: "$tradingCard.year",
+        brand: "$tradingCard.brand",
+        cardNumber: "$tradingCard.cardNumber",
+        cardSet: "$tradingCard.cardSet",
+        subject: "$tradingCard.subject",
+        variety: "$tradingCard.variety",
+        gradingCompany: "$tradingCard.gradingCompany",
+        grade: "$tradingCard.grade",
+        certificationNumber: "$tradingCard.certificationNumber",
+        frontCardImageLink: "$tradingCard.frontCardImageLink",
+        backCardImageLink: "$tradingCard.backCardImageLink",
+        sold: "$tradingCard.sold",
+      },
+    },
   ];
 
-  if(sortBy === "cert") {
+  if (sortBy === "cert") {
     aggArray.push({ $sort: { gradingCompany: 1, certificationNumber: 1 } });
+  } else if (sortBy === "year") {
+    aggArray.push({
+      $sort: { year: 1, brand: 1, cardSet: 1, cardNumber: 1, _id: 1 },
+    });
   }
 
   return await CollectionForCard.aggregate(aggArray);

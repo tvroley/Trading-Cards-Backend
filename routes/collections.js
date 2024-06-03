@@ -59,10 +59,18 @@ router.get("/:id", async (req, res, next) => {
   try {
     if (collectionId && verbose === "true") {
       let tradingCards;
-      if(!sortBy || sortBy === "cert") {
-        tradingCards = await collectionDAO.getCardsInCollection(collectionId, "cert");
+      if (!sortBy) {
+        tradingCards = await collectionDAO.getCardsInCollection(
+          collectionId,
+          "year",
+        );
+      } else {
+        tradingCards = await collectionDAO.getCardsInCollection(
+          collectionId,
+          sortBy,
+        );
       }
-      if (tradingCards.length !== 0) {
+      if (tradingCards && tradingCards.length !== 0) {
         res.json({ tradingCards: tradingCards });
       } else {
         res.status(404).send(`no trading cards found`);
@@ -74,7 +82,7 @@ router.get("/:id", async (req, res, next) => {
       } else {
         res.status(404).send(`collection not found`);
       }
-    } 
+    }
   } catch (err) {
     next(err);
   }
