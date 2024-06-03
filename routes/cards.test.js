@@ -5,6 +5,7 @@ const testUtils = require("../test-utils");
 const Cards = require("../models/tradingCard");
 const User = require("../models/user");
 const { search } = require("./auth");
+const collectionForCard = require("../models/collectionForCard");
 
 describe(`cards routes`, () => {
   beforeAll(testUtils.connectDB);
@@ -495,6 +496,10 @@ describe(`cards routes`, () => {
           certificationNumber: "78261079",
         }).lean();
         expect(deleteCardArray.length).toEqual(0);
+        const deletedCollections = await collectionForCard.find({
+          tradingCard: cardId,
+        }).lean();
+        expect(deletedCollections.length).toEqual(0);
       });
     });
     describe("card ID for a card the admin user doesn't own in URL params", () => {

@@ -37,12 +37,14 @@ router.put("/:id", async (req, res, next) => {
   if (cardId && card && Object.keys(card).length !== 0) {
     try {
       const result = await cardsDAO.updateCard(cardId, card, userId, roles);
-      if (card) {
+      if (result) {
         if (result.modifiedCount === 0) {
           res.status(404).send("card not found");
         } else {
           res.json(result);
         }
+      } else {
+        res.status(404).send("card not found");
       }
     } catch (err) {
       if (err.message.includes(`write permission`)) {
@@ -127,6 +129,8 @@ router.delete("/:id", async (req, res, next) => {
       } else {
         res.json(result);
       }
+    } else {
+      res.status(404).send("card not found");
     }
   } catch (err) {
     if (err.message.includes("permission")) {
