@@ -70,6 +70,7 @@ module.exports.deleteCard = async (cardId, userId, roles) => {
   }
 
   if (roles.includes("admin")) {
+    await CollectionForCard.deleteMany({ tradingCard: cardId });
     return await Card.deleteOne({ _id: cardId });
   } else {
     const collectionForCard = await CollectionForCard.findOne({
@@ -79,6 +80,7 @@ module.exports.deleteCard = async (cardId, userId, roles) => {
     const fullCollection = await CardCollection.findOne({ _id: collectionId });
 
     if (fullCollection.owner.toString() === userId) {
+      await CollectionForCard.deleteMany({ tradingCard: cardId });
       return await Card.deleteOne({ _id: cardId });
     } else {
       throw new errors.BadDataError(
