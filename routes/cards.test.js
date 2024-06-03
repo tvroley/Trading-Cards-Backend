@@ -4,6 +4,7 @@ const server = require("../server");
 const testUtils = require("../test-utils");
 const Cards = require("../models/tradingCard");
 const User = require("../models/user");
+const { search } = require("./auth");
 
 describe(`cards routes`, () => {
   beforeAll(testUtils.connectDB);
@@ -67,6 +68,23 @@ describe(`cards routes`, () => {
     sold: false,
     year: 1956,
     grade: "1",
+    variety: "",
+  };
+
+  const card1 = {
+    year: 2014,
+    subject: "Sue Bird",
+    cardSet: "2014 Rittenhouse WNBA",
+    brand: "Rittenhouse",
+    gradingCompany: "PSA",
+    backCardImageLink:
+      "https://d1htnxwo4o0jhw.cloudfront.net/cert/139034792/KjyGQGqrj0uvOEw4QUusnA.jpg",
+    frontCardImageLink:
+      "https://d1htnxwo4o0jhw.cloudfront.net/cert/139034792/ApJITJO_RU-CDAMS70u-YQ.jpg",
+    grade: "8",
+    cardNumber: "82",
+    certificationNumber: "73536889",
+    sold: false,
     variety: "",
   };
 
@@ -147,6 +165,80 @@ describe(`cards routes`, () => {
           .set("Authorization", "Bearer " + token0)
           .send();
         expect(responseGet.statusCode).toEqual(404);
+      });
+    });
+  });
+
+  describe("GET /cards/search", () => {
+    let token0;
+    let token1;
+    beforeEach(async () => {
+      await request(server).post("/auth/signup").send(user0);
+      const res0 = await request(server).post("/auth/login").send(user0);
+      token0 = res0.body.token;
+      await request(server).post("/auth/signup").send(user1);
+      const res1 = await request(server).post("/auth/login").send(user1);
+      token1 = res1.body.token;
+    });
+    describe("valid single word search query", () => {
+      it("should send 200 status and return results with most relevant card first", async () => {
+        const responsePost1 = await request(server)
+          .post("/cards")
+          .set("Authorization", "Bearer " + token0)
+          .send(card);
+        expect(responsePost1.statusCode).toEqual(200);
+        const responsePost2 = await request(server)
+          .post("/cards")
+          .set("Authorization", "Bearer " + token0)
+          .send(card0);
+        expect(responsePost2.statusCode).toEqual(200);
+        const responsePost3 = await request(server)
+          .post("/cards")
+          .set("Authorization", "Bearer " + token0)
+          .send(card1);
+        expect(responsePost3.statusCode).toEqual(200);
+        const responseGet = await request(server)
+          .get(`/cards/search`)
+          .set("Authorization", "Bearer " + token0)
+          .send({ search: `Sue` });
+        expect(responseGet.statusCode).toEqual(200);
+        const tradingCards = responseGet.body.cards;
+        expect(tradingCards[0]).toMatchObject(card1);
+      });
+    });
+    describe("valid multiple word search query", () => {
+      it("should send 200 status and return results with most relevant card first", async () => {
+        const responsePost1 = await request(server)
+          .post("/cards")
+          .set("Authorization", "Bearer " + token0)
+          .send(card);
+        expect(responsePost1.statusCode).toEqual(200);
+        const responsePost2 = await request(server)
+          .post("/cards")
+          .set("Authorization", "Bearer " + token0)
+          .send(card0);
+        expect(responsePost2.statusCode).toEqual(200);
+        const responsePost3 = await request(server)
+          .post("/cards")
+          .set("Authorization", "Bearer " + token0)
+          .send(card1);
+        expect(responsePost3.statusCode).toEqual(200);
+        const responseGet = await request(server)
+          .get(`/cards/search`)
+          .set("Authorization", "Bearer " + token0)
+          .send({ search: `2002 Sue Bird` });
+        expect(responseGet.statusCode).toEqual(200);
+        const tradingCards = responseGet.body.cards;
+        expect(tradingCards[0]).toMatchObject(card1);
+      });
+    });
+    describe("empty search query in request body", () => {
+      it("should send 400 status", async () => {
+        const responseGet = await request(server)
+          .get(`/cards/search`)
+          .set("Authorization", "Bearer " + token0)
+          .send({ search: `   ` });
+        expect(responseGet.statusCode).toEqual(400);
       });
     });
   });

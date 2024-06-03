@@ -65,13 +65,31 @@ router.get("/", async (req, res, next) => {
       if (cards) {
         res.json({ cards: cards });
       } else {
-        res.status(404).send("no cards not found");
+        res.status(404).send("no cards found");
       }
     } catch (err) {
       next(err);
     }
   } else {
     res.sendStatus(401);
+  }
+});
+
+router.get("/search", async (req, res, next) => {
+  const search = req.body.search;
+  if (search.trim().length !== 0) {
+    try {
+      const results = await cardsDAO.search(search);
+      if (results) {
+        res.json({ cards: results });
+      } else {
+        res.status(404).send("no cards found");
+      }
+    } catch (err) {
+      next(err);
+    }
+  } else {
+    res.status(400).send("empty search query");
   }
 });
 

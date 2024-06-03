@@ -20,4 +20,15 @@ tradingCardSchema.index(
   { unique: true },
 );
 
+tradingCardSchema.index({
+  subject: "text",
+  year: "text",
+  cardSet: "text",
+  brand: "text",
+  variety: "text",
+  certificationNumber: "text",
+  gradingCompany: "text",
+  cardNumber: "text",
+});
+
 module.exports = mongoose.model("tradingCards", tradingCardSchema);

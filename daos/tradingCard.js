@@ -82,8 +82,17 @@ module.exports.deleteCard = async (cardId, userId, roles) => {
       return await Card.deleteOne({ _id: cardId });
     } else {
       throw new errors.BadDataError(
-        "user does not have read permissions for card",
+        "user does not have write permissions for card",
       );
     }
   }
+};
+
+module.exports.search = async (query) => {
+  return await Card.find(
+    { $text: { $search: query } },
+    { score: { $meta: "textScore" } },
+  )
+    .sort({ score: { $meta: "textScore" } })
+    .lean();
 };
