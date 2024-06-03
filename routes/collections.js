@@ -54,11 +54,14 @@ router.get("/", async (req, res, next) => {
 router.get("/:id", async (req, res, next) => {
   const collectionId = req.params.id;
   const verbose = req.body.verbose;
+  const sortBy = req.body.sortBy;
 
   try {
     if (collectionId && verbose === "true") {
-      const tradingCards =
-        await collectionDAO.getCardsInCollection(collectionId);
+      let tradingCards;
+      if(!sortBy || sortBy === "cert") {
+        tradingCards = await collectionDAO.getCardsInCollection(collectionId, "cert");
+      }
       if (tradingCards.length !== 0) {
         res.json({ tradingCards: tradingCards });
       } else {
@@ -71,7 +74,7 @@ router.get("/:id", async (req, res, next) => {
       } else {
         res.status(404).send(`collection not found`);
       }
-    }
+    } 
   } catch (err) {
     next(err);
   }

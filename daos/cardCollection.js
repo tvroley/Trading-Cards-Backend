@@ -110,12 +110,12 @@ module.exports.getCardCollection = async (cardCollectionId) => {
   return await CardCollection.findOne({ _id: cardCollectionId });
 };
 
-module.exports.getCardsInCollection = async (cardCollectionId) => {
+module.exports.getCardsInCollection = async (cardCollectionId, sortBy) => {
   if (!mongoose.Types.ObjectId.isValid(cardCollectionId)) {
     throw new errors.InvalidMongooseId("Invalid card collection ID");
   }
 
-  return await CollectionForCard.aggregate([
+  const aggArray =  [
     {
       $match: { cardCollection: new mongoose.Types.ObjectId(cardCollectionId) },
     },
@@ -134,8 +134,13 @@ module.exports.getCardsInCollection = async (cardCollectionId) => {
       grade: "$tradingCard.grade", certificationNumber: "$tradingCard.certificationNumber", 
       frontCardImageLink: "$tradingCard.frontCardImageLink", backCardImageLink: "$tradingCard.backCardImageLink",
       sold: "$tradingCard.sold", } },
-    { $sort: { gradingCompany: 1, certificationNumber: 1 } },
-  ]);
+  ];
+
+  if(sortBy === "cert") {
+    aggArray.push({ $sort: { gradingCompany: 1, certificationNumber: 1 } });
+  }
+
+  return await CollectionForCard.aggregate(aggArray);
 };
 
 module.exports.getCardCollectionsForUser = async (ownerName) => {

@@ -55,6 +55,21 @@ describe(`collections routes`, () => {
     variety: "",
   };
 
+  const card1 = {
+    "backCardImageLink": "https://d1htnxwo4o0jhw.cloudfront.net/cert/132113359/9Lz9EJNkUU-0ut5gtBhkeg.jpg",
+    "frontCardImageLink": "https://d1htnxwo4o0jhw.cloudfront.net/cert/132113359/TyLJOT5i7ka5C-qOUAjc-w.jpg",
+    "subject": "Jim Brown",
+    "brand": "Topps",
+    "certificationNumber": "67733031",
+    "grade": "4",
+    "year": 1958,
+    "gradingCompany": "PSA",
+    "cardNumber": "62",
+    "cardSet": "1958 Topps",
+    "sold": true,
+    "variety": ""
+  };
+
   describe("before signup", () => {
     describe("GET /collections", () => {
       it("should return 401 and not get a collection", async () => {
@@ -316,6 +331,11 @@ describe(`collections routes`, () => {
           .set("Authorization", "Bearer " + token0)
           .send(card0);
         expect(responsePost2.statusCode).toEqual(200);
+        const responsePost3 = await request(server)
+          .post("/cards")
+          .set("Authorization", "Bearer " + token0)
+          .send(card1);
+        expect(responsePost3.statusCode).toEqual(200);
         const responseGet = await request(server)
           .get(`/collections/${user0MainCollection._id}`)
           .set("Authorization", "Bearer " + token0)
@@ -323,7 +343,8 @@ describe(`collections routes`, () => {
         expect(responseGet.statusCode).toEqual(200);
         const tradingCards = responseGet.body.tradingCards;
         expect(tradingCards[0]).toMatchObject(card);
-        expect(tradingCards[1]).toMatchObject(card0);
+        expect(tradingCards[1]).toMatchObject(card1);
+        expect(tradingCards[2]).toMatchObject(card0);
       });
     });
     describe("valid collection ID and verbose equals false in the request body", () => {

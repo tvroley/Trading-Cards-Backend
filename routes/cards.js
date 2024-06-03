@@ -78,7 +78,6 @@ router.get("/", async (req, res, next) => {
 router.get("/:id", async (req, res, next) => {
   const cardId = req.params.id;
   const userId = req.user._id;
-  const roles = req.user.roles;
 
   if (cardId) {
     try {
