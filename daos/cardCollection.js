@@ -161,6 +161,10 @@ module.exports.getCardsInCollection = async (cardCollectionId, sortBy) => {
     aggArray.push({
       $sort: { brand: 1, year: 1, cardSet: 1, cardNumber: 1, _id: 1 },
     });
+  } else if (sortBy === "cardSet") {
+    aggArray.push({
+      $sort: { cardSet: 1, year: 1, cardNumber: 1, brand: 1, _id: 1 },
+    });
   } 
 
   return await CollectionForCard.aggregate(aggArray);
