@@ -224,3 +224,12 @@ module.exports.removeCardCollection = async (cardCollectionId) => {
   await CollectionForCard.deleteMany({ cardCollection: cardCollectionId });
   return await CardCollection.deleteOne({ _id: cardCollectionId });
 };
+
+module.exports.searchCollections = async (query) => {
+  return await CardCollection.find(
+    { $text: { $search: query } },
+    { score: { $meta: "textScore" } },
+  )
+    .sort({ score: { $meta: "textScore" } })
+    .lean();
+};

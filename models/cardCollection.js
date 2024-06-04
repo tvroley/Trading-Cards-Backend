@@ -11,4 +11,8 @@ const cardCollectionSchema = new mongoose.Schema({
 
 cardCollectionSchema.index({ title: 1, owner: 1 }, { unique: true });
 
+cardCollectionSchema.index({
+  title: "text",
+});
+
 module.exports = mongoose.model("cardCollections", cardCollectionSchema);

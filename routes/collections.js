@@ -51,6 +51,24 @@ router.get("/", async (req, res, next) => {
   }
 });
 
+router.get("/search", async (req, res, next) => {
+  const search = req.body.search;
+  if (search.trim().length !== 0) {
+    try {
+      const results = await collectionDAO.searchCollections(search);
+      if (results && results.length !== 0) {
+        res.json({ collections: results });
+      } else {
+        res.status(404).send("no collections found");
+      }
+    } catch (err) {
+      next(err);
+    }
+  } else {
+    res.status(400).send("empty search query");
+  }
+});
+
 router.get("/:id", async (req, res, next) => {
   const collectionId = req.params.id;
   const verbose = req.body.verbose;

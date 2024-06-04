@@ -167,6 +167,87 @@ describe(`collections routes`, () => {
     });
   });
 
+  describe("GET /collections/search", () => {
+    let token0;
+    let token1;
+    let user0MainCollection;
+    beforeEach(async () => {
+      const result = await request(server).post("/auth/signup").send(user0);
+      user0MainCollection = result.body.collection;
+      const res0 = await request(server).post("/auth/login").send(user0);
+      token0 = res0.body.token;
+      await request(server).post("/auth/signup").send(user1);
+      const res1 = await request(server).post("/auth/login").send(user1);
+      token1 = res1.body.token;
+    });
+    describe("empty search query in the request body", () => {
+      it("should send status 400 and not get a collection", async () => {
+        const response = await request(server)
+          .get(`/collections/search`)
+          .set("Authorization", "Bearer " + token0)
+          .send({ search: "" });
+        expect(response.statusCode).toEqual(400);
+      });
+    });
+    describe("single term search query in the request body that matches a collection", () => {
+      it("should send status 200 and get a collection", async () => {
+        const responsePost1 = await request(server)
+          .post(`/collections`)
+          .set("Authorization", "Bearer " + token0)
+          .send({ collectionTitle: "test collection 1" });
+        expect(responsePost1.statusCode).toEqual(200);
+        const collection = responsePost1.body.collection;
+        const responsePost2 = await request(server)
+          .post(`/collections`)
+          .set("Authorization", "Bearer " + token0)
+          .send({ collectionTitle: "my cards" });
+        expect(responsePost2.statusCode).toEqual(200);
+        const responsePost3 = await request(server)
+          .post(`/collections`)
+          .set("Authorization", "Bearer " + token0)
+          .send({ collectionTitle: "your cards" });
+        expect(responsePost3.statusCode).toEqual(200);
+        const response = await request(server)
+          .get(`/collections/search`)
+          .set("Authorization", "Bearer " + token0)
+          .send({ search: "test" });
+        expect(response.statusCode).toEqual(200);
+        const collectionId = response.body.collections[0]._id;
+        expect(collectionId).toEqual(collection._id);
+      });
+    });
+    describe("multiple term search query in the request body that matches a collection", () => {
+      it("should send status 200 and get a collection", async () => {
+        const responsePost1 = await request(server)
+          .post(`/collections`)
+          .set("Authorization", "Bearer " + token0)
+          .send({ collectionTitle: "test collection 1" });
+        expect(responsePost1.statusCode).toEqual(200);
+        const collectionExpected = responsePost1.body.collection;
+        const responsePost2 = await request(server)
+          .post(`/collections`)
+          .set("Authorization", "Bearer " + token0)
+          .send({ collectionTitle: "my cards" });
+        expect(responsePost2.statusCode).toEqual(200);
+        const responsePost3 = await request(server)
+          .post(`/collections`)
+          .set("Authorization", "Bearer " + token0)
+          .send({ collectionTitle: "your cards" });
+        expect(responsePost3.statusCode).toEqual(200);
+        const response = await request(server)
+          .get(`/collections/search`)
+          .set("Authorization", "Bearer " + token0)
+          .send({ search: "test collection" });
+        expect(response.statusCode).toEqual(200);
+        const collectionReceived = response.body.collections[0];
+        expect(collectionExpected.title).toEqual(collectionReceived.title);
+        expect(collectionExpected._id.toString()).toEqual(
+          collectionReceived._id.toString(),
+        );
+      });
+    });
+  });
+
   describe("GET /collections by collection ID", () => {
     let token0;
     let token1;

@@ -51,7 +51,7 @@ module.exports.updateCard = async (cardId, cardObj, userId, roles) => {
     const collectionForCard = await CollectionForCard.findOne({
       tradingCard: cardId,
     });
-    if(!collectionForCard) {
+    if (!collectionForCard) {
       return undefined;
     }
     const collectionId = collectionForCard.cardCollection;
@@ -79,7 +79,7 @@ module.exports.deleteCard = async (cardId, userId, roles) => {
     const collectionForCard = await CollectionForCard.findOne({
       tradingCard: cardId,
     });
-    if(!collectionForCard) {
+    if (!collectionForCard) {
       return undefined;
     }
     const collectionId = collectionForCard.cardCollection;

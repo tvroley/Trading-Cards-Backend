@@ -496,9 +496,11 @@ describe(`cards routes`, () => {
           certificationNumber: "78261079",
         }).lean();
         expect(deleteCardArray.length).toEqual(0);
-        const deletedCollections = await collectionForCard.find({
-          tradingCard: cardId,
-        }).lean();
+        const deletedCollections = await collectionForCard
+          .find({
+            tradingCard: cardId,
+          })
+          .lean();
         expect(deletedCollections.length).toEqual(0);
       });
     });
