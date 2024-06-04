@@ -189,6 +189,15 @@ describe(`collections routes`, () => {
         expect(response.statusCode).toEqual(400);
       });
     });
+    describe("search query with no matching search terms in the request body", () => {
+      it("should send status 404 and not get a collection", async () => {
+        const response = await request(server)
+          .get(`/collections/search`)
+          .set("Authorization", "Bearer " + token0)
+          .send({ search: "banana" });
+        expect(response.statusCode).toEqual(404);
+      });
+    });
     describe("single term search query in the request body that matches a collection", () => {
       it("should send status 200 and get a collection", async () => {
         const responsePost1 = await request(server)

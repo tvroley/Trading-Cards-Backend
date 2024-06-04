@@ -82,7 +82,7 @@ router.get("/search", async (req, res, next) => {
   if (search.trim().length !== 0) {
     try {
       const results = await cardsDAO.search(search);
-      if (results) {
+      if (results && results.length !== 0) {
         res.json({ cards: results });
       } else {
         res.status(404).send("no cards found");

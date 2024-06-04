@@ -242,6 +242,15 @@ describe(`cards routes`, () => {
         expect(responseGet.statusCode).toEqual(400);
       });
     });
+    describe("search query with no matching search terms in request body", () => {
+      it("should send 404 status", async () => {
+        const responseGet = await request(server)
+          .get(`/cards/search`)
+          .set("Authorization", "Bearer " + token0)
+          .send({ search: `t` });
+        expect(responseGet.statusCode).toEqual(404);
+      });
+    });
   });
 
   describe("PUT /cards", () => {
