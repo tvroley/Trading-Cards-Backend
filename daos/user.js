@@ -41,14 +41,11 @@ module.exports.getUser = async (username) => {
   return storedUser;
 };
 
-module.exports.updateUserPassword = async (
-  userId,
-  password,
-) => {
+module.exports.updateUserPassword = async (userId, password) => {
   if (!mongoose.Types.ObjectId.isValid(userId)) {
     throw new errors.InvalidMongooseId("Invalid user ID");
   }
-  await User.updateOne({ _id: userId }, {$set: {password: password}});
+  await User.updateOne({ _id: userId }, { $set: { password: password } });
 
   return true;
 };

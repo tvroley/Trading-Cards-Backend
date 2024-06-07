@@ -20,6 +20,10 @@ describe("/auth", () => {
     username: "user1",
     password: "456password",
   };
+  const user2 = {
+    username: "user2",
+    password: "789password",
+  };
 
   describe("before signup", () => {
     describe("POST /", () => {
@@ -135,6 +139,7 @@ describe("/auth", () => {
       await request(server).post("/auth/signup").send(user1);
       const res1 = await request(server).post("/auth/login").send(user1);
       token1 = res1.body.token;
+      await request(server).post("/auth/signup").send(user2);
     });
 
     describe("PUT /password", () => {
@@ -152,43 +157,25 @@ describe("/auth", () => {
           .send({ password: "" });
         expect(res.statusCode).toEqual(400);
       });
-      it("should change password for user0", async () => {
-        const res = await request(server)
-          .put("/auth/password")
-          .set("Authorization", "Bearer " + token0)
-          .send({ password: "123" });
-        expect(res.statusCode).toEqual(200);
-        let loginRes0 = await request(server).post("/auth/login").send(user0);
-        expect(loginRes0.statusCode).toEqual(401);
-        loginRes0 = await request(server).post("/auth/login").send({
-          username: user0.username,
-          password: "123",
-        });
-        expect(loginRes0.statusCode).toEqual(200);
-        const loginRes1 = await request(server).post("/auth/login").send(user1);
-        expect(loginRes1.statusCode).toEqual(200);
-        const res0 = await request(server)
-          .put("/auth/password")
-          .set("Authorization", "Bearer " + token0)
-          .send({ password: user0.password });
-        expect(res0.statusCode).toEqual(200);
-      });
-      it("should change password for user1", async () => {
-        const res = await request(server)
-          .put("/auth/password")
-          .set("Authorization", "Bearer " + token1)
-          .send({ password: "123" });
-        expect(res.statusCode).toEqual(200);
-        const loginRes0 = await request(server).post("/auth/login").send(user0);
-        expect(loginRes0.statusCode).toEqual(200);
-        let loginRes1 = await request(server).post("/auth/login").send(user1);
-        expect(loginRes1.statusCode).toEqual(401);
-        loginRes1 = await request(server).post("/auth/login").send({
-          username: user1.username,
-          password: "123",
-        });
-        expect(loginRes1.statusCode).toEqual(200);
-      });
+      it.each([user0, user1, user2])(
+        "should change password for user",
+        async (user) => {
+          const res0 = await request(server).post("/auth/login").send(user);
+          const token = res0.body.token;
+          const res = await request(server)
+            .put("/auth/password")
+            .set("Authorization", "Bearer " + token)
+            .send({ password: "123" });
+          expect(res.statusCode).toEqual(200);
+          let loginRes0 = await request(server).post("/auth/login").send(user);
+          expect(loginRes0.statusCode).toEqual(401);
+          loginRes0 = await request(server).post("/auth/login").send({
+            username: user.username,
+            password: "123",
+          });
+          expect(loginRes0.statusCode).toEqual(200);
+        },
+      );
     });
   });
 });

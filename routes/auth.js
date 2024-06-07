@@ -103,10 +103,7 @@ router.put("/password", async (req, res, next) => {
     const user = req.user;
     const hashPassword = await bcrypt.hash(textPassword, 2);
     try {
-      await userDAO.updateUserPassword(
-        user._id,
-        hashPassword,
-      );
+      await userDAO.updateUserPassword(user._id, hashPassword);
       res.sendStatus(200);
     } catch (err) {
       next(err);
