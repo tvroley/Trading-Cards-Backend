@@ -172,14 +172,12 @@ describe(`cards routes`, () => {
 
   describe("GET /cards/search", () => {
     let token0;
-    let token1;
     beforeEach(async () => {
       await request(server).post("/auth/signup").send(user0);
       const res0 = await request(server).post("/auth/login").send(user0);
       token0 = res0.body.token;
       await request(server).post("/auth/signup").send(user1);
-      const res1 = await request(server).post("/auth/login").send(user1);
-      token1 = res1.body.token;
+      await request(server).post("/auth/login").send(user1);
     });
     describe("valid single word search query", () => {
       it("should send 200 status and return results with most relevant card first", async () => {
@@ -410,16 +408,19 @@ describe(`cards routes`, () => {
       });
     });
     describe("card object with all fields in request body", () => {
-      it("should send status 200 post a card", async () => {
-        const response = await request(server)
-          .post("/cards")
-          .set("Authorization", "Bearer " + token0)
-          .send(card);
-        expect(response.statusCode).toEqual(200);
-        const savedCards = await Cards.find().lean();
-        expect(savedCards.length).toEqual(1);
-        expect(savedCards[0]).toMatchObject(card);
-      });
+      it.each([card, card0, card1])(
+        "should send status 200, post a card",
+        async (myCard) => {
+          const response = await request(server)
+            .post("/cards")
+            .set("Authorization", "Bearer " + token0)
+            .send(myCard);
+          expect(response.statusCode).toEqual(200);
+          const savedCards = await Cards.find().lean();
+          expect(savedCards.length).toEqual(1);
+          expect(savedCards[0]).toMatchObject(myCard);
+        },
+      );
     });
     describe("duplicate card object in request body", () => {
       it("should send status 409 post a card", async () => {

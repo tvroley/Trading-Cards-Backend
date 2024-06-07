@@ -131,14 +131,11 @@ describe("/auth", () => {
   });
   describe("After both users login", () => {
     let token0;
-    let token1;
     beforeEach(async () => {
       await request(server).post("/auth/signup").send(user0);
       const res0 = await request(server).post("/auth/login").send(user0);
       token0 = res0.body.token;
       await request(server).post("/auth/signup").send(user1);
-      const res1 = await request(server).post("/auth/login").send(user1);
-      token1 = res1.body.token;
       await request(server).post("/auth/signup").send(user2);
     });
 
