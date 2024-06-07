@@ -685,7 +685,7 @@ describe(`collections routes`, () => {
         expect(collections.length).toEqual(1);
       });
     });
-    describe("create a collection with an empty name in the request body", () => {
+    describe("create a collection with an empty title in the request body", () => {
       it("should send status 400 and not post a collection", async () => {
         const response = await request(server)
           .post(`/collections`)
@@ -697,14 +697,19 @@ describe(`collections routes`, () => {
       });
     });
     describe("create a collection with a valid title in the request body", () => {
-      it("should send code 200 and post a collection", async () => {
+      it.each([
+        "testCollection",
+        "Seattle Mariners",
+        "150 Pokemon",
+        "1989 Topps Baseball",
+      ])("should send code 200 and post a collection", async (title) => {
         const response = await request(server)
           .post(`/collections`)
           .set("Authorization", "Bearer " + token0)
-          .send({ collectionTitle: "testCollection" });
+          .send({ collectionTitle: title });
         expect(response.statusCode).toEqual(200);
         const myCollection = await CardCollectionDao.findOne({
-          title: "testCollection",
+          title: title,
         }).lean();
         expect(response.body.collection._id).toEqual(
           myCollection._id.toString(),
