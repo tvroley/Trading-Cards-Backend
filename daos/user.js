@@ -12,9 +12,6 @@ module.exports.createUser = async (userObj) => {
     const userCollection = {
       title: user.username,
       owner: [user._id],
-      tradingCards: [],
-      readUsers: [user._id],
-      writeUsers: [user._id],
     };
     const collection = await CardCollection.create(userCollection);
     const result = { user: user, collection: collection };
@@ -46,20 +43,12 @@ module.exports.getUser = async (username) => {
 
 module.exports.updateUserPassword = async (
   userId,
-  username,
   password,
-  roles,
 ) => {
   if (!mongoose.Types.ObjectId.isValid(userId)) {
     throw new errors.InvalidMongooseId("Invalid user ID");
   }
-  const myUser = {
-    _id: userId,
-    password: password,
-    username: username,
-    roles: roles,
-  };
-  await User.updateOne({ _id: userId }, myUser);
+  await User.updateOne({ _id: userId }, {$set: {password: password}});
 
   return true;
 };

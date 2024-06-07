@@ -105,9 +105,7 @@ router.put("/password", async (req, res, next) => {
     try {
       await userDAO.updateUserPassword(
         user._id,
-        user.username,
         hashPassword,
-        user.roles,
       );
       res.sendStatus(200);
     } catch (err) {

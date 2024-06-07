@@ -171,7 +171,7 @@ describe("/auth", () => {
           .put("/auth/password")
           .set("Authorization", "Bearer " + token0)
           .send({ password: user0.password });
-        expect(res.statusCode).toEqual(200);
+        expect(res0.statusCode).toEqual(200);
       });
       it("should change password for user1", async () => {
         const res = await request(server)
