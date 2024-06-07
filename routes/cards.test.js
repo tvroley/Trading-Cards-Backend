@@ -421,6 +421,23 @@ describe(`cards routes`, () => {
         expect(savedCards[0]).toMatchObject(card);
       });
     });
+    describe("duplicate card object in request body", () => {
+      it("should send status 409 post a card", async () => {
+        const response = await request(server)
+          .post("/cards")
+          .set("Authorization", "Bearer " + token0)
+          .send(card);
+        expect(response.statusCode).toEqual(200);
+        const savedCards = await Cards.find().lean();
+        expect(savedCards.length).toEqual(1);
+        expect(savedCards[0]).toMatchObject(card);
+        const response2 = await request(server)
+          .post("/cards")
+          .set("Authorization", "Bearer " + token0)
+          .send(card);
+        expect(response2.statusCode).toEqual(409);
+      });
+    });
   });
 
   describe("DELETE /cards", () => {
