@@ -182,17 +182,15 @@ module.exports.getCardsInCollection = async (cardCollectionId, sortBy) => {
 };
 
 module.exports.getCardCollectionsForUser = async (ownerName) => {
-  try {
-    const ownerUser = await User.findOne({ username: ownerName });
-    if (!ownerUser) {
-      throw new errors.BadDataError("could not find collection owner");
+    const results = await User.aggregate([
+      {$match: { username: ownerName }}, 
+      { $lookup: { from: "cardcollections", localField: "_id", foreignField: "owner", as: "collections", }}]);
+    if(results && results[0]) {
+      const cardCollections = results[0].collections;
+      if(cardCollections) {
+        return cardCollections;
+      }
     }
-    const cardCollections = await CardCollection.find({ owner: ownerUser._id });
-
-    return cardCollections;
-  } catch (err) {
-    throw err;
-  }
 };
 
 module.exports.getCollectionByOwnerAndTitle = async (title, ownerName) => {
