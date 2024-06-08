@@ -202,23 +202,36 @@ module.exports.getCardCollectionsForUser = async (ownerName) => {
 };
 
 module.exports.getCollectionByOwnerAndTitle = async (title, ownerName) => {
-  try {
-    const user = await User.findOne({ username: ownerName });
-    if (!user) {
-      throw new errors.BadDataError("did not find owner");
-    }
-    const cardCollection = await CardCollection.findOne({
-      title: title,
-      owner: user._id,
-    });
-
-    if (cardCollection) {
-      return cardCollection;
-    } else {
-      throw new errors.BadDataError("did not find card collection");
-    }
-  } catch (err) {
-    throw err;
+  const results = await User.aggregate([
+    {
+      $match: { username: ownerName },
+    },
+    {
+      $lookup: {
+        from: "cardcollections",
+        localField: "_id",
+        foreignField: "owner",
+        as: "collection",
+      },
+    },
+    { $unwind: "$collection" },
+    {
+      $project: {
+        _id: "$collection._id",
+        title: "$collection.title",
+        owner: "$collection.owner",
+        __v: "$collection.__v",
+      },
+    },
+    {
+      $match: { title: title },
+    },
+  ]);
+  if (results && results[0] && Object.keys(results[0]).length > 0) {
+    const cardCollection = results[0];
+    return cardCollection;
+  } else {
+    throw new errors.BadDataError("did not find card collection");
   }
 };
 
