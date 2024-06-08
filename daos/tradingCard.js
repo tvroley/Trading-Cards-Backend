@@ -86,15 +86,17 @@ module.exports.deleteCard = async (cardId, userId, roles) => {
           as: "collection",
         },
       },
+      { $project: { collection: { $first: "$collection" }, _id: 0 } },
+      {
+        $project: {
+          _id: "$collection._id",
+          owner: "$collection.owner",
+          title: "$collection.title",
+        },
+      },
     ]);
-    if (
-      results &&
-      results[0] &&
-      results[0].collection &&
-      results[0].collection[0] &&
-      results[0].collection[0].owner
-    ) {
-      const owner = results[0].collection[0].owner;
+    if (results && results[0] && results[0].owner) {
+      const owner = results[0].owner;
       if (owner.toString() === userId) {
         await CollectionForCard.deleteMany({ tradingCard: cardId });
         return await Card.deleteOne({ _id: cardId });
