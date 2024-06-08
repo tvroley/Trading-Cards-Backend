@@ -48,21 +48,35 @@ module.exports.updateCard = async (cardId, cardObj, userId, roles) => {
   if (roles.includes("admin")) {
     return await Card.updateOne({ _id: cardId }, cardObj);
   } else {
-    const collectionForCard = await CollectionForCard.findOne({
-      tradingCard: cardId,
-    });
-    if (!collectionForCard) {
-      return undefined;
-    }
-    const collectionId = collectionForCard.cardCollection;
-    const fullCollection = await CardCollection.findOne({ _id: collectionId });
+    const results = await CollectionForCard.aggregate([
+      { $match: { tradingCard: new mongoose.Types.ObjectId(cardId) } },
+      {
+        $lookup: {
+          from: "cardcollections",
+          localField: "cardCollection",
+          foreignField: "_id",
+          as: "collection",
+        },
+      },
+      { $project: { collection: { $first: "$collection" }, _id: 0 } },
+      {
+        $project: {
+          _id: "$collection._id",
+          owner: "$collection.owner",
+          title: "$collection.title",
+        },
+      },
+    ]);
 
-    if (fullCollection.owner.toString() === userId) {
-      return await Card.updateOne({ _id: cardId }, cardObj);
-    } else {
-      throw new errors.BadDataError(
-        "user does not have write permissions for card",
-      );
+    if (results && results[0] && results[0].owner) {
+      const owner = results[0].owner;
+      if (owner.toString() === userId) {
+        return await Card.updateOne({ _id: cardId }, cardObj);
+      } else {
+        throw new errors.BadDataError(
+          "user does not have write permissions for card",
+        );
+      }
     }
   }
 };
