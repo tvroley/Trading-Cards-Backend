@@ -182,15 +182,23 @@ module.exports.getCardsInCollection = async (cardCollectionId, sortBy) => {
 };
 
 module.exports.getCardCollectionsForUser = async (ownerName) => {
-    const results = await User.aggregate([
-      {$match: { username: ownerName }}, 
-      { $lookup: { from: "cardcollections", localField: "_id", foreignField: "owner", as: "collections", }}]);
-    if(results && results[0]) {
-      const cardCollections = results[0].collections;
-      if(cardCollections) {
-        return cardCollections;
-      }
+  const results = await User.aggregate([
+    { $match: { username: ownerName } },
+    {
+      $lookup: {
+        from: "cardcollections",
+        localField: "_id",
+        foreignField: "owner",
+        as: "collections",
+      },
+    },
+  ]);
+  if (results && results[0]) {
+    const cardCollections = results[0].collections;
+    if (cardCollections) {
+      return cardCollections;
     }
+  }
 };
 
 module.exports.getCollectionByOwnerAndTitle = async (title, ownerName) => {

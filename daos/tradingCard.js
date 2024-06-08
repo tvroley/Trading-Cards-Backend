@@ -76,22 +76,33 @@ module.exports.deleteCard = async (cardId, userId, roles) => {
     await CollectionForCard.deleteMany({ tradingCard: cardId });
     return await Card.deleteOne({ _id: cardId });
   } else {
-    const collectionForCard = await CollectionForCard.findOne({
-      tradingCard: cardId,
-    });
-    if (!collectionForCard) {
-      return undefined;
-    }
-    const collectionId = collectionForCard.cardCollection;
-    const fullCollection = await CardCollection.findOne({ _id: collectionId });
-
-    if (fullCollection.owner.toString() === userId) {
-      await CollectionForCard.deleteMany({ tradingCard: cardId });
-      return await Card.deleteOne({ _id: cardId });
-    } else {
-      throw new errors.BadDataError(
-        "user does not have write permissions for card",
-      );
+    const results = await CollectionForCard.aggregate([
+      { $match: { tradingCard: new mongoose.Types.ObjectId(cardId) } },
+      {
+        $lookup: {
+          from: "cardcollections",
+          localField: "cardCollection",
+          foreignField: "_id",
+          as: "collection",
+        },
+      },
+    ]);
+    if (
+      results &&
+      results[0] &&
+      results[0].collection &&
+      results[0].collection[0] &&
+      results[0].collection[0].owner
+    ) {
+      const owner = results[0].collection[0].owner;
+      if (owner.toString() === userId) {
+        await CollectionForCard.deleteMany({ tradingCard: cardId });
+        return await Card.deleteOne({ _id: cardId });
+      } else {
+        throw new errors.BadDataError(
+          "user does not have write permissions for card",
+        );
+      }
     }
   }
 };
