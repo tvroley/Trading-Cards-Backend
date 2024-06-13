@@ -84,7 +84,7 @@
     "variety": ""
   },
   {
-    "sold": false,
+    "sold": true,
     "cardNumber": "68",
     "backCardImageLink": "https://d1htnxwo4o0jhw.cloudfront.net/cert/139035365/alGA90eNG0eHak9es1ijWg.jpg",
     "gradingCompany": "PSA",
@@ -460,5 +460,33 @@
     "certificationNumber": "87911276",
     "subject": "Diamond Miller",
     "variety": "Blue Prizm"
+  },
+  {
+    "grade": "9",
+    "sold": false,
+    "year": 2011,
+    "brand": "Rittenhouse",
+    "gradingCompany": "PSA",
+    "frontCardImageLink": "https://d1htnxwo4o0jhw.cloudfront.net/cert/156581565/0mrj4EIgZUStFQ5QyBKejw.jpg",
+    "cardNumber": "",
+    "certificationNumber": "89107875",
+    "backCardImageLink": "https://d1htnxwo4o0jhw.cloudfront.net/cert/156581565/nMLQ57HpZUm0C_2nqVyYfQ.jpg",
+    "cardSet": "2011 Rittenhouse WNBA",
+    "variation": "Autographs",
+    "player": "Courtney Vandersloot"
+  },
+  {
+    "backCardImageLink": "https://d1htnxwo4o0jhw.cloudfront.net/cert/153661065/VoosTzHjU0KlZDq0XRPqsA.jpg",
+    "cardSet": "2019 Panini Donruss WNBA",
+    "gradingCompany": "PSA",
+    "frontCardImageLink": "https://d1htnxwo4o0jhw.cloudfront.net/cert/153661065/T4mNikiZH0awzO9rUBTouA.jpg",
+    "year": 2019,
+    "player": "Katie Lou Samuelson",
+    "cardNumber": "98",
+    "sold": false,
+    "certificationNumber": "87487926",
+    "brand": "Panini",
+    "variation": "Press Proof Gold Laser",
+    "grade": "9"
   }
 ]
