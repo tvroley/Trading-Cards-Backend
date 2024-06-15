@@ -4,7 +4,6 @@ const server = require("../server");
 const testUtils = require("../test-utils");
 const Cards = require("../models/tradingCard");
 const User = require("../models/user");
-const { search } = require("./auth");
 const collectionForCard = require("../models/collectionForCard");
 
 describe(`cards routes`, () => {
@@ -198,8 +197,9 @@ describe(`cards routes`, () => {
         expect(responsePost3.statusCode).toEqual(200);
         const responseGet = await request(server)
           .get(`/cards/search`)
+          .query({search: `Sue`})
           .set("Authorization", "Bearer " + token0)
-          .send({ search: `Sue` });
+          .send();
         expect(responseGet.statusCode).toEqual(200);
         const tradingCards = responseGet.body.cards;
         expect(tradingCards[0]).toMatchObject(card1);
@@ -224,8 +224,9 @@ describe(`cards routes`, () => {
         expect(responsePost3.statusCode).toEqual(200);
         const responseGet = await request(server)
           .get(`/cards/search`)
+          .query({search: `2002 Sue Bird`})
           .set("Authorization", "Bearer " + token0)
-          .send({ search: `2002 Sue Bird` });
+          .send();
         expect(responseGet.statusCode).toEqual(200);
         const tradingCards = responseGet.body.cards;
         expect(tradingCards[0]).toMatchObject(card1);
@@ -235,8 +236,9 @@ describe(`cards routes`, () => {
       it("should send 400 status", async () => {
         const responseGet = await request(server)
           .get(`/cards/search`)
+          .query({ search: `   ` })
           .set("Authorization", "Bearer " + token0)
-          .send({ search: `   ` });
+          .send();
         expect(responseGet.statusCode).toEqual(400);
       });
     });
@@ -244,8 +246,9 @@ describe(`cards routes`, () => {
       it("should send 404 status", async () => {
         const responseGet = await request(server)
           .get(`/cards/search`)
+          .query({ search: `t` })
           .set("Authorization", "Bearer " + token0)
-          .send({ search: `t` });
+          .send();
         expect(responseGet.statusCode).toEqual(404);
       });
     });
