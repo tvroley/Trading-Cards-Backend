@@ -184,8 +184,9 @@ describe(`collections routes`, () => {
       it("should send status 400 and not get a collection", async () => {
         const response = await request(server)
           .get(`/collections/search`)
+          .query({ search: "" })
           .set("Authorization", "Bearer " + token0)
-          .send({ search: "" });
+          .send();
         expect(response.statusCode).toEqual(400);
       });
     });
@@ -193,8 +194,9 @@ describe(`collections routes`, () => {
       it("should send status 404 and not get a collection", async () => {
         const response = await request(server)
           .get(`/collections/search`)
+          .query({ search: "banana" })
           .set("Authorization", "Bearer " + token0)
-          .send({ search: "banana" });
+          .send();
         expect(response.statusCode).toEqual(404);
       });
     });
@@ -218,8 +220,9 @@ describe(`collections routes`, () => {
         expect(responsePost3.statusCode).toEqual(200);
         const response = await request(server)
           .get(`/collections/search`)
+          .query({ search: "test" })
           .set("Authorization", "Bearer " + token0)
-          .send({ search: "test" });
+          .send();
         expect(response.statusCode).toEqual(200);
         const collectionId = response.body.collections[0]._id;
         expect(collectionId).toEqual(collection._id);
@@ -245,8 +248,9 @@ describe(`collections routes`, () => {
         expect(responsePost3.statusCode).toEqual(200);
         const response = await request(server)
           .get(`/collections/search`)
+          .query({ search: "test collection" })
           .set("Authorization", "Bearer " + token0)
-          .send({ search: "test collection" });
+          .send();
         expect(response.statusCode).toEqual(200);
         const collectionReceived = response.body.collections[0];
         expect(collectionExpected.title).toEqual(collectionReceived.title);

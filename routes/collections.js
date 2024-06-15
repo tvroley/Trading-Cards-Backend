@@ -52,7 +52,7 @@ router.get("/", async (req, res, next) => {
 });
 
 router.get("/search", async (req, res, next) => {
-  const search = req.body.search;
+  const search = req.query.search;
   if (search.trim().length !== 0) {
     try {
       const results = await collectionDAO.searchCollections(search);
