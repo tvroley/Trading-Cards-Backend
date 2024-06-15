@@ -5,8 +5,8 @@ const errors = require("../middleware/errors");
 const collectionDAO = require("../daos/cardCollection");
 
 router.get("/", async (req, res, next) => {
-  const ownerName = req.body.ownerName;
-  const title = req.body.title;
+  const ownerName = req.query.ownerName;
+  const title = req.query.title;
 
   if (String(ownerName).trim().length === 0) {
     res.status(400).send("empty collection owner name");

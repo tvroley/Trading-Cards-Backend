@@ -279,8 +279,9 @@ describe(`collections routes`, () => {
         expect(responsePost.statusCode).toEqual(200);
         const responseGet = await request(server)
           .get(`/collections`)
+          .query({ ownerName: user0.username })
           .set("Authorization", "Bearer " + token0)
-          .send({ ownerName: user0.username });
+          .send();
         expect(responseGet.statusCode).toEqual(200);
         const collections = responseGet.body.collections;
         expect(collections.length).toEqual(2);
@@ -300,8 +301,9 @@ describe(`collections routes`, () => {
         expect(responsePost.statusCode).toEqual(200);
         const responseGet = await request(server)
           .get(`/collections`)
+          .query({ ownerName: user0.username })
           .set("Authorization", "Bearer " + token1)
-          .send({ ownerName: user0.username });
+          .send();
         expect(responseGet.statusCode).toEqual(200);
       });
     });
@@ -309,8 +311,9 @@ describe(`collections routes`, () => {
       it("should send status 404 and not get all collections for an owner", async () => {
         const responseGet = await request(server)
           .get(`/collections`)
+          .query({ ownerName: "Nobody" })
           .set("Authorization", "Bearer " + token1)
-          .send({ ownerName: "Nobody" });
+          .send();
         expect(responseGet.statusCode).toEqual(404);
       });
     });
@@ -318,8 +321,9 @@ describe(`collections routes`, () => {
       it("should send status 400 and not get all collections for an owner", async () => {
         const responseGet = await request(server)
           .get(`/collections`)
+          .query({ ownerName: "" })
           .set("Authorization", "Bearer " + token1)
-          .send({ ownerName: "" });
+          .send();
         expect(responseGet.statusCode).toEqual(400);
       });
     });
@@ -342,8 +346,9 @@ describe(`collections routes`, () => {
       it("should send status 404 and not get a collection", async () => {
         const response = await request(server)
           .get(`/collections`)
+          .query({ ownerName: user0.username, title: "nothing" })
           .set("Authorization", "Bearer " + token0)
-          .send({ ownerName: user0.username, title: "nothing" });
+          .send();
         expect(response.statusCode).toEqual(404);
       });
     });
@@ -351,8 +356,9 @@ describe(`collections routes`, () => {
       it("should send status 404 and not get a collection", async () => {
         const response = await request(server)
           .get(`/collections`)
+          .query({ ownerName: "nobody", title: user0.username })
           .set("Authorization", "Bearer " + token0)
-          .send({ ownerName: "nobody", title: user0.username });
+          .send();
         expect(response.statusCode).toEqual(404);
       });
     });
@@ -360,8 +366,9 @@ describe(`collections routes`, () => {
       it("should send status 400 and not get a collection", async () => {
         const response = await request(server)
           .get(`/collections`)
+          .query({ ownerName: "", title: user0.username })
           .set("Authorization", "Bearer " + token0)
-          .send({ ownerName: "", title: user0.username });
+          .send();
         expect(response.statusCode).toEqual(400);
       });
     });
@@ -369,8 +376,9 @@ describe(`collections routes`, () => {
       it("should send status 400 and not get a collection", async () => {
         const response = await request(server)
           .get(`/collections`)
+          .query({ ownerName: user0.username, title: "" })
           .set("Authorization", "Bearer " + token0)
-          .send({ ownerName: user0.username, title: "" });
+          .send();
         expect(response.statusCode).toEqual(400);
       });
     });
@@ -378,8 +386,9 @@ describe(`collections routes`, () => {
       it("should send status 200 and get a collection", async () => {
         const response = await request(server)
           .get(`/collections`)
+          .query({ ownerName: user0.username, title: user0.username })
           .set("Authorization", "Bearer " + token0)
-          .send({ ownerName: user0.username, title: user0.username });
+          .send();
         expect(response.statusCode).toEqual(200);
         const collection = response.body.collection;
         expect(collection).toMatchObject(user0MainCollection);
@@ -389,8 +398,9 @@ describe(`collections routes`, () => {
       it("should send status 200 and get a collection", async () => {
         const response = await request(server)
           .get(`/collections`)
+          .query({ ownerName: user0.username, title: user0.username })
           .set("Authorization", "Bearer " + token1)
-          .send({ ownerName: user0.username, title: user0.username });
+          .send();
         expect(response.statusCode).toEqual(200);
         const collection = response.body.collection;
         expect(collection).toMatchObject(user0MainCollection);
