@@ -197,7 +197,7 @@ describe(`cards routes`, () => {
         expect(responsePost3.statusCode).toEqual(200);
         const responseGet = await request(server)
           .get(`/cards/search`)
-          .query({search: `Sue`})
+          .query({ search: `Sue` })
           .set("Authorization", "Bearer " + token0)
           .send();
         expect(responseGet.statusCode).toEqual(200);
@@ -224,7 +224,7 @@ describe(`cards routes`, () => {
         expect(responsePost3.statusCode).toEqual(200);
         const responseGet = await request(server)
           .get(`/cards/search`)
-          .query({search: `2002 Sue Bird`})
+          .query({ search: `2002 Sue Bird` })
           .set("Authorization", "Bearer " + token0)
           .send();
         expect(responseGet.statusCode).toEqual(200);
