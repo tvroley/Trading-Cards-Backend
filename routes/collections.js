@@ -71,8 +71,8 @@ router.get("/search", async (req, res, next) => {
 
 router.get("/:id", async (req, res, next) => {
   const collectionId = req.params.id;
-  const verbose = req.body.verbose;
-  const sortBy = req.body.sortBy;
+  const verbose = req.query.verbose;
+  const sortBy = req.query.sortBy;
 
   try {
     if (collectionId && verbose === "true") {

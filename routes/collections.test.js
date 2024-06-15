@@ -444,8 +444,9 @@ describe(`collections routes`, () => {
         expect(responsePost3.statusCode).toEqual(200);
         const responseGet = await request(server)
           .get(`/collections/${user0MainCollection._id}`)
+          .query({ verbose: "true" })
           .set("Authorization", "Bearer " + token0)
-          .send({ verbose: "true" });
+          .send();
         expect(responseGet.statusCode).toEqual(200);
         const tradingCards = responseGet.body.tradingCards;
         expect(tradingCards[0]).toMatchObject(card0);
@@ -472,8 +473,9 @@ describe(`collections routes`, () => {
         expect(responsePost3.statusCode).toEqual(200);
         const responseGet = await request(server)
           .get(`/collections/${user0MainCollection._id}`)
+          .query({ verbose: "true", sortBy: "cert" })
           .set("Authorization", "Bearer " + token0)
-          .send({ verbose: "true", sortBy: "cert" });
+          .send();
         expect(responseGet.statusCode).toEqual(200);
         const tradingCards = responseGet.body.tradingCards;
         expect(tradingCards[0]).toMatchObject(card);
@@ -500,8 +502,9 @@ describe(`collections routes`, () => {
         expect(responsePost3.statusCode).toEqual(200);
         const responseGet = await request(server)
           .get(`/collections/${user0MainCollection._id}`)
+          .query({ verbose: "true", sortBy: "year" })
           .set("Authorization", "Bearer " + token0)
-          .send({ verbose: "true", sortBy: "year" });
+          .send();
         expect(responseGet.statusCode).toEqual(200);
         const tradingCards = responseGet.body.tradingCards;
         expect(tradingCards[0]).toMatchObject(card0);
@@ -528,8 +531,9 @@ describe(`collections routes`, () => {
         expect(responsePost3.statusCode).toEqual(200);
         const responseGet = await request(server)
           .get(`/collections/${user0MainCollection._id}`)
+          .query({ verbose: "true", sortBy: "sold" })
           .set("Authorization", "Bearer " + token0)
-          .send({ verbose: "true", sortBy: "sold" });
+          .send();
         expect(responseGet.statusCode).toEqual(200);
         const tradingCards = responseGet.body.tradingCards;
         expect(tradingCards[0]).toMatchObject(card1);
@@ -556,8 +560,9 @@ describe(`collections routes`, () => {
         expect(responsePost3.statusCode).toEqual(200);
         const responseGet = await request(server)
           .get(`/collections/${user0MainCollection._id}`)
+          .query({ verbose: "true", sortBy: "player" })
           .set("Authorization", "Bearer " + token0)
-          .send({ verbose: "true", sortBy: "player" });
+          .send();
         expect(responseGet.statusCode).toEqual(200);
         const tradingCards = responseGet.body.tradingCards;
         expect(tradingCards[0]).toMatchObject(card1);
@@ -584,8 +589,9 @@ describe(`collections routes`, () => {
         expect(responsePost3.statusCode).toEqual(200);
         const responseGet = await request(server)
           .get(`/collections/${user0MainCollection._id}`)
+          .query({ verbose: "true", sortBy: "brand" })
           .set("Authorization", "Bearer " + token0)
-          .send({ verbose: "true", sortBy: "brand" });
+          .send();
         expect(responseGet.statusCode).toEqual(200);
         const tradingCards = responseGet.body.tradingCards;
         expect(tradingCards[0]).toMatchObject(card);
@@ -612,8 +618,9 @@ describe(`collections routes`, () => {
         expect(responsePost3.statusCode).toEqual(200);
         const responseGet = await request(server)
           .get(`/collections/${user0MainCollection._id}`)
+          .query({ verbose: "true", sortBy: "cardSet" })
           .set("Authorization", "Bearer " + token0)
-          .send({ verbose: "true", sortBy: "cardSet" });
+          .send();
         expect(responseGet.statusCode).toEqual(200);
         const tradingCards = responseGet.body.tradingCards;
         expect(tradingCards[0]).toMatchObject(card0);
@@ -635,8 +642,9 @@ describe(`collections routes`, () => {
         expect(responsePost2.statusCode).toEqual(200);
         const responseGet = await request(server)
           .get(`/collections/${user0MainCollection._id}`)
+          .query({ verbose: "false" })
           .set("Authorization", "Bearer " + token0)
-          .send({ verbose: "false" });
+          .send();
         expect(responseGet.statusCode).toEqual(200);
         const collection = responseGet.body.collection;
         expect(collection.title).toEqual(user0.username);
@@ -657,8 +665,9 @@ describe(`collections routes`, () => {
         expect(responseDelete.statusCode).toEqual(200);
         const responseGet = await request(server)
           .get(`/collections/${collection._id}`)
+          .query({ verbose: "true" })
           .set("Authorization", "Bearer " + token0)
-          .send({ verbose: "true" });
+          .send();
         expect(responseGet.statusCode).toEqual(404);
       });
     });
@@ -666,8 +675,9 @@ describe(`collections routes`, () => {
       it("should send status 404 and not get a collection", async () => {
         const response = await request(server)
           .get(`/collections/123`)
+          .query({ verbose: "true" })
           .set("Authorization", "Bearer " + token0)
-          .send({ verbose: "true" });
+          .send();
         expect(response.statusCode).toEqual(400);
       });
     });
