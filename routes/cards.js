@@ -10,16 +10,28 @@ router.post("/", async (req, res, next) => {
   if (req.body) {
     try {
       const card = await cardsDAO.createCard(req.body);
-      const mainCollection = await collectionDAO.getCollectionByOwnerAndTitle(
-        req.user.username,
-        req.user.username,
-      );
-      await collectionDAO.addCardToCollection(
-        mainCollection._id,
-        card._id,
-        userId,
-      );
-      res.json({ card: card });
+      if (!card) {
+        res.status(400).send(`no card created`);
+      } else {
+        const mainCollection = await collectionDAO.getCollectionByOwnerAndTitle(
+          req.user.username,
+          req.user.username,
+        );
+        if (!mainCollection) {
+          res.status(400).send(`could not find base collection for user`);
+        } else {
+          const collectionForCard = await collectionDAO.addCardToCollection(
+            mainCollection._id,
+            card._id,
+            userId,
+          );
+          if (!collectionForCard) {
+            res.status(400).send(`could not add new card to base collection`);
+          } else {
+            res.json({ card: card });
+          }
+        }
+      }
     } catch (err) {
       next(err);
     }
