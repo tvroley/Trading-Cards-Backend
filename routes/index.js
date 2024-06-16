@@ -7,7 +7,9 @@ const { handleError } = require("../middleware/errors");
 
 const allowedOrigins = [
   "http://localhost:5173",
-  "https://trading-cards-backend-production.up.railway.app/",
+  "http://localhost:5173/collection",
+  "http://localhost:5173/collection/add",
+  "https://my-cards-2e97d.web.app",
 ];
 
 const corsOptions = {
