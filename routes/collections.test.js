@@ -669,7 +669,7 @@ describe(`collections routes`, () => {
           .set("Authorization", "Bearer " + token0)
           .send();
         expect(responseGet.statusCode).toEqual(200);
-        expect(responseGet.tradingCards.length).toEqual(0);
+        expect(responseGet.body.tradingCards.length).toEqual(0);
       });
     });
     describe("collection ID for empty collection and verbose in the request body", () => {
@@ -686,7 +686,7 @@ describe(`collections routes`, () => {
           .set("Authorization", "Bearer " + token0)
           .send();
         expect(responseGet.statusCode).toEqual(200);
-        expect(responseGet.tradingCards.length).toEqual(0);
+        expect(responseGet.body.tradingCards.length).toEqual(0);
       });
     });
     describe("invalid collection ID in the URL params", () => {
