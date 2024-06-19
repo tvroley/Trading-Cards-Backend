@@ -542,7 +542,7 @@ describe(`collections routes`, () => {
       });
     });
     describe("valid collection ID and verbose in the request body and sortBy equals player", () => {
-      it("should send status 200 and cards sorted by player", async () => {
+      it("should send status 200 and cards sorted by subject", async () => {
         const responsePost1 = await request(server)
           .post("/cards")
           .set("Authorization", "Bearer " + token0)
@@ -560,7 +560,7 @@ describe(`collections routes`, () => {
         expect(responsePost3.statusCode).toEqual(200);
         const responseGet = await request(server)
           .get(`/collections/${user0MainCollection._id}`)
-          .query({ verbose: "true", sortBy: "player" })
+          .query({ verbose: "true", sortBy: "subject" })
           .set("Authorization", "Bearer " + token0)
           .send();
         expect(responseGet.statusCode).toEqual(200);
@@ -651,7 +651,7 @@ describe(`collections routes`, () => {
       });
     });
     describe("collection ID for collection that doesn't exist and verbose in the request body", () => {
-      it("should send status 404 and not send trading cards", async () => {
+      it("should send status 200 and send empty trading cards array", async () => {
         const responsePost = await request(server)
           .post(`/collections`)
           .set("Authorization", "Bearer " + token0)
@@ -668,7 +668,25 @@ describe(`collections routes`, () => {
           .query({ verbose: "true" })
           .set("Authorization", "Bearer " + token0)
           .send();
-        expect(responseGet.statusCode).toEqual(404);
+        expect(responseGet.statusCode).toEqual(200);
+        expect(responseGet.tradingCards.length).toEqual(0);
+      });
+    });
+    describe("collection ID for empty collection and verbose in the request body", () => {
+      it("should send status 200 and send empty trading cards array", async () => {
+        const responsePost = await request(server)
+          .post(`/collections`)
+          .set("Authorization", "Bearer " + token0)
+          .send({ collectionTitle: "testCollection" });
+        expect(responsePost.statusCode).toEqual(200);
+        const collection = responsePost.body.collection;
+        const responseGet = await request(server)
+          .get(`/collections/${collection._id}`)
+          .query({ verbose: "true" })
+          .set("Authorization", "Bearer " + token0)
+          .send();
+        expect(responseGet.statusCode).toEqual(200);
+        expect(responseGet.tradingCards.length).toEqual(0);
       });
     });
     describe("invalid collection ID in the URL params", () => {

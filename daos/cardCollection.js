@@ -153,7 +153,7 @@ module.exports.getCardsInCollection = async (cardCollectionId, sortBy) => {
     aggArray.push({
       $sort: { year: 1, brand: 1, cardSet: 1, cardNumber: 1, _id: 1 },
     });
-  } else if (sortBy === "player") {
+  } else if (sortBy === "subject") {
     aggArray.push({
       $sort: {
         subject: 1,

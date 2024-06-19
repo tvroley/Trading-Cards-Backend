@@ -7,8 +7,6 @@ const { handleError } = require("../middleware/errors");
 
 const allowedOrigins = [
   "http://localhost:5173",
-  "http://localhost:5173/collection",
-  "http://localhost:5173/collection/add",
   "https://my-cards-2e97d.web.app",
 ];
 
