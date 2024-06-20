@@ -190,13 +190,13 @@ module.exports.searchForCardInCollection = async (cardCollectionId, query) => {
   const aggArray = [
     {
       $match: {
-        $text: { $search: query }
-      }
+        $text: { $search: query },
+      },
     },
     {
       $sort: {
-        score: { $meta: "textScore" }
-      }
+        score: { $meta: "textScore" },
+      },
     },
     {
       $lookup: {

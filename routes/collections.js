@@ -77,10 +77,10 @@ router.get("/:id", async (req, res, next) => {
 
   try {
     if (collectionId && verbose === "true" && query) {
-        const tradingCards = await collectionDAO.searchForCardInCollection(
-          collectionId,
-          query,
-        );
+      const tradingCards = await collectionDAO.searchForCardInCollection(
+        collectionId,
+        query,
+      );
       if (tradingCards) {
         res.json({ tradingCards: tradingCards });
       }
