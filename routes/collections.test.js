@@ -72,6 +72,20 @@ describe(`collections routes`, () => {
     variety: "",
   };
 
+  const card2 = {
+    "cardNumber": 259,
+    "cardSet": "2013 Sports Illustrated For Kids",
+    "sold": false,
+    "frontCardImageLink": "https://d1htnxwo4o0jhw.cloudfront.net/cert/144383604/W4r5ptiR9Ey2vcShzL7pTw.jpg",
+    "backCardImageLink": "https://d1htnxwo4o0jhw.cloudfront.net/cert/144383604/MLPlP-vbY06UR8AKumJSMg.jpg",
+    "brand": "Sports Illustrated For Kids",
+    "gradingCompany": "PSA",
+    "certificationNumber": "78261080",
+    "grade": "9",
+    "year": 2013,
+    "subject": "Elena Delle Donne"
+  };
+
   describe("before signup", () => {
     describe("GET /collections", () => {
       it("should return 401 and not get a collection", async () => {
@@ -697,6 +711,83 @@ describe(`collections routes`, () => {
           .set("Authorization", "Bearer " + token0)
           .send();
         expect(response.statusCode).toEqual(400);
+      });
+    });
+  });
+
+  describe("GET /collections search for cards in a collection", () => {
+    let token0;
+    let token1;
+    let user0MainCollection;
+    beforeEach(async () => {
+      const result = await request(server).post("/auth/signup").send(user0);
+      user0MainCollection = result.body.collection;
+      const res0 = await request(server).post("/auth/login").send(user0);
+      token0 = res0.body.token;
+      await request(server).post("/auth/signup").send(user1);
+      const res1 = await request(server).post("/auth/login").send(user1);
+      token1 = res1.body.token;
+    });
+    describe("valid collection ID and verbose in the request body and search is Mantle", () => {
+      it("should send status 200 and Mickey Mantle card first in a card array", async () => {
+        const responsePost1 = await request(server)
+          .post("/cards")
+          .set("Authorization", "Bearer " + token0)
+          .send(card);
+        expect(responsePost1.statusCode).toEqual(200);
+        const responsePost2 = await request(server)
+          .post("/cards")
+          .set("Authorization", "Bearer " + token0)
+          .send(card0);
+        expect(responsePost2.statusCode).toEqual(200);
+        const responsePost3 = await request(server)
+          .post("/cards")
+          .set("Authorization", "Bearer " + token0)
+          .send(card1);
+        expect(responsePost3.statusCode).toEqual(200);
+        const responseGet = await request(server)
+          .get(`/collections/${user0MainCollection._id}`)
+          .query({ verbose: "true", search: "Mantle" })
+          .set("Authorization", "Bearer " + token0)
+          .send();
+        expect(responseGet.statusCode).toEqual(200);
+        const tradingCards = responseGet.body.tradingCards;
+        expect(tradingCards[0]._id).toEqual(responsePost2.body.card._id);
+        expect(tradingCards[0].subject).toEqual(responsePost2.body.card.subject);
+        expect(tradingCards[0].year).toEqual(responsePost2.body.card.year);
+        expect(tradingCards[0].brand).toEqual(responsePost2.body.card.brand);
+      });
+    });
+    describe("valid collection ID and verbose in the request body and search is Donne", () => {
+      it("should send status 200 and no cards", async () => {
+        const responsePost1 = await request(server)
+          .post("/cards")
+          .set("Authorization", "Bearer " + token0)
+          .send(card);
+        expect(responsePost1.statusCode).toEqual(200);
+        const responsePost2 = await request(server)
+          .post("/cards")
+          .set("Authorization", "Bearer " + token0)
+          .send(card0);
+        expect(responsePost2.statusCode).toEqual(200);
+        const responsePost3 = await request(server)
+          .post("/cards")
+          .set("Authorization", "Bearer " + token0)
+          .send(card1);
+        expect(responsePost3.statusCode).toEqual(200);
+        const responsePost4 = await request(server)
+          .post("/cards")
+          .set("Authorization", "Bearer " + token1)
+          .send(card2);
+        expect(responsePost4.statusCode).toEqual(200);
+        const responseGet = await request(server)
+          .get(`/collections/${user0MainCollection._id}`)
+          .query({ verbose: "true", search: "Donne" })
+          .set("Authorization", "Bearer " + token0)
+          .send();
+        expect(responseGet.statusCode).toEqual(200);
+        const tradingCards = responseGet.body.tradingCards;
+        expect(tradingCards.length).toEqual(0);
       });
     });
   });

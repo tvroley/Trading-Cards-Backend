@@ -73,9 +73,18 @@ router.get("/:id", async (req, res, next) => {
   const collectionId = req.params.id;
   const verbose = req.query.verbose;
   const sortBy = req.query.sortBy;
+  const query = req.query.search;
 
   try {
-    if (collectionId && verbose === "true") {
+    if (collectionId && verbose === "true" && query) {
+        const tradingCards = await collectionDAO.searchForCardInCollection(
+          collectionId,
+          query,
+        );
+      if (tradingCards) {
+        res.json({ tradingCards: tradingCards });
+      }
+    } else if (collectionId && verbose === "true") {
       let tradingCards;
       if (!sortBy) {
         tradingCards = await collectionDAO.getCardsInCollection(

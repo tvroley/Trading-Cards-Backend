@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 
+const Card = require("../models/tradingCard");
 const CardCollection = require("../models/cardCollection");
 const User = require("../models/user");
 const CollectionForCard = require("../models/collectionForCard");
@@ -179,6 +180,53 @@ module.exports.getCardsInCollection = async (cardCollectionId, sortBy) => {
   }
 
   return await CollectionForCard.aggregate(aggArray);
+};
+
+module.exports.searchForCardInCollection = async (cardCollectionId, query) => {
+  if (!mongoose.Types.ObjectId.isValid(cardCollectionId)) {
+    throw new errors.InvalidMongooseId("Invalid card collection ID");
+  }
+
+  const aggArray = [
+    {
+      $match: {
+        $text: { $search: query }
+      }
+    },
+    {
+      $sort: {
+        score: { $meta: "textScore" }
+      }
+    },
+    {
+      $lookup: {
+        from: "collectionforcards",
+        localField: "_id",
+        foreignField: "tradingCard",
+        as: "collect",
+      },
+    },
+    { $unwind: "$collect" },
+    {
+      $project: {
+        collectionId: "$collect.cardCollection",
+        subject: true,
+        year: true,
+        cardSet: true,
+        brand: true,
+        variety: true,
+        certificationNumber: true,
+        gradingCompany: true,
+        cardNumber: true,
+        score: { $meta: "textScore" },
+      },
+    },
+    {
+      $match: { collectionId: new mongoose.Types.ObjectId(cardCollectionId) },
+    },
+  ];
+
+  return await Card.aggregate(aggArray);
 };
 
 module.exports.getCardCollectionsForUser = async (ownerName) => {
