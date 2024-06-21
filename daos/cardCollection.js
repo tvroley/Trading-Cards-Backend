@@ -219,6 +219,10 @@ module.exports.searchForCardInCollection = async (cardCollectionId, query) => {
         gradingCompany: true,
         cardNumber: true,
         score: { $meta: "textScore" },
+        grade: true,
+        frontCardImageLink: true,
+        backCardImageLink: true,
+        sold: true,
       },
     },
     {

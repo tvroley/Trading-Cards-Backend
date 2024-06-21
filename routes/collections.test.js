@@ -760,6 +760,7 @@ describe(`collections routes`, () => {
         );
         expect(tradingCards[0].year).toEqual(responsePost2.body.card.year);
         expect(tradingCards[0].brand).toEqual(responsePost2.body.card.brand);
+        expect(tradingCards[0].frontCardImageLink).toEqual(responsePost2.body.card.frontCardImageLink);
       });
     });
     describe("valid collection ID and verbose in the request body and search is Donne", () => {
