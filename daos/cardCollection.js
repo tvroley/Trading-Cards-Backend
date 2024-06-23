@@ -182,6 +182,36 @@ module.exports.getCardsInCollection = async (cardCollectionId, sortBy) => {
   return await CollectionForCard.aggregate(aggArray);
 };
 
+module.exports.getCollectionsForCard = async (cardId) => {
+  if (!mongoose.Types.ObjectId.isValid(cardId)) {
+    throw new errors.InvalidMongooseId("Invalid card ID");
+  }
+
+  const aggArray = [
+    {
+      $match: { tradingCard: new mongoose.Types.ObjectId(cardId) },
+    },
+    {
+      $lookup: {
+        from: "cardcollections",
+        localField: "cardCollection",
+        foreignField: "_id",
+        as: "collect",
+      },
+    },
+    { $project: { collect: { $first: "$collect" } } },
+    {
+      $project: {
+        _id: "$collect._id",
+        title: "$collect.title",
+        owner: "$collect.owner",
+      },
+    },
+  ];
+
+  return await CollectionForCard.aggregate(aggArray);
+};
+
 module.exports.searchForCardInCollection = async (cardCollectionId, query) => {
   if (!mongoose.Types.ObjectId.isValid(cardCollectionId)) {
     throw new errors.InvalidMongooseId("Invalid card collection ID");

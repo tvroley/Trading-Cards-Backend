@@ -69,6 +69,21 @@ router.get("/search", async (req, res, next) => {
   }
 });
 
+router.get("/forcard/:id", async (req, res, next) => {
+  const cardId = req.params.id;
+
+  try {
+    if (cardId) {
+      const collections = await collectionDAO.getCollectionsForCard(cardId);
+      if (collections) {
+        res.json({ collections: collections });
+      }
+    }
+  } catch (err) {
+    next(err);
+  }
+});
+
 router.get("/:id", async (req, res, next) => {
   const collectionId = req.params.id;
   const verbose = req.query.verbose;

@@ -760,7 +760,9 @@ describe(`collections routes`, () => {
         );
         expect(tradingCards[0].year).toEqual(responsePost2.body.card.year);
         expect(tradingCards[0].brand).toEqual(responsePost2.body.card.brand);
-        expect(tradingCards[0].frontCardImageLink).toEqual(responsePost2.body.card.frontCardImageLink);
+        expect(tradingCards[0].frontCardImageLink).toEqual(
+          responsePost2.body.card.frontCardImageLink,
+        );
       });
     });
     describe("valid collection ID and verbose in the request body and search is Donne", () => {
@@ -793,6 +795,48 @@ describe(`collections routes`, () => {
         expect(responseGet.statusCode).toEqual(200);
         const tradingCards = responseGet.body.tradingCards;
         expect(tradingCards.length).toEqual(0);
+      });
+    });
+  });
+
+  describe("GET /forcard get collections for card", () => {
+    let token0;
+    let token1;
+    let user0MainCollection;
+    beforeEach(async () => {
+      const result = await request(server).post("/auth/signup").send(user0);
+      user0MainCollection = result.body.collection;
+      const res0 = await request(server).post("/auth/login").send(user0);
+      token0 = res0.body.token;
+      await request(server).post("/auth/signup").send(user1);
+      const res1 = await request(server).post("/auth/login").send(user1);
+      token1 = res1.body.token;
+    });
+    describe("valid card ID in the URL parameter", () => {
+      it("should send status 200 and collection objects", async () => {
+        const responsePost1 = await request(server)
+          .post("/cards")
+          .set("Authorization", "Bearer " + token0)
+          .send(card);
+        expect(responsePost1.statusCode).toEqual(200);
+        const responsePost = await request(server)
+          .post(`/collections`)
+          .set("Authorization", "Bearer " + token0)
+          .send({ collectionTitle: "testCollection" });
+        expect(responsePost.statusCode).toEqual(200);
+        const collection = responsePost.body.collection;
+        const resPostCardToCollection = await request(server)
+          .post(`/collections/${collection._id}`)
+          .set("Authorization", "Bearer " + token0)
+          .send({
+            cardId: responsePost1.body.card._id,
+          });
+        expect(resPostCardToCollection.statusCode).toEqual(200);
+        const responseGet = await request(server)
+          .get(`/collections/forcard/${responsePost1.body.card._id}`)
+          .set("Authorization", "Bearer " + token0)
+          .send();
+        expect(responseGet.statusCode).toEqual(200);
       });
     });
   });
