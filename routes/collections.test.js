@@ -1292,4 +1292,165 @@ describe(`collections routes`, () => {
       });
     });
   });
+
+  describe("DELETE /collections/forcard remove card from collection", () => {
+    let token0;
+    let token1;
+    let user0MainCollection;
+    beforeEach(async () => {
+      const result = await request(server).post("/auth/signup").send(user0);
+      user0MainCollection = result.body.collection;
+      const res0 = await request(server).post("/auth/login").send(user0);
+      token0 = res0.body.token;
+      await request(server).post("/auth/signup").send(user1);
+      const res1 = await request(server).post("/auth/login").send(user1);
+      token1 = res1.body.token;
+    });
+    describe("delete a collection with an invalid ID in the URL query", () => {
+      it("should send code 400 and not delete a collection", async () => {
+        const response = await request(server)
+          .delete(`/collections/forcard/`)
+          .query({ card: "123", collection: "123" })
+          .set("Authorization", "Bearer " + token0)
+          .send();
+        expect(response.statusCode).toEqual(400);
+      });
+    });
+    describe("remove a card from a collection with a collection ID in the URL params for a collection that doesn't exist", () => {
+      it("should send status 404 and not delete a collection", async () => {
+        const responsePost = await request(server)
+          .post(`/collections`)
+          .set("Authorization", "Bearer " + token0)
+          .send({ collectionTitle: "testCollection" });
+        expect(responsePost.statusCode).toEqual(200);
+        const collection = responsePost.body.collection;
+        const responsePost1 = await request(server)
+          .post("/cards")
+          .set("Authorization", "Bearer " + token0)
+          .send(card);
+        expect(responsePost1.statusCode).toEqual(200);
+        const responseDelete = await request(server)
+          .delete(`/collections/${collection._id}`)
+          .set("Authorization", "Bearer " + token0)
+          .send();
+        expect(responseDelete.statusCode).toEqual(200);
+        const collections = await CardCollectionDao.find({
+          title: "testCollection",
+        }).lean();
+        expect(collections.length).toEqual(0);
+        const responseDelete2 = await request(server)
+          .delete(`/collections/`)
+          .query({ card: responsePost1.body.card._id, collection: collection._id })
+          .set("Authorization", "Bearer " + token0)
+          .send();
+        expect(responseDelete2.statusCode).toEqual(404);
+      });
+    });
+    describe("remove a card from a collection with a collection ID in the URL query for a collection that the user owns", () => {
+      it("should send status 200 and remove the card from the collection", async () => {
+        const responsePost = await request(server)
+          .post(`/collections`)
+          .set("Authorization", "Bearer " + token0)
+          .send({ collectionTitle: "testCollection" });
+        expect(responsePost.statusCode).toEqual(200);
+        const collection = responsePost.body.collection;
+        const responsePost1 = await request(server)
+          .post("/cards")
+          .set("Authorization", "Bearer " + token0)
+          .send(card);
+        expect(responsePost1.statusCode).toEqual(200);
+        const resPostCardToCollection = await request(server)
+          .post(`/collections/${collection._id}`)
+          .set("Authorization", "Bearer " + token0)
+          .send({
+            cardId: responsePost1.body.card._id,
+          });
+        expect(resPostCardToCollection.statusCode).toEqual(200);
+        const responseDelete = await request(server)
+          .delete(`/collections/forcard/`)
+          .query({collection: collection._id, card: responsePost1.body.card._id})
+          .set("Authorization", "Bearer " + token0)
+          .send();
+        expect(responseDelete.statusCode).toEqual(200);
+        const collectionForCard = await CollectionForCard.find({
+          cardCollection: collection._id, tradingCard: responsePost1.body.card._id
+        }).lean();
+        expect(collectionForCard.length).toEqual(0);
+      });
+    });
+    describe("remove a card from a collection with a collection ID in the URL params for a collection that the user doesn't own", () => {
+      it("should not delete collection and send status code 401", async () => {
+        const responsePost = await request(server)
+          .post(`/collections`)
+          .set("Authorization", "Bearer " + token0)
+          .send({ collectionTitle: "testCollection" });
+        expect(responsePost.statusCode).toEqual(200);
+        const collection = responsePost.body.collection;
+        const responsePost1 = await request(server)
+          .post("/cards")
+          .set("Authorization", "Bearer " + token0)
+          .send(card);
+        expect(responsePost1.statusCode).toEqual(200);
+        const myCard = responsePost1.body.card;
+        const resPostCardToCollection = await request(server)
+          .post(`/collections/${collection._id}`)
+          .set("Authorization", "Bearer " + token0)
+          .send({
+            cardId: myCard._id,
+          });
+        expect(resPostCardToCollection.statusCode).toEqual(200);
+        const responseDelete = await request(server)
+          .delete(`/collections/forcard/`)
+          .query({collection: collection._id, card: myCard._id})
+          .set("Authorization", "Bearer " + token1)
+          .send();
+        expect(responseDelete.statusCode).toEqual(401);
+        const collectionForCard = await CollectionForCard.find({
+          cardCollection: collection._id, tradingCard: responsePost1.body.card._id
+        }).lean();
+        expect(collectionForCard.length).toEqual(1);
+      });
+    });
+    describe("admin remove a card from a collection with a collection ID in the URL params for any collection", () => {
+      it("should delete collection and send status code 200", async () => {
+        const responsePost = await request(server)
+          .post("/collections")
+          .set("Authorization", "Bearer " + token0)
+          .send({ collectionTitle: "testCollection" });
+        expect(responsePost.statusCode).toEqual(200);
+        const collectionId = responsePost.body.collection._id;
+        const responsePost1 = await request(server)
+          .post("/cards")
+          .set("Authorization", "Bearer " + token0)
+          .send(card);
+        expect(responsePost1.statusCode).toEqual(200);
+        const resPostCardToCollection = await request(server)
+          .post(`/collections/${collectionId}`)
+          .set("Authorization", "Bearer " + token0)
+          .send({
+            cardId: responsePost1.body.card._id,
+          });
+        expect(resPostCardToCollection.statusCode).toEqual(200);
+        await UserDao.updateOne(
+          { username: user1.username },
+          { $set: { roles: ["admin"] } },
+        );
+        const respsonseLogin = await request(server)
+          .post("/auth/login")
+          .send(user1);
+        const token2 = respsonseLogin.body.token;
+        const responseDelete = await request(server)
+          .delete(`/collections/forcard/`)
+          .query({collection: collectionId, card: responsePost1.body.card._id})
+          .set("Authorization", "Bearer " + token2)
+          .send();
+        expect(responseDelete.statusCode).toEqual(200);
+        expect(responseDelete.body.deletedCount).toEqual(1);
+        const collectionForCard = await CollectionForCard.find({
+          cardCollection: collectionId, tradingCard: responsePost1.body.card._id
+        }).lean();
+        expect(collectionForCard.length).toEqual(0);
+      });
+    });
+  });
 });

@@ -326,6 +326,18 @@ module.exports.removeCardCollection = async (cardCollectionId) => {
   return await CardCollection.deleteOne({ _id: cardCollectionId });
 };
 
+module.exports.removeCardFromCollection = async (cardId, cardCollectionId) => {
+  if (!mongoose.Types.ObjectId.isValid(cardCollectionId)) {
+    throw new errors.InvalidMongooseId("Invalid card collection ID");
+  }
+
+  if (!mongoose.Types.ObjectId.isValid(cardId)) {
+    throw new errors.InvalidMongooseId("Invalid card ID");
+  }
+
+  return await CollectionForCard.deleteOne({ cardCollection: cardCollectionId, tradingCard: cardId });
+};
+
 module.exports.searchCollections = async (query) => {
   return await CardCollection.find(
     { $text: { $search: query } },

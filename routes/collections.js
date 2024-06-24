@@ -201,6 +201,48 @@ router.put("/:id", async (req, res, next) => {
   }
 });
 
+router.delete("/forcard/", async (req, res, next) => {
+  const collectionId = req.query.collection;
+  const cardId = req.query.card;
+  const roles = req.user.roles;
+  const userId = req.user._id;
+  const username = req.user.username;
+
+  if (collectionId && cardId) {
+    try {
+      const collection = await collectionDAO.getCardCollection(collectionId);
+
+      if (collection) {
+        if (
+          roles.includes("admin") ||
+          (userId === collection.owner.toString() &&
+            collection.title !== username)
+        ) {
+          const result =
+            await collectionDAO.removeCardFromCollection(cardId, collectionId);
+          res.json(result);
+        } else {
+          if (collection.title === username) {
+            res.sendStatus(409);
+          } else {
+            res.status(401).send(`no permission to delete collection`);
+          }
+        }
+      } else {
+        res.status(404).send("collection not found");
+      }
+    } catch (err) {
+      if (err instanceof errors.InvalidMongooseId) {
+        res.status(400).send(err.message);
+      } else {
+        next(err);
+      }
+    }
+  } else {
+    res.sendStatus(400);
+  }
+});
+
 router.delete("/:id", async (req, res, next) => {
   const collectionId = req.params.id;
 
