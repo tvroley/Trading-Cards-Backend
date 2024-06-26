@@ -7,8 +7,12 @@ const collectionDAO = require("../daos/cardCollection");
 router.get("/", async (req, res, next) => {
   const ownerName = req.query.ownerName;
   const title = req.query.title;
+  const getAll = req.query.getAll;
 
-  if (String(ownerName).trim().length === 0) {
+  if(getAll === "true") {
+    const collections = await collectionDAO.getAllCardCollections();
+    res.json({ collections: collections });
+  } else if (String(ownerName).trim().length === 0) {
     res.status(400).send("empty collection owner name");
   } else if (String(title).trim().length === 0) {
     res.status(400).send("empty collection title name");

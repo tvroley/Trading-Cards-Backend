@@ -183,6 +183,59 @@ describe(`collections routes`, () => {
     });
   });
 
+  describe("GET /collections all collections with owner names", () => {
+    let token0;
+    let token1;
+    let user0MainCollection;
+    beforeEach(async () => {
+      const result = await request(server).post("/auth/signup").send(user0);
+      user0MainCollection = result.body.collection;
+      const res0 = await request(server).post("/auth/login").send(user0);
+      token0 = res0.body.token;
+      await request(server).post("/auth/signup").send(user1);
+      const res1 = await request(server).post("/auth/login").send(user1);
+      token1 = res1.body.token;
+    });
+    describe("getAll is true in URL query", () => {
+      it("should send status 200 and get all collections", async () => {
+        const responsePost1 = await request(server)
+          .post(`/collections`)
+          .set("Authorization", "Bearer " + token0)
+          .send({ collectionTitle: "testCollection1" });
+        expect(responsePost1.statusCode).toEqual(200);
+        const response = await request(server)
+          .get(`/collections/`)
+          .query({ getAll: "true" })
+          .set("Authorization", "Bearer " + token0)
+          .send();
+        expect(response.statusCode).toEqual(200);
+        const collections = response.body.collections;
+        expect(collections.length).toEqual(3);
+        expect(collections[0].ownerName).toEqual("user011");
+        expect(collections[0].title).toEqual("testCollection1");
+        expect(collections[1].ownerName).toEqual("user011");
+        expect(collections[1].title).toEqual("user011");
+        expect(collections[2].ownerName).toEqual("user100");
+        expect(collections[2].title).toEqual("user100");
+      });
+    });
+    describe("getAll is false in URL query", () => {
+      it("should send status 400 and get all collections", async () => {
+        const responsePost1 = await request(server)
+          .post(`/collections`)
+          .set("Authorization", "Bearer " + token0)
+          .send({ collectionTitle: "testCollection1" });
+        expect(responsePost1.statusCode).toEqual(200);
+        const response = await request(server)
+          .get(`/collections/`)
+          .query({ getAll: "false" })
+          .set("Authorization", "Bearer " + token0)
+          .send();
+        expect(response.statusCode).toEqual(400);
+      });
+    });
+  });
+
   describe("GET /collections/search", () => {
     let token0;
     let token1;
