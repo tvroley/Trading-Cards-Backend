@@ -89,13 +89,6 @@ describe(`collections routes`, () => {
   };
 
   describe("before signup", () => {
-    describe("GET /collections", () => {
-      it("should return 401 and not get a collection", async () => {
-        const response = await request(server).get(`/collections/123`).send();
-        expect(response.statusCode).toEqual(401);
-      });
-    });
-
     describe("PUT /collections", () => {
       it("should return 401 and not update a collection", async () => {
         const res = await request(server)

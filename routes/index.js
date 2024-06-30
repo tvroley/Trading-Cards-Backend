@@ -28,9 +28,9 @@ const corsOptions = {
 router.use(cors(corsOptions));
 
 router.use("/auth", require("./auth"));
+router.use("/collections", require("./collections"));
 router.use(middleware.isAuthenticated);
 router.use("/cards", require("./cards"));
-router.use("/collections", require("./collections"));
 router.use(handleError);
 
 module.exports = router;

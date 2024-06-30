@@ -1,7 +1,7 @@
 const { Router } = require("express");
 const router = Router();
 const errors = require("../middleware/errors");
-
+const middleware = require("../middleware/authenticate");
 const collectionDAO = require("../daos/cardCollection");
 
 router.get("/", async (req, res, next) => {
@@ -131,6 +131,8 @@ router.get("/:id", async (req, res, next) => {
     next(err);
   }
 });
+
+router.use(middleware.isAuthenticated);
 
 router.post("/", async (req, res, next) => {
   const title = req.body.collectionTitle;
