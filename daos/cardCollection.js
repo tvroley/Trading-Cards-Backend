@@ -393,7 +393,7 @@ module.exports.searchCollections = async (query) => {
           title: true,
           owner: true,
           _id: true,
-          username: "$user.username",
+          ownerName: "$user.username",
           score: { $meta: "textScore" },
         },
       },

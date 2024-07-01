@@ -287,7 +287,11 @@ describe(`collections routes`, () => {
           .send();
         expect(response.statusCode).toEqual(200);
         const collectionId = response.body.collections[0]._id;
+        const title = response.body.collections[0].title;
+        const ownerName = response.body.collections[0].ownerName;
         expect(collectionId).toEqual(collection._id);
+        expect(ownerName).toEqual(user0.username);
+        expect(title).toEqual(collection.title);
       });
     });
     describe("multiple term search query in the request body that matches a collection", () => {
@@ -319,6 +323,8 @@ describe(`collections routes`, () => {
         expect(collectionExpected._id.toString()).toEqual(
           collectionReceived._id.toString(),
         );
+        const ownerName = collectionReceived.ownerName;
+        expect(ownerName).toEqual(user0.username);
       });
     });
   });
