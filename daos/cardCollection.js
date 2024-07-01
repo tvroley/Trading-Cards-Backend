@@ -368,10 +368,36 @@ module.exports.removeCardFromCollection = async (cardId, cardCollectionId) => {
 };
 
 module.exports.searchCollections = async (query) => {
-  return await CardCollection.find(
-    { $text: { $search: query } },
-    { score: { $meta: "textScore" } },
-  )
-    .sort({ score: { $meta: "textScore" } })
-    .lean();
+    const aggArray = [
+      {
+        $match: {
+          $text: { $search: query },
+        },
+      },
+      {
+        $sort: {
+          score: { $meta: "textScore" },
+        },
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "owner",
+          foreignField: "_id",
+          as: "user",
+        },
+      },
+      { $unwind: "$user" },
+      {
+        $project: {
+          title: true,
+          owner: true,
+          _id: true,
+          username: "$user.username",
+          score: { $meta: "textScore" },
+        },
+      },
+    ];
+
+    return await CardCollection.aggregate(aggArray);
 };
