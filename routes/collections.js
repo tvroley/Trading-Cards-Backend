@@ -9,7 +9,7 @@ router.get("/", async (req, res, next) => {
   const title = req.query.title;
   const getAll = req.query.getAll;
 
-  if(getAll === "true") {
+  if (getAll === "true") {
     const collections = await collectionDAO.getAllCardCollections();
     res.json({ collections: collections });
   } else if (String(ownerName).trim().length === 0) {
@@ -224,8 +224,10 @@ router.delete("/forcard/", async (req, res, next) => {
           (userId === collection.owner.toString() &&
             collection.title !== username)
         ) {
-          const result =
-            await collectionDAO.removeCardFromCollection(cardId, collectionId);
+          const result = await collectionDAO.removeCardFromCollection(
+            cardId,
+            collectionId,
+          );
           res.json(result);
         } else {
           if (collection.title === username) {

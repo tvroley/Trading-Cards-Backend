@@ -124,17 +124,17 @@ module.exports.getAllCardCollections = async () => {
         as: "user",
       },
     },
-    { $project: { user: { $first: "$user" }, _id: 1, title: 1, } },
+    { $project: { user: { $first: "$user" }, _id: 1, title: 1 } },
     {
       $project: {
         ownerName: "$user.username",
         _id: 1,
-        title: 1,       
+        title: 1,
       },
     },
     {
-      $sort: { ownerName: 1, title: 1, },
-    }
+      $sort: { ownerName: 1, title: 1 },
+    },
   ];
 
   return await CardCollection.aggregate(aggArray);
@@ -364,40 +364,43 @@ module.exports.removeCardFromCollection = async (cardId, cardCollectionId) => {
     throw new errors.InvalidMongooseId("Invalid card ID");
   }
 
-  return await CollectionForCard.deleteOne({ cardCollection: cardCollectionId, tradingCard: cardId });
+  return await CollectionForCard.deleteOne({
+    cardCollection: cardCollectionId,
+    tradingCard: cardId,
+  });
 };
 
 module.exports.searchCollections = async (query) => {
-    const aggArray = [
-      {
-        $match: {
-          $text: { $search: query },
-        },
+  const aggArray = [
+    {
+      $match: {
+        $text: { $search: query },
       },
-      {
-        $sort: {
-          score: { $meta: "textScore" },
-        },
+    },
+    {
+      $sort: {
+        score: { $meta: "textScore" },
       },
-      {
-        $lookup: {
-          from: "users",
-          localField: "owner",
-          foreignField: "_id",
-          as: "user",
-        },
+    },
+    {
+      $lookup: {
+        from: "users",
+        localField: "owner",
+        foreignField: "_id",
+        as: "user",
       },
-      { $unwind: "$user" },
-      {
-        $project: {
-          title: true,
-          owner: true,
-          _id: true,
-          ownerName: "$user.username",
-          score: { $meta: "textScore" },
-        },
+    },
+    { $unwind: "$user" },
+    {
+      $project: {
+        title: true,
+        owner: true,
+        _id: true,
+        ownerName: "$user.username",
+        score: { $meta: "textScore" },
       },
-    ];
+    },
+  ];
 
-    return await CardCollection.aggregate(aggArray);
+  return await CardCollection.aggregate(aggArray);
 };

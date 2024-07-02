@@ -1392,7 +1392,10 @@ describe(`collections routes`, () => {
         expect(collections.length).toEqual(0);
         const responseDelete2 = await request(server)
           .delete(`/collections/`)
-          .query({ card: responsePost1.body.card._id, collection: collection._id })
+          .query({
+            card: responsePost1.body.card._id,
+            collection: collection._id,
+          })
           .set("Authorization", "Bearer " + token0)
           .send();
         expect(responseDelete2.statusCode).toEqual(404);
@@ -1420,12 +1423,16 @@ describe(`collections routes`, () => {
         expect(resPostCardToCollection.statusCode).toEqual(200);
         const responseDelete = await request(server)
           .delete(`/collections/forcard/`)
-          .query({collection: collection._id, card: responsePost1.body.card._id})
+          .query({
+            collection: collection._id,
+            card: responsePost1.body.card._id,
+          })
           .set("Authorization", "Bearer " + token0)
           .send();
         expect(responseDelete.statusCode).toEqual(200);
         const collectionForCard = await CollectionForCard.find({
-          cardCollection: collection._id, tradingCard: responsePost1.body.card._id
+          cardCollection: collection._id,
+          tradingCard: responsePost1.body.card._id,
         }).lean();
         expect(collectionForCard.length).toEqual(0);
       });
@@ -1453,12 +1460,13 @@ describe(`collections routes`, () => {
         expect(resPostCardToCollection.statusCode).toEqual(200);
         const responseDelete = await request(server)
           .delete(`/collections/forcard/`)
-          .query({collection: collection._id, card: myCard._id})
+          .query({ collection: collection._id, card: myCard._id })
           .set("Authorization", "Bearer " + token1)
           .send();
         expect(responseDelete.statusCode).toEqual(401);
         const collectionForCard = await CollectionForCard.find({
-          cardCollection: collection._id, tradingCard: responsePost1.body.card._id
+          cardCollection: collection._id,
+          tradingCard: responsePost1.body.card._id,
         }).lean();
         expect(collectionForCard.length).toEqual(1);
       });
@@ -1493,13 +1501,17 @@ describe(`collections routes`, () => {
         const token2 = respsonseLogin.body.token;
         const responseDelete = await request(server)
           .delete(`/collections/forcard/`)
-          .query({collection: collectionId, card: responsePost1.body.card._id})
+          .query({
+            collection: collectionId,
+            card: responsePost1.body.card._id,
+          })
           .set("Authorization", "Bearer " + token2)
           .send();
         expect(responseDelete.statusCode).toEqual(200);
         expect(responseDelete.body.deletedCount).toEqual(1);
         const collectionForCard = await CollectionForCard.find({
-          cardCollection: collectionId, tradingCard: responsePost1.body.card._id
+          cardCollection: collectionId,
+          tradingCard: responsePost1.body.card._id,
         }).lean();
         expect(collectionForCard.length).toEqual(0);
       });
