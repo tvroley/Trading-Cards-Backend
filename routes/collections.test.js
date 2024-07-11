@@ -599,7 +599,7 @@ describe(`collections routes`, () => {
         expect(responsePost3.statusCode).toEqual(200);
         const responseGet = await request(server)
           .get(`/collections/${user0MainCollection._id}`)
-          .query({ verbose: "true", sortBy: "sold" })
+          .query({ verbose: "true", sortBy: "sold", ascDesc: "DESC" })
           .set("Authorization", "Bearer " + token0)
           .send();
         expect(responseGet.statusCode).toEqual(200);

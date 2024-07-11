@@ -93,6 +93,7 @@ router.get("/:id", async (req, res, next) => {
   const verbose = req.query.verbose;
   const sortBy = req.query.sortBy;
   const query = req.query.search;
+  const ascDesc = req.query.ascDesc;
 
   try {
     if (collectionId && verbose === "true" && query) {
@@ -109,11 +110,13 @@ router.get("/:id", async (req, res, next) => {
         tradingCards = await collectionDAO.getCardsInCollection(
           collectionId,
           "year",
+          ascDesc
         );
       } else {
         tradingCards = await collectionDAO.getCardsInCollection(
           collectionId,
           sortBy,
+          ascDesc
         );
       }
       if (tradingCards) {

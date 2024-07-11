@@ -140,7 +140,7 @@ module.exports.getAllCardCollections = async () => {
   return await CardCollection.aggregate(aggArray);
 };
 
-module.exports.getCardsInCollection = async (cardCollectionId, sortBy) => {
+module.exports.getCardsInCollection = async (cardCollectionId, sortBy, ascDesc) => {
   if (!mongoose.Types.ObjectId.isValid(cardCollectionId)) {
     throw new errors.InvalidMongooseId("Invalid card collection ID");
   }
@@ -177,16 +177,21 @@ module.exports.getCardsInCollection = async (cardCollectionId, sortBy) => {
     },
   ];
 
+  let ascNumber = 1;
+  if(ascDesc === "DESC") {
+    ascNumber = -1;
+  }
+
   if (sortBy === "cert") {
-    aggArray.push({ $sort: { gradingCompany: 1, certificationNumber: 1 } });
+    aggArray.push({ $sort: { gradingCompany: ascNumber, certificationNumber: ascNumber } });
   } else if (sortBy === "year") {
     aggArray.push({
-      $sort: { year: 1, brand: 1, cardSet: 1, cardNumber: 1, _id: 1 },
+      $sort: { year: ascNumber, brand: 1, cardSet: 1, cardNumber: 1, _id: 1 },
     });
   } else if (sortBy === "subject") {
     aggArray.push({
       $sort: {
-        subject: 1,
+        subject: ascNumber,
         year: 1,
         brand: 1,
         cardSet: 1,
@@ -196,15 +201,15 @@ module.exports.getCardsInCollection = async (cardCollectionId, sortBy) => {
     });
   } else if (sortBy === "brand") {
     aggArray.push({
-      $sort: { brand: 1, year: 1, cardSet: 1, cardNumber: 1, _id: 1 },
+      $sort: { brand: ascNumber, year: 1, cardSet: 1, cardNumber: 1, _id: 1 },
     });
   } else if (sortBy === "cardSet") {
     aggArray.push({
-      $sort: { cardSet: 1, year: 1, cardNumber: 1, brand: 1, _id: 1 },
+      $sort: { cardSet: ascNumber, year: 1, cardNumber: 1, brand: 1, _id: 1 },
     });
   } else if (sortBy === "sold") {
     aggArray.push({
-      $sort: { sold: -1, year: 1, brand: 1, cardSet: 1, cardNumber: 1, _id: 1 },
+      $sort: { sold: ascNumber, year: 1, brand: 1, cardSet: 1, cardNumber: 1, _id: 1 },
     });
   }
 
