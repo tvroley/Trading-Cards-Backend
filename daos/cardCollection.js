@@ -140,7 +140,11 @@ module.exports.getAllCardCollections = async () => {
   return await CardCollection.aggregate(aggArray);
 };
 
-module.exports.getCardsInCollection = async (cardCollectionId, sortBy, ascDesc) => {
+module.exports.getCardsInCollection = async (
+  cardCollectionId,
+  sortBy,
+  ascDesc,
+) => {
   if (!mongoose.Types.ObjectId.isValid(cardCollectionId)) {
     throw new errors.InvalidMongooseId("Invalid card collection ID");
   }
@@ -178,12 +182,14 @@ module.exports.getCardsInCollection = async (cardCollectionId, sortBy, ascDesc) 
   ];
 
   let ascNumber = 1;
-  if(ascDesc === "DESC") {
+  if (ascDesc === "DESC") {
     ascNumber = -1;
   }
 
   if (sortBy === "cert") {
-    aggArray.push({ $sort: { gradingCompany: ascNumber, certificationNumber: ascNumber } });
+    aggArray.push({
+      $sort: { gradingCompany: ascNumber, certificationNumber: ascNumber },
+    });
   } else if (sortBy === "year") {
     aggArray.push({
       $sort: { year: ascNumber, brand: 1, cardSet: 1, cardNumber: 1, _id: 1 },
@@ -209,7 +215,14 @@ module.exports.getCardsInCollection = async (cardCollectionId, sortBy, ascDesc) 
     });
   } else if (sortBy === "sold") {
     aggArray.push({
-      $sort: { sold: ascNumber, year: 1, brand: 1, cardSet: 1, cardNumber: 1, _id: 1 },
+      $sort: {
+        sold: ascNumber,
+        year: 1,
+        brand: 1,
+        cardSet: 1,
+        cardNumber: 1,
+        _id: 1,
+      },
     });
   }
 
@@ -408,4 +421,75 @@ module.exports.searchCollections = async (query) => {
   ];
 
   return await CardCollection.aggregate(aggArray);
+};
+
+module.exports.resetDemoCollection = async () => {
+  try {
+    const grandpaCollection = await module.exports.getCollectionByOwnerAndTitle(
+      "grandpa",
+      "grandpa",
+    );
+    const grandpaCollectionId = grandpaCollection._id;
+    const uncleCollection = await module.exports.getCollectionByOwnerAndTitle(
+      "uncle",
+      "uncle",
+    );
+    const uncleCollectionId = uncleCollection._id;
+    const demoCollection = await module.exports.getCollectionByOwnerAndTitle(
+      "demo",
+      "demo",
+    );
+    const demoCollectionId = demoCollection._id;
+    const grandpaCards =
+      await module.exports.getCardsInCollection(grandpaCollectionId);
+    const uncleCards =
+      await module.exports.getCardsInCollection(uncleCollectionId);
+    const allCards = [];
+    grandpaCards.map((card) => {
+      allCards.push(card);
+    });
+    uncleCards.map((card) => {
+      allCards.push(card);
+    });
+
+    allCards.map((card) => {
+      Card.create({
+        year: card.year,
+        brand: card.brand,
+        cardSet: card.cardSet,
+        subject: card.subject,
+        gradingCompany: card.gradingCompany,
+        grade: card.grade,
+        certificationNumber: card.certificationNumber + "DEMO",
+        frontCardImageLink: card.frontCardImageLink,
+        backCardImageLink: card.backCardImageLink,
+        sold: card.sold,
+      })
+        .then((result) => {
+          CollectionForCard.create({
+            tradingCard: result._id,
+            cardCollection: demoCollectionId,
+          }).catch((err) => {
+            if (err.message.includes("duplicate key")) {
+              throw new errors.DuplicateKeyError(err.message);
+            } else {
+              throw err;
+            }
+          });
+        })
+        .catch((err) => {
+          if (err.message.includes("duplicate key")) {
+            throw new errors.DuplicateKeyError(err.message);
+          } else {
+            throw err;
+          }
+        });
+    });
+  } catch (err) {
+    if (err.message.includes("duplicate key")) {
+      throw new errors.DuplicateKeyError(err.message);
+    } else {
+      throw err;
+    }
+  }
 };

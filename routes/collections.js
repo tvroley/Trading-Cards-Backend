@@ -110,13 +110,13 @@ router.get("/:id", async (req, res, next) => {
         tradingCards = await collectionDAO.getCardsInCollection(
           collectionId,
           "year",
-          ascDesc
+          ascDesc,
         );
       } else {
         tradingCards = await collectionDAO.getCardsInCollection(
           collectionId,
           sortBy,
-          ascDesc
+          ascDesc,
         );
       }
       if (tradingCards) {
@@ -176,6 +176,21 @@ router.post("/:id", async (req, res, next) => {
     }
   } else {
     res.status(400).send("collection ID or card ID");
+  }
+});
+
+router.put("/demo", async (req, res, next) => {
+  const roles = req.user.roles;
+
+  if (roles.includes("admin")) {
+    try {
+      await collectionDAO.resetDemoCollection();
+      res.status(200).send();
+    } catch (err) {
+      next(err);
+    }
+  } else {
+    res.sendStatus(401);
   }
 });
 
