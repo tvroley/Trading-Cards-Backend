@@ -2,7 +2,7 @@ const request = require("supertest");
 
 const server = require("../server");
 const testUtils = require("../test-utils");
-const CardsDao = require("../models/tradingCard");
+const User = require("../models/user");
 const UserDao = require("../models/user");
 const CardCollectionDao = require("../models/cardCollection");
 const CollectionForCard = require("../models/collectionForCard");
@@ -19,6 +19,18 @@ describe(`collections routes`, () => {
   const user1 = {
     username: "user100",
     password: "456password",
+  };
+  const uncle = {
+    username: "uncle",
+    password: "789password",
+  };
+  const grandpa = {
+    username: "grandpa",
+    password: "321password",
+  };
+  const demo = {
+    username: "demo",
+    password: "demo",
   };
 
   const card = {
@@ -1214,6 +1226,61 @@ describe(`collections routes`, () => {
         expect(updateCollectionArray.length).toEqual(1);
         const collectionIdReceived = updateCollectionArray[0]._id.toString();
         expect(collectionIdReceived).toEqual(collectionId);
+      });
+    });
+  });
+
+  describe("PUT /demo", () => {
+    let token0;
+    let token1;
+    let token2;
+    let token3;
+    let token4;
+    let user0MainCollection;
+    beforeEach(async () => {
+      const result = await request(server).post("/auth/signup").send(user0);
+      user0MainCollection = result.body.collection;
+      await User.updateOne(
+        { username: "user011" },
+        { $set: { roles: ["admin"] } },
+      );
+      const res0 = await request(server).post("/auth/login").send(user0);
+      token0 = res0.body.token;
+      await request(server).post("/auth/signup").send(user1);
+      const res1 = await request(server).post("/auth/login").send(user1);
+      token1 = res1.body.token;
+      await request(server).post("/auth/signup").send(uncle);
+      const res2 = await request(server).post("/auth/login").send(uncle);
+      token2 = res2.body.token;
+      await request(server)
+          .post("/cards")
+          .set("Authorization", "Bearer " + token2)
+          .send(card);
+      await request(server).post("/auth/signup").send(grandpa);
+      const res3 = await request(server).post("/auth/login").send(grandpa);
+      token3 = res3.body.token;
+      await request(server)
+          .post("/cards")
+          .set("Authorization", "Bearer " + token3)
+          .send(card1);
+      await request(server).post("/auth/signup").send(demo);
+      const res4 = await request(server).post("/auth/login").send(demo);
+      token4 = res4.body.token;
+    });
+    describe("run demo reset with admin user", () => {
+      it("should send status 200", async () => {
+        const responsePut = await request(server)
+          .put(`/collections/demo`)
+          .set("Authorization", "Bearer " + token0);
+        expect(responsePut.statusCode).toEqual(200);
+      });
+    });
+    describe("run demo reset with user that is not admin", () => {
+      it("should send status 401", async () => {
+        const responsePut = await request(server)
+          .put(`/collections/demo`)
+          .set("Authorization", "Bearer " + token1);
+        expect(responsePut.statusCode).toEqual(401);
       });
     });
   });
