@@ -444,16 +444,9 @@ module.exports.resetDemoCollection = async () => {
       await module.exports.getCardsInCollection(grandpaCollectionId);
     const uncleCards =
       await module.exports.getCardsInCollection(uncleCollectionId);
-    const allCards = [];
+    const allDemoCards = [];
     grandpaCards.map((card) => {
-      allCards.push(card);
-    });
-    uncleCards.map((card) => {
-      allCards.push(card);
-    });
-
-    allCards.map((card) => {
-      Card.create({
+      const demoCard = {
         year: card.year,
         brand: card.brand,
         cardSet: card.cardSet,
@@ -464,27 +457,41 @@ module.exports.resetDemoCollection = async () => {
         frontCardImageLink: card.frontCardImageLink,
         backCardImageLink: card.backCardImageLink,
         sold: card.sold,
-      })
-        .then((result) => {
-          CollectionForCard.create({
-            tradingCard: result._id,
-            cardCollection: demoCollectionId,
-          }).catch((err) => {
-            if (err.message.includes("duplicate key")) {
-              throw new errors.DuplicateKeyError(err.message);
-            } else {
-              throw err;
-            }
-          });
-        })
-        .catch((err) => {
-          if (err.message.includes("duplicate key")) {
-            throw new errors.DuplicateKeyError(err.message);
-          } else {
-            throw err;
-          }
-        });
+      };
+      allDemoCards.push(demoCard);
     });
+    uncleCards.map((card) => {
+      const demoCard = {
+        year: card.year,
+        brand: card.brand,
+        cardSet: card.cardSet,
+        subject: card.subject,
+        gradingCompany: card.gradingCompany,
+        grade: card.grade,
+        certificationNumber: card.certificationNumber + "DEMO",
+        frontCardImageLink: card.frontCardImageLink,
+        backCardImageLink: card.backCardImageLink,
+        sold: card.sold,
+      };
+      allDemoCards.push(demoCard);
+    });
+    const resultCards = await Card.insertMany(allDemoCards);
+    const collectionEntries = [];
+    resultCards.map((card) => {
+      const collectionEntry = {
+        tradingCard: card._id,
+        cardCollection: demoCollectionId,
+      };
+      collectionEntries.push(collectionEntry);
+    });
+    const resultCollectionEntries =
+      await CollectionForCard.insertMany(collectionEntries);
+
+    const result = {
+      resultCards: resultCards,
+      resultCollectionEntries: resultCollectionEntries,
+    };
+    return result;
   } catch (err) {
     if (err.message.includes("duplicate key")) {
       throw new errors.DuplicateKeyError(err.message);

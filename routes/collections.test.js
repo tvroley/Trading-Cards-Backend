@@ -1253,16 +1253,16 @@ describe(`collections routes`, () => {
       const res2 = await request(server).post("/auth/login").send(uncle);
       token2 = res2.body.token;
       await request(server)
-          .post("/cards")
-          .set("Authorization", "Bearer " + token2)
-          .send(card);
+        .post("/cards")
+        .set("Authorization", "Bearer " + token2)
+        .send(card);
       await request(server).post("/auth/signup").send(grandpa);
       const res3 = await request(server).post("/auth/login").send(grandpa);
       token3 = res3.body.token;
       await request(server)
-          .post("/cards")
-          .set("Authorization", "Bearer " + token3)
-          .send(card1);
+        .post("/cards")
+        .set("Authorization", "Bearer " + token3)
+        .send(card1);
       await request(server).post("/auth/signup").send(demo);
       const res4 = await request(server).post("/auth/login").send(demo);
       token4 = res4.body.token;
@@ -1273,6 +1273,8 @@ describe(`collections routes`, () => {
           .put(`/collections/demo`)
           .set("Authorization", "Bearer " + token0);
         expect(responsePut.statusCode).toEqual(200);
+        expect(responsePut.body.resultCards.length).toEqual(2);
+        expect(responsePut.body.resultCollectionEntries.length).toEqual(2);
       });
     });
     describe("run demo reset with user that is not admin", () => {

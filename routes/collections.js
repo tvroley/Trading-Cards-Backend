@@ -184,8 +184,8 @@ router.put("/demo", async (req, res, next) => {
 
   if (roles.includes("admin")) {
     try {
-      await collectionDAO.resetDemoCollection();
-      res.status(200).send();
+      const result = await collectionDAO.resetDemoCollection();
+      res.json(result);
     } catch (err) {
       next(err);
     }
