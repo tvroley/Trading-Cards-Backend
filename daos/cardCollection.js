@@ -445,6 +445,8 @@ module.exports.resetDemoCollection = async () => {
     const uncleCards =
       await module.exports.getCardsInCollection(uncleCollectionId);
     const allDemoCards = [];
+    await CollectionForCard.deleteMany({ cardCollection: demoCollectionId });
+    await Card.deleteMany({ certificationNumber: /DEMO/ });
     grandpaCards.map((card) => {
       const demoCard = {
         year: card.year,

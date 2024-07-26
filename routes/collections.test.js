@@ -33,6 +33,40 @@ describe(`collections routes`, () => {
     password: "demo",
   };
 
+  const cardDemo = {
+    gradingCompany: "PSA",
+    brand: "Fleer",
+    cardSet: "2002 Ultra WNBA",
+    subject: "Sue Bird",
+    sold: false,
+    backCardImageLink:
+      "https://d1htnxwo4o0jhw.cloudfront.net/cert/126428695/355819081.jpg",
+    certificationNumber: "63741116DEMO",
+    cardNumber: "101",
+    frontCardImageLink:
+      "https://d1htnxwo4o0jhw.cloudfront.net/cert/126428695/355823629.jpg",
+    year: 2002,
+    grade: "9",
+    variety: "",
+  };
+
+  const card0Demo = {
+    sold: false,
+    backCardImageLink:
+      "https://sgcimagprodstorage.blob.core.windows.net/mycollections/6313b7ee-6887-4e10-9a28-dc9fa2312278/h275/back/6313b7ee-6887-4e10-9a28-dc9fa2312278.jpg",
+    subject: "Mickey Mantle",
+    cardSet: "1956 Topps",
+    cardNumber: "135",
+    gradingCompany: "SGC",
+    certificationNumber: "1174031DEMO",
+    year: 1956,
+    frontCardImageLink:
+      "https://sgcimagprodstorage.blob.core.windows.net/mycollections/6313b7ee-6887-4e10-9a28-dc9fa2312278/h275/front/6313b7ee-6887-4e10-9a28-dc9fa2312278.jpg",
+    brand: "Topps",
+    grade: "2.5",
+    variety: "",
+  };
+
   const card = {
     gradingCompany: "PSA",
     brand: "Fleer",
@@ -1262,10 +1296,18 @@ describe(`collections routes`, () => {
       await request(server)
         .post("/cards")
         .set("Authorization", "Bearer " + token3)
-        .send(card1);
+        .send(card0);
       await request(server).post("/auth/signup").send(demo);
       const res4 = await request(server).post("/auth/login").send(demo);
       token4 = res4.body.token;
+      await request(server)
+        .post("/cards")
+        .set("Authorization", "Bearer " + token4)
+        .send(cardDemo);
+      await request(server)
+        .post("/cards")
+        .set("Authorization", "Bearer " + token4)
+        .send(card0Demo);
     });
     describe("run demo reset with admin user", () => {
       it("should send status 200", async () => {
