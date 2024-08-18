@@ -10,8 +10,8 @@ const tradingCardSchema = new mongoose.Schema({
   gradingCompany: { type: String, required: true },
   grade: { type: String, required: true },
   certificationNumber: { type: String, required: true },
-  frontCardImageLink: { type: String, required: true },
-  backCardImageLink: { type: String, required: true },
+  frontCardImageLink: { type: String, required: false },
+  backCardImageLink: { type: String, required: false },
   sold: { type: Boolean, required: true },
 });
 
