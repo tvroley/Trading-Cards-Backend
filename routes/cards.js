@@ -71,20 +71,15 @@ router.put("/:id", async (req, res, next) => {
 });
 
 router.get("/", async (req, res, next) => {
-  const roles = req.user.roles;
-  if (roles.includes(`admin`)) {
-    try {
-      const cards = await cardsDAO.getAllCards();
-      if (cards) {
-        res.json({ cards: cards });
-      } else {
-        res.status(404).send("no cards found");
-      }
-    } catch (err) {
-      next(err);
+  try {
+    const cards = await cardsDAO.getAllCards();
+    if (cards) {
+      res.json({ cards: cards });
+    } else {
+      res.status(404).send("no cards found");
     }
-  } else {
-    res.sendStatus(401);
+  } catch (err) {
+    next(err);
   }
 });
 
