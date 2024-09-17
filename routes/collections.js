@@ -88,6 +88,27 @@ router.get("/forcard/:id", async (req, res, next) => {
   }
 });
 
+router.get("/cardcount/:id", async (req, res, next) => {
+  const collectionId = req.params.id;
+
+  try {
+    if (collectionId) {
+      const count = await collectionDAO.countCardsInCollection(
+        collectionId,
+      );
+      if (count) {
+        res.json({ count: count });
+      } else {
+        res.status(404).send(`collection not found`);
+      }
+    } else {
+      res.status(400).send("missing collection ID");
+    } 
+  } catch (err) {
+    next(err);
+  }
+});
+
 router.get("/:id", async (req, res, next) => {
   const collectionId = req.params.id;
   const verbose = req.query.verbose;

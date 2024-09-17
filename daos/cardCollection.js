@@ -229,6 +229,14 @@ module.exports.getCardsInCollection = async (
   return await CollectionForCard.aggregate(aggArray);
 };
 
+module.exports.countCardsInCollection = async (cardCollectionId) => {
+  if (!mongoose.Types.ObjectId.isValid(cardCollectionId)) {
+    throw new errors.InvalidMongooseId("Invalid card collection ID");
+  }
+
+  return await CollectionForCard.countDocuments({cardCollection: new mongoose.Types.ObjectId(cardCollectionId)});
+}
+
 module.exports.getCollectionsForCard = async (cardId) => {
   if (!mongoose.Types.ObjectId.isValid(cardId)) {
     throw new errors.InvalidMongooseId("Invalid card ID");
