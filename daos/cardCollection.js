@@ -237,6 +237,14 @@ module.exports.countCardsInCollection = async (cardCollectionId) => {
   return await CollectionForCard.countDocuments({cardCollection: new mongoose.Types.ObjectId(cardCollectionId)});
 }
 
+module.exports.countCollectionsForUser = async (userId) => {
+  if (!mongoose.Types.ObjectId.isValid(userId)) {
+    throw new errors.InvalidMongooseId("Invalid user ID");
+  }
+
+  return await CardCollection.countDocuments({owner: new mongoose.Types.ObjectId(userId)});
+}
+
 module.exports.getCollectionsForCard = async (cardId) => {
   if (!mongoose.Types.ObjectId.isValid(cardId)) {
     throw new errors.InvalidMongooseId("Invalid card ID");

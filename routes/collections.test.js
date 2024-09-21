@@ -1002,10 +1002,36 @@ describe(`collections routes`, () => {
       it("should send status 400 and not get a collection", async () => {
         const response = await request(server)
           .get(`/collections/cardcount/123`)
-          .query({ verbose: "true" })
           .set("Authorization", "Bearer " + token0)
           .send();
         expect(response.statusCode).toEqual(400);
+      });
+    });
+  });
+
+  describe("GET /collections count collections for user", () => {
+    let token0;
+    let user0MainCollection;
+    beforeEach(async () => {
+      const result = await request(server).post("/auth/signup").send(user0);
+      user0MainCollection = result.body.collection;
+      const res0 = await request(server).post("/auth/login").send(user0);
+      token0 = res0.body.token;
+    });
+    describe("valid login", () => {
+      it("should send status 200 and return the number of collections for the user", async () => {
+        const responsePost = await request(server)
+          .post(`/collections`)
+          .set("Authorization", "Bearer " + token0)
+          .send({ collectionTitle: "testCollection" });
+        expect(responsePost.statusCode).toEqual(200);
+        const responseGet = await request(server)
+          .get(`/collections/collectionscount`)
+          .set("Authorization", "Bearer " + token0)
+          .send();
+        expect(responseGet.statusCode).toEqual(200);
+        const count = responseGet.body.count;
+        expect(count).toEqual(2);
       });
     });
   });

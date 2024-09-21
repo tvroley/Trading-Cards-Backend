@@ -109,6 +109,26 @@ router.get("/cardcount/:id", async (req, res, next) => {
   }
 });
 
+router.get("/collectionscount", middleware.isAuthenticated, async (req, res, next) => {
+  middleware.isAuthenticated;
+  const userId = req.user._id;
+
+  try {
+    if (userId) {
+      const count = await collectionDAO.countCollectionsForUser(
+        userId,
+      );
+      if (count) {
+        res.json({ count: count });
+      } else {
+        res.status(404).send(`collection count not found`);
+      }
+    } 
+  } catch (err) {
+    next(err);
+  }
+});
+
 router.get("/:id", async (req, res, next) => {
   const collectionId = req.params.id;
   const verbose = req.query.verbose;
