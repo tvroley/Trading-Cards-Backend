@@ -14,10 +14,12 @@ describe(`cards routes`, () => {
   const user0 = {
     username: "user01",
     password: "123password",
+    email: "user01@yahoo.com",
   };
   const user1 = {
     username: "user10",
     password: "456password",
+    email: "user1@yahoo.com",
   };
 
   const card = {

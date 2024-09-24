@@ -15,22 +15,27 @@ describe(`collections routes`, () => {
   const user0 = {
     username: "user011",
     password: "123password",
+    email: "user0@yahoo.com",
   };
   const user1 = {
     username: "user100",
     password: "456password",
+    email: "user1@yahoo.com",
   };
   const uncle = {
     username: "uncle",
     password: "789password",
+    email: "uncle@yahoo.com",
   };
   const grandpa = {
     username: "grandpa",
     password: "321password",
+    email: "grandpa@yahoo.com",
   };
   const demo = {
     username: "demo",
     password: "demo",
+    email: "demo@yahoo.com",
   };
 
   const cardDemo = {

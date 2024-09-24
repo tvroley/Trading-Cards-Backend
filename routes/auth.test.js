@@ -15,14 +15,17 @@ describe("/auth", () => {
   const user0 = {
     username: "user0",
     password: "123password",
+    email: "user0@yahoo.com",
   };
   const user1 = {
     username: "user1",
     password: "456password",
+    email: "user1@yahoo.com",
   };
   const user2 = {
     username: "user2",
     password: "789password",
+    email: "user2@yahoo.com",
   };
 
   describe("before signup", () => {

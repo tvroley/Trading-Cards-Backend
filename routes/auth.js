@@ -14,16 +14,20 @@ router.post("/signup", async (req, res, next) => {
     req.body.password &&
     req.body.password.trim().length !== 0 &&
     req.body.username &&
-    req.body.username.trim().length !== 0
+    req.body.username.trim().length !== 0 &&
+    req.body.email &&
+    req.body.email.trim().length !== 0
   ) {
     const textPassword = req.body.password;
     const username = req.body.username;
+    const email = req.body.email;
     const hash = await bcrypt.hash(textPassword, 2);
     try {
       const result = await userDAO.createUser({
         username: username,
         password: hash,
         roles: ["user"],
+        email: email,
       });
       res.json(result);
     } catch (err) {
