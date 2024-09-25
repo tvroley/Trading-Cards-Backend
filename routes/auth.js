@@ -113,6 +113,11 @@ router.post("/logout", async (req, res, next) => {
 
 router.use(middleware.isAuthenticated);
 
+router.get("/username", async (req, res, next) => {
+  const username = req.user.username;
+  res.json({ username: username });
+});
+
 router.put("/password", async (req, res, next) => {
   if (req.body.password || req.body.password.trim().length !== 0) {
     const textPassword = req.body.password;
