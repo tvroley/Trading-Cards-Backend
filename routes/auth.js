@@ -46,13 +46,24 @@ router.post("/login", async (req, res, next) => {
   if (
     req.body.password &&
     req.body.password.trim().length !== 0 &&
-    req.body.username &&
-    req.body.username.trim().length !== 0
+    ((req.body.username && req.body.username.trim().length !== 0) || 
+    (req.body.email && req.body.email.trim().length !== 0))
   ) {
     const textPassword = req.body.password;
+    const email = req.body.email;
     const username = req.body.username;
     let storedUser;
-    await userDAO
+    if(req.body.email && req.body.email.trim().length !== 0){
+      await userDAO
+      .getUserByEmail(email)
+      .then((user) => {
+        storedUser = user;
+      })
+      .catch((err) => {
+        next(err);
+      });
+    } else if(req.body.username && req.body.username.trim().length !== 0){
+      await userDAO
       .getUser(username)
       .then((user) => {
         storedUser = user;
@@ -60,6 +71,7 @@ router.post("/login", async (req, res, next) => {
       .catch((err) => {
         next(err);
       });
+    } 
 
     if (!storedUser) {
       res.status(401).send(`could not find user`);

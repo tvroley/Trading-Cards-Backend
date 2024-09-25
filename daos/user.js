@@ -41,6 +41,20 @@ module.exports.getUser = async (username) => {
   return storedUser;
 };
 
+module.exports.getUserByEmail = async (email) => {
+  let storedUser;
+  await User.findOne({ email: email })
+    .lean()
+    .then((docs) => {
+      storedUser = docs;
+    })
+    .catch((err) => {
+      throw err;
+    });
+
+  return storedUser;
+};
+
 module.exports.updateUserPassword = async (userId, password) => {
   if (!mongoose.Types.ObjectId.isValid(userId)) {
     throw new errors.InvalidMongooseId("Invalid user ID");
