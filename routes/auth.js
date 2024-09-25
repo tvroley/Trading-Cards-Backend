@@ -88,7 +88,7 @@ router.post("/login", async (req, res, next) => {
               },
               secret,
             );
-            res.json({ token: token });
+            res.json({ username: storedUser.username, token: token });
           } else {
             res.status(401).send(`invalid password`);
           }
