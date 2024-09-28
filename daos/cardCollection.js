@@ -554,7 +554,7 @@ module.exports.findCollectionForCardWithNoCard = async () => {
   const ghosts = [];
   collectForCards.map(async (collectForCard) => {
     const card = await Card.find({ _id: collectForCard.tradingCard });
-    if (!Object.hasOwn(card, "year")) {
+    if (!card.hasOwnProperty("year")) {
       ghosts.push(collectForCard.tradingCard);
     }
   });
