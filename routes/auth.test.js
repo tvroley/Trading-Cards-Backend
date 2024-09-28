@@ -179,19 +179,16 @@ describe("/auth", () => {
     });
 
     describe("GET /username", () => {
-      it.each([user0, user1, user2])(
-        "should send username",
-        async (user) => {
-          const res0 = await request(server).post("/auth/login").send(user);
-          const token = res0.body.token;
-          const res = await request(server)
-            .get("/auth/username")
-            .set("Authorization", "Bearer " + token)
-            .send();
-          expect(res.statusCode).toEqual(200);
-          expect(res.body.username).toEqual(user.username);
-        },
-      );
+      it.each([user0, user1, user2])("should send username", async (user) => {
+        const res0 = await request(server).post("/auth/login").send(user);
+        const token = res0.body.token;
+        const res = await request(server)
+          .get("/auth/username")
+          .set("Authorization", "Bearer " + token)
+          .send();
+        expect(res.statusCode).toEqual(200);
+        expect(res.body.username).toEqual(user.username);
+      });
     });
   });
 });

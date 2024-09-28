@@ -5,6 +5,7 @@ const CardCollection = require("../models/cardCollection");
 const User = require("../models/user");
 const CollectionForCard = require("../models/collectionForCard");
 const errors = require("../middleware/errors");
+const collectionForCard = require("../models/collectionForCard");
 
 module.exports = {};
 
@@ -234,16 +235,20 @@ module.exports.countCardsInCollection = async (cardCollectionId) => {
     throw new errors.InvalidMongooseId("Invalid card collection ID");
   }
 
-  return await CollectionForCard.countDocuments({cardCollection: new mongoose.Types.ObjectId(cardCollectionId)});
-}
+  return await CollectionForCard.countDocuments({
+    cardCollection: new mongoose.Types.ObjectId(cardCollectionId),
+  });
+};
 
 module.exports.countCollectionsForUser = async (userId) => {
   if (!mongoose.Types.ObjectId.isValid(userId)) {
     throw new errors.InvalidMongooseId("Invalid user ID");
   }
 
-  return await CardCollection.countDocuments({owner: new mongoose.Types.ObjectId(userId)});
-}
+  return await CardCollection.countDocuments({
+    owner: new mongoose.Types.ObjectId(userId),
+  });
+};
 
 module.exports.getCollectionsForCard = async (cardId) => {
   if (!mongoose.Types.ObjectId.isValid(cardId)) {
@@ -526,12 +531,14 @@ module.exports.removeDemoCollection = async () => {
       "demo",
     );
     let result;
-    if(demoCollection){
+    if (demoCollection) {
       const demoCollectionId = demoCollection._id;
-      result = await CollectionForCard.deleteMany({ cardCollection: demoCollectionId });
+      result = await CollectionForCard.deleteMany({
+        cardCollection: demoCollectionId,
+      });
       await Card.deleteMany({ certificationNumber: /DEMO/ });
-    } 
-    
+    }
+
     return result;
   } catch (err) {
     if (err.message.includes("duplicate key")) {
@@ -540,4 +547,17 @@ module.exports.removeDemoCollection = async () => {
       throw err;
     }
   }
+};
+
+module.exports.findCollectionForCardWithNoCard = async () => {
+  const collectForCards = await collectionForCard.find();
+  const ghosts = [];
+  collectForCards.map(async (collectForCard) => {
+    const card = await Card.find({ _id: collectForCard.tradingCard });
+    if (!Object.hasOwn(card, "year")) {
+      ghosts.push(collectForCard.tradingCard);
+    }
+  });
+
+  return ghosts;
 };

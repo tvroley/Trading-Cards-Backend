@@ -93,9 +93,7 @@ router.get("/cardcount/:id", async (req, res, next) => {
 
   try {
     if (collectionId) {
-      const count = await collectionDAO.countCardsInCollection(
-        collectionId,
-      );
+      const count = await collectionDAO.countCardsInCollection(collectionId);
       if (count) {
         res.json({ count: count });
       } else {
@@ -103,31 +101,54 @@ router.get("/cardcount/:id", async (req, res, next) => {
       }
     } else {
       res.status(400).send("missing collection ID");
-    } 
+    }
   } catch (err) {
     next(err);
   }
 });
 
-router.get("/collectionscount", middleware.isAuthenticated, async (req, res, next) => {
-  middleware.isAuthenticated;
-  const userId = req.user._id;
+router.get(
+  "/collectionscount",
+  middleware.isAuthenticated,
+  async (req, res, next) => {
+    const userId = req.user._id;
 
-  try {
-    if (userId) {
-      const count = await collectionDAO.countCollectionsForUser(
-        userId,
-      );
-      if (count) {
-        res.json({ count: count });
-      } else {
-        res.status(404).send(`collection count not found`);
+    try {
+      if (userId) {
+        const count = await collectionDAO.countCollectionsForUser(userId);
+        if (count) {
+          res.json({ count: count });
+        } else {
+          res.status(404).send(`collection count not found`);
+        }
       }
-    } 
-  } catch (err) {
-    next(err);
-  }
-});
+    } catch (err) {
+      next(err);
+    }
+  },
+);
+
+router.get(
+  "/ghostcard",
+  middleware.isAuthenticated,
+  async (req, res, next) => {
+    const userId = req.user._id;
+    const roles = req.user.roles;
+
+    try {
+      if (userId && roles.includes('admin')) {
+        const ghosts = await collectionDAO.findCollectionForCardWithNoCard();
+        if (count) {
+          res.json({ ghosts: ghosts });
+        } else {
+          res.status(404).send(`ghosts cards not found`);
+        }
+      }
+    } catch (err) {
+      next(err);
+    }
+  },
+);
 
 router.get("/:id", async (req, res, next) => {
   const collectionId = req.params.id;
