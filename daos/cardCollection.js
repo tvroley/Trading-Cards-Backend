@@ -525,9 +525,12 @@ module.exports.removeDemoCollection = async () => {
       "demo",
       "demo",
     );
-    const demoCollectionId = demoCollection._id;
-    const result = await CollectionForCard.deleteMany({ cardCollection: demoCollectionId });
-    await Card.deleteMany({ certificationNumber: /DEMO/ });
+    let result;
+    if(demoCollection){
+      const demoCollectionId = demoCollection._id;
+      result = await CollectionForCard.deleteMany({ cardCollection: demoCollectionId });
+      await Card.deleteMany({ certificationNumber: /DEMO/ });
+    } 
     
     return result;
   } catch (err) {
