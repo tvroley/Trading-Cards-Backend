@@ -235,21 +235,6 @@ router.put("/demo", async (req, res, next) => {
   }
 });
 
-router.put("/demoremove", async (req, res, next) => {
-  const roles = req.user.roles;
-
-  if (roles.includes("admin")) {
-    try {
-      const result = await collectionDAO.removeDemoCollection();
-      res.json(result);
-    } catch (err) {
-      next(err);
-    }
-  } else {
-    res.sendStatus(401);
-  }
-});
-
 router.put("/:id", async (req, res, next) => {
   const collectionId = req.params.id;
   const collectionTitle = req.body.collectionTitle;
@@ -322,6 +307,21 @@ router.delete("/forcard/", async (req, res, next) => {
     }
   } else {
     res.sendStatus(400);
+  }
+});
+
+router.delete("/demoremove", async (req, res, next) => {
+  const roles = req.user.roles;
+
+  if (roles.includes("admin")) {
+    try {
+      const result = await collectionDAO.removeDemoCollection();
+      res.json(result);
+    } catch (err) {
+      next(err);
+    }
+  } else {
+    res.sendStatus(401);
   }
 });
 
