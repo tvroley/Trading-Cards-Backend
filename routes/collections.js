@@ -138,7 +138,7 @@ router.get(
     try {
       if (userId && roles.includes('admin')) {
         const ghosts = await collectionDAO.findCollectionForCardWithNoCard();
-        if (count) {
+        if (ghosts) {
           res.json({ ghosts: ghosts });
         } else {
           res.status(404).send(`ghosts cards not found`);
