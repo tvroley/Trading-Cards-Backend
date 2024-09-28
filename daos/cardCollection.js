@@ -518,3 +518,23 @@ module.exports.resetDemoCollection = async () => {
     }
   }
 };
+
+module.exports.removeDemoCollection = async () => {
+  try {
+    const demoCollection = await module.exports.getCollectionByOwnerAndTitle(
+      "demo",
+      "demo",
+    );
+    const demoCollectionId = demoCollection._id;
+    const result = await CollectionForCard.deleteMany({ cardCollection: demoCollectionId });
+    await Card.deleteMany({ certificationNumber: /DEMO/ });
+    
+    return result;
+  } catch (err) {
+    if (err.message.includes("duplicate key")) {
+      throw new errors.DuplicateKeyError(err.message);
+    } else {
+      throw err;
+    }
+  }
+};
