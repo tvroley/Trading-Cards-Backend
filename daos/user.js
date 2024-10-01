@@ -63,3 +63,12 @@ module.exports.updateUserPassword = async (userId, password) => {
 
   return true;
 };
+
+module.exports.deleteUser = async (userId) => {
+  if (!mongoose.Types.ObjectId.isValid(userId)) {
+    throw new errors.InvalidMongooseId("Invalid user ID");
+  }
+  const result = await User.deleteOne({ _id: userId });
+
+  return result;
+};

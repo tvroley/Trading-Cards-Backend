@@ -2,7 +2,7 @@ const { Router } = require("express");
 const router = Router();
 const bcrypt = require("bcrypt");
 const errors = require("../middleware/errors");
-
+const collectionDAO = require("../daos/cardCollection");
 const userDAO = require("../daos/user");
 const middleware = require("../middleware/authenticate");
 
@@ -131,6 +131,18 @@ router.put("/password", async (req, res, next) => {
     }
   } else {
     res.sendStatus(400);
+  }
+});
+
+router.delete("/delete", async (req, res, next) => {
+  const username = req.user.username;
+  try {
+    const user = await userDAO.getUser(username);
+    const userResult = await userDAO.deleteUser(user._id);
+    const collectionResult = await collectionDAO.deleteAllCardsAndCollectionsForUser(user._id);
+    res.status(200).send(userResult);
+  } catch(err) {
+    next(err);
   }
 });
 

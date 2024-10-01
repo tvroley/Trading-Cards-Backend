@@ -5,7 +5,7 @@ const CardCollection = require("../models/cardCollection");
 const User = require("../models/user");
 const CollectionForCard = require("../models/collectionForCard");
 const errors = require("../middleware/errors");
-const collectionForCard = require("../models/collectionForCard");
+const tradingCard = require("../models/tradingCard");
 
 module.exports = {};
 
@@ -550,7 +550,7 @@ module.exports.removeDemoCollection = async () => {
 };
 
 module.exports.findCollectionForCardWithNoCard = async () => {
-  const collectForCards = await collectionForCard.find();
+  const collectForCards = await CollectionForCard.find();
   const ghosts = [];
   collectForCards.map(async (collectForCard) => {
     const card = await Card.find({ _id: collectForCard.tradingCard });
@@ -561,3 +561,19 @@ module.exports.findCollectionForCardWithNoCard = async () => {
 
   return ghosts;
 };
+
+module.exports.deleteAllCardsAndCollectionsForUser = async (userId) => {
+  const userCollections = await CardCollection.find({owner: userId});
+  let collectionsForCards;
+  userCollections.map(async (userCollection) => {
+    collectionsForCards = await CollectionForCard.find({cardCollection: userCollection._id});
+    collectionsForCards.map(async (userCollectionForCard) => {
+      const card = userCollectionForCard.tradingCard;
+      tradingCard.deleteOne({_id: card});
+      CollectionForCard.deleteOne({_id: userCollectionForCard._id});
+    });
+    CardCollection.deleteOne({_id: userCollection._id});
+  });
+
+  return true;
+}
