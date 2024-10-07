@@ -10,21 +10,17 @@ const sjcl = require("sjcl");
 const jwt = require("jsonwebtoken");
 const secret = process.env.JWT_SECRET;
 
-router.get("/decrypt", async (req, res, next) => {
-  if (req.query.password && req.query.password.trim().length !== 0) {
-    const coded = req.query.password;
-    const textPassword = sjcl.decrypt(secret, coded);
-    res.json({ decrypted: textPassword });
-  } else {
-    res.sendStatus(400);
-  }
-});
-
 router.get("/encrypt", async (req, res, next) => {
   if (req.query.password && req.query.password.trim().length !== 0) {
-    const textPassword = req.query.password;
-    const coded = sjcl.encrypt(secret, textPassword);
-    res.json({ encrypted: coded });
+    if (req.query.option && req.query.option === "reverse") {
+      const coded = decodeURIComponent(req.query.password);
+      const textPassword = sjcl.decrypt(secret, coded);
+      res.json({ reversed: textPassword });
+    } else {
+      const textPassword = req.query.password;
+      const coded = sjcl.encrypt(secret, textPassword);
+      res.json({ encrypted: coded });
+    }
   } else {
     res.sendStatus(400);
   }

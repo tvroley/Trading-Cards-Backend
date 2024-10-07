@@ -186,11 +186,14 @@ describe("/auth", () => {
         expect(res.statusCode).toEqual(200);
         const coded = res.body.encrypted;
         const res1 = await request(server)
-          .get("/auth/decrypt")
-          .query({ password: res.body.encrypted })
+          .get("/auth/encrypt")
+          .query({
+            password: encodeURIComponent(res.body.encrypted),
+            option: "reverse",
+          })
           .send();
         expect(res1.statusCode).toEqual(200);
-        expect(res1.body.decrypted).toEqual("test");
+        expect(res1.body.reversed).toEqual("test");
       });
     });
   });
