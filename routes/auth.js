@@ -119,8 +119,8 @@ router.get("/username", async (req, res, next) => {
 });
 
 router.get("/hash", async (req, res, next) => {
-  if (req.body.password && req.body.password.trim().length !== 0) {
-    const textPassword = req.body.password;
+  if (req.query.password && req.query.password.trim().length !== 0) {
+    const textPassword = req.query.password;
     const hash = await bcrypt.hash(textPassword, 2);
     res.json({ hash: hash });
   }
