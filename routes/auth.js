@@ -5,6 +5,7 @@ const errors = require("../middleware/errors");
 const collectionDAO = require("../daos/cardCollection");
 const userDAO = require("../daos/user");
 const middleware = require("../middleware/authenticate");
+import { decrypt, encrypt } from "sjcl";
 
 const jwt = require("jsonwebtoken");
 const secret = process.env.JWT_SECRET;
@@ -123,6 +124,22 @@ router.get("/hash", async (req, res, next) => {
     const textPassword = req.query.password;
     const hash = await bcrypt.hash(textPassword, 2);
     res.json({ hash: hash });
+  }
+});
+
+router.get("/encrypt", async (req, res, next) => {
+  if (req.query.password && req.query.password.trim().length !== 0) {
+    const textPassword = req.query.password;
+    const coded = encrypt(secret, textPassword);
+    res.json({ encrypted: coded });
+  }
+});
+
+router.get("/decrypt", async (req, res, next) => {
+  if (req.query.password && req.query.password.trim().length !== 0) {
+    const coded = req.query.password;
+    const textPassword = decrypt(secret, coded);
+    res.json({ decrypted: textPassword });
   }
 });
 
