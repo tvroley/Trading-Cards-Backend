@@ -142,8 +142,12 @@ router.get("/encrypt", async (req, res, next) => {
 router.get("/decrypt", async (req, res, next) => {
   if (req.query.password && req.query.password.trim().length !== 0) {
     const coded = req.query.password;
-    const textPassword = sjcl.decrypt(secret, coded);
-    res.json({ decrypted: textPassword });
+    if(!secret){
+      res.sendStatus(500);  
+    } else {
+      const textPassword = sjcl.decrypt(secret, coded);
+      res.json({ decrypted: textPassword });
+    }
   } else {
     res.sendStatus(400);
   }
