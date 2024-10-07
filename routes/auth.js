@@ -114,11 +114,6 @@ router.post("/logout", async (req, res, next) => {
 
 router.use(middleware.isAuthenticated);
 
-router.get("/username", async (req, res, next) => {
-  const username = req.user.username;
-  res.json({ username: username });
-});
-
 router.get("/hash", async (req, res, next) => {
   if (req.query.password && req.query.password.trim().length !== 0) {
     const textPassword = req.query.password;
@@ -129,25 +124,21 @@ router.get("/hash", async (req, res, next) => {
   }
 });
 
-router.get("/encrypt", async (req, res, next) => {
+router.get("/decrypt", async (req, res, next) => {
   if (req.query.password && req.query.password.trim().length !== 0) {
-    const textPassword = req.query.password;
-    const coded = sjcl.encrypt(secret, textPassword);
-    res.json({ encrypted: coded });
+    const coded = req.query.password;
+    const textPassword = sjcl.decrypt(secret, coded);
+    res.json({ decrypted: textPassword });
   } else {
     res.sendStatus(400);
   }
 });
 
-router.get("/decrypt", async (req, res, next) => {
+router.get("/encrypt", async (req, res, next) => {
   if (req.query.password && req.query.password.trim().length !== 0) {
-    const coded = req.query.password;
-    if(!secret){
-      res.sendStatus(500);  
-    } else {
-      const textPassword = sjcl.decrypt(secret, coded);
-      res.json({ decrypted: textPassword });
-    }
+    const textPassword = req.query.password;
+    const coded = sjcl.encrypt(secret, textPassword);
+    res.json({ encrypted: coded });
   } else {
     res.sendStatus(400);
   }

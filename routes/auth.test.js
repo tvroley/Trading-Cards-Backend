@@ -1,6 +1,5 @@
 const request = require("supertest");
 var jwt = require("jsonwebtoken");
-
 const server = require("../server");
 const testUtils = require("../test-utils");
 
@@ -178,16 +177,24 @@ describe("/auth", () => {
       );
     });
 
-    describe("GET /username", () => {
-      it.each([user0, user1, user2])("should send username", async (user) => {
-        const res0 = await request(server).post("/auth/login").send(user);
+    describe("GET /encrypt", () => {
+      it("should encrypt and decrypt", async () => {
+        const res0 = await request(server).post("/auth/login").send(user0);
         const token = res0.body.token;
         const res = await request(server)
-          .get("/auth/username")
+          .get("/auth/encrypt")
+          .query({ password: "test" })
           .set("Authorization", "Bearer " + token)
           .send();
         expect(res.statusCode).toEqual(200);
-        expect(res.body.username).toEqual(user.username);
+        const coded = res.body.encrypted;
+        const res1 = await request(server)
+          .get("/auth/decrypt")
+          .query({ password: res.body.encrypted })
+          .set("Authorization", "Bearer " + token)
+          .send();
+        expect(res1.statusCode).toEqual(200);
+        expect(res1.body.decrypted).toEqual("test");
       });
     });
   });
