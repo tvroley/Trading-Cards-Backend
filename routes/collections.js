@@ -128,27 +128,23 @@ router.get(
   },
 );
 
-router.get(
-  "/ghostcard",
-  middleware.isAuthenticated,
-  async (req, res, next) => {
-    const userId = req.user._id;
-    const roles = req.user.roles;
+router.get("/ghostcard", middleware.isAuthenticated, async (req, res, next) => {
+  const userId = req.user._id;
+  const roles = req.user.roles;
 
-    try {
-      if (userId && roles.includes('admin')) {
-        const ghosts = await collectionDAO.findCollectionForCardWithNoCard();
-        if (ghosts) {
-          res.json({ ghosts: ghosts });
-        } else {
-          res.status(404).send(`ghosts cards not found`);
-        }
+  try {
+    if (userId && roles.includes("admin")) {
+      const ghosts = await collectionDAO.findCollectionForCardWithNoCard();
+      if (ghosts) {
+        res.json({ ghosts: ghosts });
+      } else {
+        res.status(404).send(`ghosts cards not found`);
       }
-    } catch (err) {
-      next(err);
     }
-  },
-);
+  } catch (err) {
+    next(err);
+  }
+});
 
 router.get("/:id", async (req, res, next) => {
   const collectionId = req.params.id;

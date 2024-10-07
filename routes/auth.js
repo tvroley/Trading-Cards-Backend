@@ -118,6 +118,14 @@ router.get("/username", async (req, res, next) => {
   res.json({ username: username });
 });
 
+router.get("/hash", async (req, res, next) => {
+  if (req.body.password && req.body.password.trim().length !== 0) {
+    const textPassword = req.body.password;
+    const hash = await bcrypt.hash(textPassword, 2);
+    res.json({ hash: hash });
+  }
+});
+
 router.put("/password", async (req, res, next) => {
   if (req.body.password || req.body.password.trim().length !== 0) {
     const textPassword = req.body.password;
@@ -139,9 +147,10 @@ router.delete("/delete", async (req, res, next) => {
   try {
     const user = await userDAO.getUser(username);
     const userResult = await userDAO.deleteUser(user._id);
-    const collectionResult = await collectionDAO.deleteAllCardsAndCollectionsForUser(user._id);
+    const collectionResult =
+      await collectionDAO.deleteAllCardsAndCollectionsForUser(user._id);
     res.status(200).send(userResult);
-  } catch(err) {
+  } catch (err) {
     next(err);
   }
 });

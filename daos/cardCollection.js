@@ -563,17 +563,19 @@ module.exports.findCollectionForCardWithNoCard = async () => {
 };
 
 module.exports.deleteAllCardsAndCollectionsForUser = async (userId) => {
-  const userCollections = await CardCollection.find({owner: userId});
+  const userCollections = await CardCollection.find({ owner: userId });
   let collectionsForCards;
   userCollections.map(async (userCollection) => {
-    collectionsForCards = await CollectionForCard.find({cardCollection: userCollection._id});
+    collectionsForCards = await CollectionForCard.find({
+      cardCollection: userCollection._id,
+    });
     collectionsForCards.map(async (userCollectionForCard) => {
       const card = userCollectionForCard.tradingCard;
-      await tradingCard.deleteOne({_id: card});
-      await CollectionForCard.deleteOne({_id: userCollectionForCard._id});
+      await tradingCard.deleteOne({ _id: card });
+      await CollectionForCard.deleteOne({ _id: userCollectionForCard._id });
     });
-    await CardCollection.deleteOne({_id: userCollection._id});
+    await CardCollection.deleteOne({ _id: userCollection._id });
   });
 
   return true;
-}
+};
