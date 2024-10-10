@@ -107,28 +107,24 @@ router.get("/cardcount/:id", async (req, res, next) => {
   }
 });
 
-router.get(
-  "/collectionscount",
-  middleware.isAuthenticated,
-  async (req, res, next) => {
-    const userId = req.user._id;
+router.get("/collectionscount", async (req, res, next) => {
+  const userId = req.user._id;
 
-    try {
-      if (userId) {
-        const count = await collectionDAO.countCollectionsForUser(userId);
-        if (count) {
-          res.json({ count: count });
-        } else {
-          res.status(404).send(`collection count not found`);
-        }
+  try {
+    if (userId) {
+      const count = await collectionDAO.countCollectionsForUser(userId);
+      if (count) {
+        res.json({ count: count });
+      } else {
+        res.status(404).send(`collection count not found`);
       }
-    } catch (err) {
-      next(err);
     }
-  },
-);
+  } catch (err) {
+    next(err);
+  }
+});
 
-router.get("/ghostcard", middleware.isAuthenticated, async (req, res, next) => {
+router.get("/ghostcard", async (req, res, next) => {
   const userId = req.user._id;
   const roles = req.user.roles;
 
@@ -192,8 +188,6 @@ router.get("/:id", async (req, res, next) => {
     next(err);
   }
 });
-
-router.use(middleware.isAuthenticated);
 
 router.post("/", async (req, res, next) => {
   const title = req.body.collectionTitle;

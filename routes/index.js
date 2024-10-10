@@ -28,8 +28,8 @@ const corsOptions = {
 router.use(cors(corsOptions));
 
 router.use("/auth", require("./auth"));
-router.use("/collections", require("./collections"));
 router.use(middleware.isAuthenticated);
+router.use("/collections", require("./collections"));
 router.use("/cards", require("./cards"));
 router.use(handleError);
 
