@@ -210,5 +210,18 @@ describe("/auth", () => {
         expect(usernames.includes(user2.username)).toBeTruthy();
       });
     });
+
+    describe("GET /searchusernames", () => {
+      it("should send all usernames", async () => {
+        const res = await request(server)
+          .get("/auth/searchusernames")
+          .query({ search: "user0" })
+          .set("Authorization", "Bearer " + token0)
+          .send();
+        expect(res.statusCode).toEqual(200);
+        const usernames = res.body.usernames;
+        expect(usernames.includes(user0.username)).toBeTruthy();
+      });
+    });
   });
 });

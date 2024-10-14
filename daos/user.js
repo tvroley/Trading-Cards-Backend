@@ -57,6 +57,21 @@ module.exports.getAllUsers = async () => {
   return allUserNames;
 };
 
+module.exports.searchUsers = async (query) => {
+  const usernames = [];
+  const results = await User.find(
+    { $text: { $search: query } },
+    { score: { $meta: "textScore" } },
+  )
+    .sort({ score: { $meta: "textScore" } })
+    .lean();
+  results.map((user) => {
+    usernames.push(user.username);
+  });
+
+  return usernames;
+};
+
 module.exports.getUserByEmail = async (email) => {
   let storedUser;
   await User.findOne({ email: email })

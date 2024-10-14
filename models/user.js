@@ -7,4 +7,8 @@ const userSchema = new mongoose.Schema({
   roles: { type: [String], required: true },
 });
 
+userSchema.index({
+  username: "text",
+});
+
 module.exports = mongoose.model("users", userSchema);

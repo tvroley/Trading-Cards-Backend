@@ -149,6 +149,24 @@ router.get("/usernames", async (req, res, next) => {
     }
 });
 
+router.get("/searchusernames", async (req, res, next) => {
+  const search = req.query.search;
+  if (search.trim().length !== 0) {
+    try {
+      const results = await userDAO.searchUsers(search);
+      if (results && results.length !== 0) {
+        res.json({ usernames: results });
+      } else {
+        res.status(404).send("no collections found");
+      }
+    } catch (err) {
+      next(err);
+    }
+  } else {
+    res.status(400).send("empty search query");
+  }
+});
+
 router.put("/password", async (req, res, next) => {
   if (req.body.password || req.body.password.trim().length !== 0) {
     const textPassword = req.body.password;
