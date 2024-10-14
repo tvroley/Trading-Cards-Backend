@@ -85,7 +85,7 @@ router.get("/", async (req, res, next) => {
 
 router.get("/search", async (req, res, next) => {
   const search = req.query.search;
-  if (search.trim().length !== 0) {
+  if (search && search.trim().length !== 0) {
     try {
       const results = await cardsDAO.search(search);
       if (results && results.length !== 0) {
