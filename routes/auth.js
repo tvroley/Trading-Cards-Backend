@@ -140,6 +140,15 @@ router.get("/hash", async (req, res, next) => {
   }
 });
 
+router.get("/usernames", async (req, res, next) => {
+    try {
+      const usernames = await userDAO.getAllUsers();
+      res.json({usernames: usernames});
+    } catch(err) {
+      next(err);
+    }
+});
+
 router.put("/password", async (req, res, next) => {
   if (req.body.password || req.body.password.trim().length !== 0) {
     const textPassword = req.body.password;

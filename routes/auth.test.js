@@ -196,5 +196,19 @@ describe("/auth", () => {
         expect(res1.body.reversed).toEqual("test");
       });
     });
+
+    describe("GET /usernames", () => {
+      it("should send all usernames", async () => {
+        const res = await request(server)
+          .get("/auth/usernames")
+          .set("Authorization", "Bearer " + token0)
+          .send();
+        expect(res.statusCode).toEqual(200);
+        const usernames = res.body.usernames;
+        expect(usernames.includes(user0.username)).toBeTruthy();
+        expect(usernames.includes(user1.username)).toBeTruthy();
+        expect(usernames.includes(user2.username)).toBeTruthy();
+      });
+    });
   });
 });
